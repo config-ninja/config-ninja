@@ -1,0 +1,71 @@
+# Coverage.py
+htmlcov/
+reports/
+
+# documentation
+docs/
+
+# cruft
+*.rej
+
+# Data
+*.csv*
+*.dat*
+*.md5
+*.pickle*
+*.xls*
+*.zip*
+
+# environment config
+*.env
+buildx.yml
+config.yml
+
+# Hypothesis
+.hypothesis/
+
+# Jupyter
+*.ipynb
+.ipynb_checkpoints/
+notebooks/
+
+# macOS
+.DS_Store
+
+# mypy
+.dmypy.json
+.mypy_cache/
+
+# Node.js
+node_modules/
+
+# Poetry
+.venv/
+dist/
+
+# PyCharm
+.idea/
+
+# pyenv
+.python-version
+
+# pytest
+.pytest_cache/
+.testmondata*
+
+# Python
+__pycache__/
+*.py[cdo]
+
+# Terraform
+.terraform/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# misc
+*.bak
+.*.bak
+.cache
+.coverage
