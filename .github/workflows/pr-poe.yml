@@ -1,5 +1,5 @@
 # Run this workflow to test Python code changes.
-name: 🎨 poe
+name: 🎨 poe (PR)
 
 on:
   pull_request:

@@ -1,1 +1,1 @@
-"""# Config Ninja 🥷"""  # noqa: D415
+""".. include:: ../../README.md"""  # noqa: D415

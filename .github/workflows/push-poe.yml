@@ -1,5 +1,5 @@
 # Run this workflow to test Python code changes.
-name: 🎨 poe
+name: 🎨 poe (push)
 
 on:
   push:
@@ -50,7 +50,32 @@ jobs:
           artifacts: ""
           poe-task: docs
 
-      - uses: actions/upload-artifact@v4
+      - name: Fix permissions
+        run: |
+          chmod -c -R +rX "path/" | while read line; do
+            echo "::warning title=Invalid file permissions automatically fixed::$line"
+          done
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: docs
+          name: github-pages
           path: docs
+
+  deploy:
+    environment:
+      name: GitHub Pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    needs: docs
+
+    permissions:
+      pages: write
+      id-token: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
