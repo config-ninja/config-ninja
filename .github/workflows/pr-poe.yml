@@ -1,0 +1,29 @@
+# Run this workflow to test Python code changes.
+name: 🎨 poe
+
+on:
+  pull_request:
+    paths:
+      - "*.py"
+      - "**/*.py"
+      - pyproject.toml
+      - poetry.lock
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/poe
+        with:
+          poe-task: lint
+          poetry-groups: main,dev,lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/poe
+        with:
+          poe-task: test
+          poetry-groups: main,dev,test

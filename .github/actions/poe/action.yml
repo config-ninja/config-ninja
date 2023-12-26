@@ -1,0 +1,52 @@
+name: setup
+description: Execute steps to set up the project
+inputs:
+  artifacts:
+    description: The path to the artifacts to upload
+    default: docs
+
+  poe-task:
+    description: Execute this 'poe' task
+    default: test
+
+  poetry-groups:
+    description: The dependency groups to install with poetry
+    default: ""
+
+  python-version:
+    description: The version of Python to use
+    default: "3.12"
+
+runs:
+  steps:
+    - run: pipx install poetry
+      shell: sh
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - id: poetry
+      run: tr -d '\n' <<<"${{ inputs.poetry-groups }}" |
+        tr -c '[:alnum:]' '-' |
+        xargs printf 'groups=%s\n' >>"$GITHUB_OUTPUT"
+      shell: bash
+
+    - uses: actions/cache@v3
+      with:
+        path: ~/.cache
+        key: ${{ inputs.python-version }}-${{ steps.poetry.outputs.groups }}
+
+    - run: poetry ${{ inputs.poetry-groups && format('install --only {0}', inputs.poetry-groups) || 'install'}}
+      shell: sh
+
+    - run: poetry run poe ${{ inputs.poe-task }}
+      shell: sh
+
+    - if: ${{ inputs.artifacts }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.poe-task }}-${{ inputs.artifacts }}
+        path: ${{ inputs.artifacts }}
+
+  using: composite
