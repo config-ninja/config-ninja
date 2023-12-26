@@ -4,9 +4,6 @@ default_stages: [commit, manual]
 fail_fast: false
 ci:
   skip:
-    - pyupgrade
-    - absolufy-imports
-    - yesqa
     - shellcheck
     - poetry-check
 
@@ -90,12 +87,6 @@ repos:
 
   - repo: local
     hooks:
-      - id: absolufy-imports
-        name: absolufy-imports
-        entry: absolufy-imports
-        require_serial: true
-        language: system
-        types: [python]
       - id: shellcheck
         name: shellcheck
         entry: shellcheck --check-sourced
