@@ -1,2 +1,1 @@
-# noqa: D415
-"""# Config Ninja 🥷"""
+"""# Config Ninja 🥷"""  # noqa: D415

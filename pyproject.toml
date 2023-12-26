@@ -107,13 +107,14 @@ upload_to_vcs_release = true
 
 [tool.poetry.dependencies]
 # https://python-poetry.org/docs/dependency-specification/
-python = "^3.8"
+python = "^3.8.1"
 pyyaml = "^6.0"
 typing-extensions = { version = "^4.7.1", python = "3.8" }
+typer = "^0.9.0"
+boto3 = "^1.34.7"
 
 [tool.poetry.group.dev.dependencies]
 absolufy-imports = "^0.3"
-flake8-rst-docstrings = ">=0.2,<0.4"
 jupyterlab = ">=3.4,<5.0"
 poethepoet = ">=0.20,<0.25"
 pdoc = "^14"
@@ -127,51 +128,27 @@ pytest-mock = "^3.8"
 pytest-testmon = "^2.0.12"
 pytest-watch = "^4.2.0"
 pytest-xdist = "^3"
-pyupgrade = ">=2.34,<4.0"
 safety = "^2.1"
 shellcheck-py = {version = ">=0.8,<0.10", markers = "platform_machine != 'arm64'"}
 toml = "^0.10"
-yesqa = "^1.4"
-types-pyyaml = "^6"
 anybadge = "^1.14"
-pylint = "^2.17"
-pylint-gitlab = "^1.2.0"
 certifi = ">=2023.07.22"
+pylint = "^3.0"
 
 gitpython = ">=3.1.32"             # https://nvd.nist.gov/vuln/detail/CVE-2023-40267
 python-semantic-release = "^8.0.8"
-radon = {extras = ["toml"], version = "^6.0.1"}
-lxml = {version = ">=4.9.3", python = ">=3.12"}
-setuptools = "^69.0.3"  # needed by flake8-logging-format
+python-dotenv = "^1.0.0"
 
 [tool.poetry.group.pre-commit.dependencies]
 # note: these must be synchronized with `.pre-commit-config.yaml`
-bandit = { extras = ["toml"], version = "^1.7" }
-black = ">=22.6,<24.0"
-flake8 = "^5"
-flake8-bugbear = ">=22.6,<24.0"
-flake8-comprehensions = "^3.10"
-flake8-eradicate = "^1.5.0"
-flake8-mutable = "^1.2"
-flake8-print = "^5"
-flake8-pytest-style = "^1.6"
-flake8-tidy-imports = "^4.8"
-isort = "^5.12"
+ruff = "^0.1.9"
 mypy = { extras = ["reports"], version = "^1.4.1" }
-pydocstyle = { extras = ["toml"], version = "^6.1" }
+lxml = {version = ">=4.9.3", python = ">=3.12"}
+pyright = "^1.1.342"
 
-
-[tool.ruff]
-line-length = 100
-
-[tool.bandit]
-# https://bandit.readthedocs.io/en/latest/config.html
-skips = ["B101"]
-exclude_dirs = ["tests", "**/tests", "**/test_*"]
-
-[tool.black]
-# https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#configuration-via-a-file
-line-length = 100
+[tool.poetry.group.types.dependencies]
+boto3-stubs = {version = "1.34.7", extras = ["appconfig", "appconfigdata"]}
+types-pyyaml = "^6"
 
 [tool.coverage.report]
 # https://coverage.readthedocs.io/en/latest/config.html#report
@@ -190,19 +167,6 @@ source = ["src"]
 # https://coverage.readthedocs.io/en/latest/config.html#xml
 output = "docs/reports/coverage.xml"
 
-[tool.isort]
-# https://pycqa.github.io/isort/docs/configuration/options.html
-color_output = true
-line_length = 100
-profile = "black"
-src_paths = ["src", "tests"]
-sections = ["FUTURE", "STDLIB", "THIRDPARTY", "LOCALPROJECT", "LOCALFOLDER"]
-import_heading_stdlib = "stdlib"
-import_heading_thirdparty = "third party"
-import_heading_localproject = "local"
-import_heading_localfolder = "TODO: replace with absolute imports"
-known_localproject = ["config_ninja"]
-
 [tool.mypy]
 # https://mypy.readthedocs.io/en/latest/config_file.html
 junit_xml = "docs/reports/mypy.xml"
@@ -216,19 +180,6 @@ show_column_numbers = true
 show_error_codes = true
 show_error_context = true
 warn_unreachable = true
-
-[tool.pydocstyle]
-# http://www.pydocstyle.org/en/latest/usage.html#configuration-files
-convention = "google"
-
-[tool.pytest.ini_options]
-# https://docs.pytest.org/en/latest/reference/reference.html#ini-options-ref
-addopts = "--color=yes --doctest-modules --failed-first --strict-config --strict-markers --verbosity=2"
-doctest_optionflags = "ELLIPSIS IGNORE_EXCEPTION_DETAIL"
-looponfailroots = ["./src"]
-filterwarnings = ["error", "ignore:The --looponfail command line argument and looponfailroots config variable are deprecated:DeprecationWarning"]
-testpaths = ["src", "tests"]
-xfail_strict = true
 
 [tool.poe.tasks]
 _version.cmd = "poetry version"
@@ -526,7 +477,7 @@ max-statements = 50
 # Minimum number of public methods for a class (see R0903).
 min-public-methods = 2
 # configure the maximum cyclomatic complexity (mccabe)
-max-complexity = 5
+max-complexity = 6
 
 [tool.pylint.exceptions]
 # Exceptions that will emit a warning when caught.
@@ -664,8 +615,6 @@ evaluation = "max(0, 0 if fatal else 10.0 - ((float(5 * error + warning + refact
 # mypackage.mymodule.MyReporterClass.
 output-format = """\
   colorized,\
-  pylint_gitlab.GitlabCodeClimateReporter:docs/reports/pylint-gitlab.json,\
-  pylint_gitlab.GitlabPagesHtmlReporter:docs/reports/pylint-gitlab.html,\
   text:docs/reports/pylint-report.txt\
 """
 # Tells whether to display a full report or only the messages.
@@ -788,3 +737,65 @@ redefining-builtins-modules = [
   "builtins",
   "io",
 ]
+
+[tool.pyright]
+strict = ["src"]
+typeCheckingMode = "strict"
+
+[tool.pytest.ini_options]
+# https://docs.pytest.org/en/latest/reference/reference.html#ini-options-ref
+addopts = "--color=yes --doctest-modules --failed-first --strict-config --strict-markers --verbosity=2"
+doctest_optionflags = "ELLIPSIS IGNORE_EXCEPTION_DETAIL"
+looponfailroots = ["./src"]
+filterwarnings = [
+  "error",
+  "ignore:The --looponfail command line argument and looponfailroots config variable are deprecated:DeprecationWarning",
+  "ignore::DeprecationWarning:dateutil.tz.tz"
+]
+testpaths = ["src", "tests"]
+xfail_strict = true
+
+[tool.ruff]
+extend-include = ["*.ipynb"]
+fix = true
+line-length = 100
+show-fixes = true
+show-source = true
+src = ["src", "tests"]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint]
+select = [
+  "B",
+  "C90",
+  "E4",
+  "E7",
+  "E9",
+  "ERA",
+  "D",
+  "F",
+  "G",
+  "I",
+  "N",
+  "PL",
+  "PT",
+  "RET",
+  "RUF",
+  "S",
+  "T20",
+  "TID",
+  "UP",
+  "W"
+]
+
+[tool.ruff.lint.flake8-tidy-imports]
+# Disallow all relative imports.
+ban-relative-imports = "all"
+
+[tool.ruff.mccabe]
+max-complexity = 5
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
