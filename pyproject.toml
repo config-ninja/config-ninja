@@ -121,7 +121,7 @@ types-pyyaml = "^6"
 [tool.poetry.group.lint.dependencies]
 anybadge = "^1.14"
 pylint = "^3.0"
-safety = "^2.1"
+safety = "^2.3"
 shellcheck-py = {version = ">=0.8,<0.10", markers = "platform_machine != 'arm64'"}
 pre-commit = [
   {version = "<3.6", python = "<3.9"},
