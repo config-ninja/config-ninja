@@ -29,14 +29,14 @@ key_3:
 @pytest.fixture()
 def mock_appconfig_client() -> AppConfigClient:
     """Mock the `boto3` client for the `AppConfig` service."""
-    return mock.MagicMock(spec_set=AppConfigClient)
+    return mock.MagicMock(name='mock_appconfig_client', spec_set=AppConfigClient)
 
 
 @pytest.fixture()
 def mock_session(mocker: MockerFixture) -> Session:
     """Mock the `boto3.Session` class."""
-    mock_session = mock.MagicMock(spec_set=Session)
-    mocker.patch('boto3.Session', new=mock_session)
+    mock_session = mock.MagicMock(name='mock_session', spec_set=Session)
+    mocker.patch('boto3.Session', return_value=mock_session)
     return mock_session
 
 
@@ -61,10 +61,10 @@ def mock_session_with_1_id(
     mock_appconfig_client: mock.MagicMock, mock_session: mock.MagicMock
 ) -> AppConfigClient:
     """Mock the `boto3` client for the `AppConfig` service to return a single ID."""
-    mock_page_iterator = mock.MagicMock(spec_set=PageIterator)
+    mock_page_iterator = mock.MagicMock(name='mock_page_iterator', spec_set=PageIterator)
     mock_page_iterator.search.return_value = ['id-1']
 
-    mock_paginator = mock.MagicMock(spec_set=Paginator)
+    mock_paginator = mock.MagicMock(name='mock_page_iterator', spec_set=Paginator)
     mock_paginator.paginate.return_value = mock_page_iterator
 
     mock_appconfig_client.get_paginator.return_value = mock_paginator
@@ -114,9 +114,28 @@ def mock_latest_config() -> GetLatestConfigurationResponseTypeDef:
 @pytest.fixture()
 def mock_appconfigdata_client(mock_latest_config: mock.MagicMock) -> AppConfigDataClient:
     """Mock the low-level `boto3` client for the `AppConfigData` service."""
-    mock_client = mock.MagicMock(spec_set=AppConfigDataClient)
+    mock_client = mock.MagicMock(name='mock_appconfigdata_client', spec_set=AppConfigDataClient)
     mock_client.get_latest_configuration.return_value = mock_latest_config
     return mock_client
+
+
+@pytest.fixture()
+def mock_full_session(
+    mock_session_with_1_id: mock.MagicMock,
+    mock_appconfig_client: mock.MagicMock,
+    mock_appconfigdata_client: mock.MagicMock,
+) -> Session:
+    """Mock the `boto3.Session` class with a full AppConfig client."""
+
+    def client(service: str) -> mock.MagicMock:
+        if service == 'appconfig':
+            return mock_appconfig_client
+        if service == 'appconfigdata':
+            return mock_appconfigdata_client
+        raise ValueError(f'Unknown service: {service}')
+
+    mock_session_with_1_id.client = client
+    return mock_session_with_1_id
 
 
 @pytest.fixture()
