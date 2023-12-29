@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Iterator, Literal
 
 import boto3
 
-from config_ninja.backend import AbstractBackend
+from config_ninja.backend import Backend
 
 try:  # pragma: no cover
     from typing import TypeAlias  # type: ignore[attr-defined,unused-ignore]
@@ -31,13 +31,13 @@ OperationName: TypeAlias = Literal[
 logger = logging.getLogger(__name__)
 
 
-class AppConfigBackend(AbstractBackend):
+class AppConfigBackend(Backend):
     """Retrieve the deployed configuration from AWS AppConfig.
 
     # Usage
 
     >>> backend = AppConfigBackend(appconfigdata_client, 'app-id', 'conf-id', 'env-id')
-    >>> print(backend.get_raw())
+    >>> print(backend.get())
     key_0: value_0
     key_1: 1
     key_2: true
@@ -45,9 +45,6 @@ class AppConfigBackend(AbstractBackend):
         - 1
         - 2
         - 3
-
-    >>> backend.get()
-    {'key_0': 'value_0', 'key_1': 1, 'key_2': True, 'key_3': [1, 2, 3]}
     """
 
     client: AppConfigDataClient
@@ -106,7 +103,7 @@ class AppConfigBackend(AbstractBackend):
 
         return ids[0]
 
-    def get_raw(self) -> str:
+    def get(self) -> str:
         """Retrieve the latest configuration deployment as a raw string."""
         token = self.client.start_configuration_session(
             ApplicationIdentifier=self.application_id,
@@ -116,7 +113,7 @@ class AppConfigBackend(AbstractBackend):
         )['InitialConfigurationToken']
 
         resp = self.client.get_latest_configuration(ConfigurationToken=token)
-        return str(resp['Configuration'].read().decode())
+        return resp['Configuration'].read().decode()
 
     @classmethod
     def get_application_id(cls, name: str, client: AppConfigClient) -> str:

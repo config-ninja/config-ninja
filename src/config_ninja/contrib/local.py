@@ -8,18 +8,18 @@ from typing import Iterator
 
 from watchfiles import watch
 
-from config_ninja.backend import AbstractBackend
+from config_ninja.backend import Backend
 
 logger = logging.getLogger(__name__)
 
 
-class LocalBackend(AbstractBackend):
+class LocalBackend(Backend):
     """Read the configuration from a local file.
 
-    ## Usage
+    # Usage
 
     >>> backend = LocalBackend(example_file)
-    >>> print(backend.get_raw())
+    >>> print(backend.get())
     key_0: value_0
     key_1: 1
     key_2: true
@@ -42,15 +42,18 @@ class LocalBackend(AbstractBackend):
         if not self.path.is_file():
             warnings.warn(f'could not read file: {path}', category=RuntimeWarning, stacklevel=2)
 
-    def get_raw(self) -> str:
+    def get(self) -> str:
         """Read the contents of the configuration file as a string."""
         return self.path.read_text()
 
-    def poll(self, interval: int = 10) -> Iterator[str]:
-        """Poll the file's parent directory for changes, and yield the file contents on change."""
+    def poll(self, interval: int = 0) -> Iterator[str]:
+        """Poll the file's parent directory for changes, and yield the file contents on change.
+
+        The `interval` parameter is ignored.
+        """
         for _ in watch(self.path):
             logger.info("detected change to '%s'", self.path)
-            yield self.get_raw()
+            yield self.get()
 
 
 logger.debug('successfully imported %s', __name__)

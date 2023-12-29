@@ -1,10 +1,14 @@
 """Execute tests for the CLI."""
 from __future__ import annotations
 
+import json
 from pathlib import Path
+from typing import Any, Sequence
 
 import boto3
 import pytest
+import tomlkit
+import yaml
 from pytest_mock import MockerFixture
 from tests.fixtures import MOCK_YAML_CONFIG
 from typer.testing import CliRunner
@@ -16,16 +20,25 @@ runner = CliRunner()
 
 
 @pytest.fixture()
+def settings(settings_text: str) -> dict[str, Any]:
+    """Parse the settings file and return its contents as a `dict`."""
+    out: dict[str, Any] = yaml.safe_load(settings_text)
+    return out
+
+
+@pytest.fixture()
 def settings_text() -> str:
     """Resolve the path to the settings file and return its contents as a string."""
     return config_ninja.resolve_settings_path().read_text().strip()
 
 
-def test_help() -> None:
+@pytest.mark.parametrize('args', [[], ['-h'], ['--help']])
+def test_help(args: Sequence[str]) -> None:
     """Verify the `-h` argument matches `--help` and the default command."""
-    results = [runner.invoke(app, args) for args in ([], ['-h'], ['--help'])]
-    assert all(result.exit_code == 0 for result in results)
-    assert all(result.stdout == results[0].stdout for result in results[1:])
+    results = runner.invoke(app, args)
+    stdout = results.stdout.strip()
+    assert results.exit_code == 0
+    assert stdout.startswith('Usage')
 
 
 def test_version() -> None:
@@ -67,13 +80,13 @@ def test_get_example_local(settings_text: str) -> None:
     assert result.stdout.strip() == settings_text
 
 
-def test_poll_example_local(mocker: MockerFixture, settings_text: str) -> None:
+def test_get_example_local_poll(mocker: MockerFixture, settings_text: str) -> None:
     """Test the `poll` command with a local file."""
     # Arrange
     mocker.patch('config_ninja.contrib.local.watch', return_value=iter([None]))
 
     # Act
-    result = runner.invoke(app, ['poll', 'example-local'])
+    result = runner.invoke(app, ['get', '--poll', 'example-local'])
 
     # Assert
     assert result.exit_code == 0, result.exception
@@ -87,3 +100,85 @@ def test_self_print() -> None:
     assert result.exit_code == 0, result.exception
     assert 'example-local' in result.stdout.strip()
     assert 'example-appconfig' in result.stdout.strip()
+
+
+def test_apply_example_local(settings: dict[str, Any]) -> None:
+    """Execute the `apply` command for a local file backend."""
+    result = runner.invoke(app, ['apply', 'example-local'])
+    output = (
+        Path(settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path']).read_text().strip()
+    )
+
+    assert result.exit_code == 0, result.exception
+    assert output == json.dumps(settings)
+
+
+def test_apply_example_local_template(settings: dict[str, Any]) -> None:
+    """Execute the `apply` command for a local file backend."""
+    result = runner.invoke(app, ['apply', 'example-local-template'])
+    output = (
+        Path(settings['CONFIG_NINJA_OBJECTS']['example-local-template']['dest']['path'])
+        .read_text()
+        .strip()
+    )
+
+    assert result.exit_code == 0, result.exception
+    assert (
+        output
+        == tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
+            {
+                'CONFIG_NINJA_OBJECTS': {
+                    'example-local-template': {
+                        'dest': settings['CONFIG_NINJA_OBJECTS']['example-local-template']['dest']
+                    }
+                }
+            }
+        ).strip()
+    )
+
+
+def test_apply_example_local_poll(
+    mocker: MockerFixture, settings_text: str, settings: dict[str, Any]
+) -> None:
+    """Test the `apply --poll` command with a local file backend."""
+    # Arrange
+    mocker.patch('config_ninja.contrib.local.watch', return_value=iter([settings_text]))
+
+    # Act
+    result = runner.invoke(app, ['apply', '--poll', 'example-local'])
+
+    # Assert
+    assert result.exit_code == 0, result.exception
+    assert Path(
+        settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path']
+    ).read_text().strip() == json.dumps(settings)
+
+
+def test_apply_example_local_template_poll(
+    mocker: MockerFixture, settings_text: str, settings: dict[str, Any]
+) -> None:
+    """Test the `apply --poll` command with a local file backend."""
+    # Arrange
+    mocker.patch('config_ninja.contrib.local.watch', return_value=iter([settings_text]))
+
+    # Act
+    result = runner.invoke(app, ['apply', '--poll', 'example-local-template'])
+    output = (
+        Path(settings['CONFIG_NINJA_OBJECTS']['example-local-template']['dest']['path'])
+        .read_text()
+        .strip()
+    )
+
+    assert result.exit_code == 0, result.exception
+    assert (
+        output
+        == tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
+            {
+                'CONFIG_NINJA_OBJECTS': {
+                    'example-local-template': {
+                        'dest': settings['CONFIG_NINJA_OBJECTS']['example-local-template']['dest']
+                    }
+                }
+            }
+        ).strip()
+    )

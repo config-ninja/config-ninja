@@ -3,34 +3,78 @@ from __future__ import annotations
 
 # stdlib
 import abc
+import json
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Iterator
+from typing import Any, Callable, Iterator, Literal
 
+import tomlkit as toml
 import yaml
 
 logger = logging.getLogger(__name__)
 
-if TYPE_CHECKING:  # pragma: no cover
-    DecodeT = Callable[[str], dict[str, Any]]
+FormatT = Literal['json', 'raw', 'toml', 'yaml', 'yml']
+LoadT = Callable[[str], dict[str, Any]]
+DumpT = Callable[[dict[str, Any]], str]
 
 
-class AbstractBackend(abc.ABC):
+def load_raw(raw: str) -> dict[str, str]:
+    """Treat the string as raw text."""
+    return {'content': raw}
+
+
+def dump_raw(data: dict[str, str]) -> str:
+    """Get the `'content'` key from the given `dict`."""
+    return data['content']
+
+
+LOADERS: dict[FormatT, LoadT] = {
+    'json': json.loads,
+    'raw': load_raw,
+    'toml': toml.loads,
+    'yaml': yaml.safe_load,
+    'yml': yaml.safe_load,
+}
+
+DUMPERS: dict[FormatT, DumpT] = {
+    'json': json.dumps,
+    'raw': dump_raw,
+    'toml': toml.dumps,  # pyright: ignore[reportUnknownMemberType]
+    'yaml': yaml.dump,
+    'yml': yaml.dump,
+}
+
+
+def dumps(fmt: FormatT, data: dict[str, Any]) -> str:
+    """Serialize the given data using the given format."""
+    try:
+        dump = DUMPERS[fmt]
+    except KeyError as exc:  # pragma: no cover
+        raise ValueError(f"unsupported format: '{fmt}'") from exc
+
+    return dump(data)
+
+
+def loads(fmt: FormatT, raw: str) -> dict[str, Any]:
+    """Deserialize the given data using the given format."""
+    try:
+        return LOADERS[fmt](raw)
+    except KeyError as exc:
+        raise ValueError(f"unsupported format: '{fmt}'") from exc
+
+
+class Backend(abc.ABC):
     """Define the API for backend implementations."""
 
     @abc.abstractmethod
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initialize the backend."""
-
-    def get(self, decoder: DecodeT = yaml.safe_load) -> dict[str, Any]:
-        """Retrieve and decode the configuration."""
-        return decoder(self.get_raw())
-
-    @abc.abstractmethod
-    def get_raw(self) -> str:
+    def get(self) -> str:
         """Retrieve the raw configuration as a string."""
 
     @classmethod
-    def new(cls: type[AbstractBackend], *args: Any, **kwargs: Any) -> AbstractBackend:
+    def new(
+        cls: type[Backend],
+        *args: Any,
+        **kwargs: Any,
+    ) -> Backend:
         """Connect a new instance to the backend."""
         return cls(*args, **kwargs)
 

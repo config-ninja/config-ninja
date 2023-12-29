@@ -71,7 +71,14 @@ repos:
           - types-pyyaml
           - boto3
           - boto3-stubs[appconfig,appconfigdata]
+          - jinja2
+          - pyspry
+          - pyyaml
+          - tomlkit
+          - typer[all]
           - types-pyyaml
+          - typing_extensions
+          - watchfiles
 
   - repo: https://github.com/RobertCraigie/pyright-python
     rev: v1.1.342
@@ -80,10 +87,12 @@ repos:
         additional_dependencies:
           - boto3
           - boto3-stubs[appconfig,appconfigdata]
+          - jinja2
           - pyspry
           - pytest
           - pytest-mock
           - pyyaml
+          - tomlkit
           - typer[all]
           - types-pyyaml
           - typing_extensions

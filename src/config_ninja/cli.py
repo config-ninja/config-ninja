@@ -4,23 +4,27 @@ Note: Typer currently does not support future annotations.
 """
 import contextlib
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Annotated, Any, Dict, Iterator, Optional, Type
+from typing import Annotated, Any, Dict, Iterator, Optional, Tuple, Type
 
+import jinja2
 import pyspry
 import typer
 import yaml
 from rich import print
 
 import config_ninja
-from config_ninja.backend import AbstractBackend
+from config_ninja.backend import Backend, FormatT, dumps, loads
 from config_ninja.contrib import get_backend
 
-app_kwargs: Dict[str, Any] = dict(
-    context_settings={'help_option_names': ['-h', '--help']},
-    no_args_is_help=True,
-    rich_markup_mode='rich',
-)
+logger = logging.getLogger(__name__)
+
+app_kwargs: Dict[str, Any] = {
+    'context_settings': {'help_option_names': ['-h', '--help']},
+    'no_args_is_help': True,
+    'rich_markup_mode': 'rich',
+}
 
 app = typer.Typer(**app_kwargs)
 self_app = typer.Typer(**app_kwargs)
@@ -29,7 +33,29 @@ app.add_typer(
     self_app, name='self', help="Operate on [bold blue]config-ninja[/]'s own configuration file."
 )
 
-logger = logging.getLogger(__name__)
+KeyAnnotation = Annotated[
+    str,
+    typer.Argument(help='The key of the configuration object to retrieve', show_default=False),
+]
+
+PollAnnotation = Annotated[
+    Optional[bool],
+    typer.Option(
+        '-p',
+        '--poll',
+        help='Enable polling; print the configuration on changes.',
+        show_default=False,
+    ),
+]
+
+
+@dataclass
+class DestSpec:
+    """Container for the destination spec parsed from settings."""
+
+    path: Path
+    output: Optional[FormatT] = None
+    template: Optional[jinja2.Template] = None
 
 
 @contextlib.contextmanager
@@ -38,7 +64,7 @@ def handle_key_errors(objects: Dict[str, Any]) -> Iterator[None]:
     try:
         yield
     except KeyError as exc:  # pragma: no cover
-        print(f'[red]ERROR[/]: Invalid key: [green]{exc.args[0]}[/]\n')
+        print(f'[red]ERROR[/]: Missing key: [green]{exc.args[0]}[/]\n')
         print(yaml.dump(objects))
         typer.Exit(1)
 
@@ -53,7 +79,7 @@ def version_callback(ctx: typer.Context, value: Optional[bool] = None) -> None:
         typer.Exit()
 
 
-def init_backend(settings: pyspry.Settings | None, key: str) -> AbstractBackend:
+def init_backend(settings: Optional[pyspry.Settings], key: str) -> Tuple[FormatT, Backend]:
     """Get the backend for the specified configuration object."""
     if not settings:  # pragma: no cover
         print('[red]ERROR[/]: Could not load settings.')
@@ -63,38 +89,72 @@ def init_backend(settings: pyspry.Settings | None, key: str) -> AbstractBackend:
 
     with handle_key_errors(objects):
         source = objects[key]['source']
-        backend_class: Type[AbstractBackend] = get_backend(source['backend'])
+        backend_class: Type[Backend] = get_backend(source['backend'])
+        fmt = source.get('format', 'raw')
         if 'new' in source:
             backend = backend_class.new(**source['new']['kwargs'])
         else:
             backend = backend_class(**source['init']['kwargs'])
 
-    return backend
+    return fmt, backend
 
 
-@app.command(name='get', help='Get the value of a configuration object.')
-def print_obj_config(
-    ctx: typer.Context,
-    key: Annotated[str, typer.Argument(help='The key of the configuration object to retrieve')],
-) -> None:
+def get_dest(settings: pyspry.Settings, key: str) -> DestSpec:
+    """Read the destination spec from the settings file."""
+    objects = settings.OBJECTS
+    with handle_key_errors(objects):
+        dest = objects[key]['dest']
+        path = Path(dest['path'])
+        try:
+            template_path = Path(dest.get('template'))
+        except TypeError:
+            return DestSpec(output=dest['output'], path=path)
+
+        if output := dest.get('output'):
+            print(
+                f"[yellow]WARNING[/]: Ignoring output format '{output}'; "
+                f"using 'template={template_path!s}' instead"
+            )
+        loader = jinja2.FileSystemLoader(template_path.parent)
+        env = jinja2.Environment(autoescape=jinja2.select_autoescape(default=True), loader=loader)
+
+        return DestSpec(path=path, template=env.get_template(template_path.name))
+
+
+@app.command(name='get', help='Print the value of the specified configuration object.')
+def print_obj_config(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) -> None:
     """Print the value of the specified configuration object."""
-    backend = init_backend(ctx.obj['settings'], key)
-    print(backend.get_raw())
+    _, backend = init_backend(ctx.obj['settings'], key)
+
+    if poll:
+        for content in backend.poll():
+            print(content)
+    else:
+        print(backend.get())
 
 
-@app.command(name='poll')
-def poll_obj_config(
-    ctx: typer.Context,
-    key: Annotated[str, typer.Argument(help='The key of the configuration object to retrieve')],
-) -> None:
-    """Poll for changes to a configuration object.
+@app.command()
+def apply(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) -> None:
+    """Apply the specified configuration to the system."""
+    fmt, backend = init_backend(ctx.obj['settings'], key)
+    dest = get_dest(ctx.obj['settings'], key)
+    dest.path.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
 
-    Each time the configuration changes, print the new value to stdout.
-    """
-    backend = init_backend(ctx.obj['settings'], key)
-
-    for content in backend.poll():
-        print(content)
+    if poll:
+        for content in backend.poll():
+            data = loads(fmt, content)
+            if dest.template:
+                dest.path.write_text(dest.template.render(data))
+            else:
+                assert dest.output is not None  # noqa: S101  # 👈 for static analysis
+                dest.path.write_text(dumps(dest.output, data))
+    else:
+        data = loads(fmt, backend.get())
+        if dest.template:
+            dest.path.write_text(dest.template.render(data))
+        else:
+            assert dest.output is not None  # noqa: S101  # 👈 for static analysis
+            dest.path.write_text(dumps(dest.output, data))
 
 
 @self_app.command(name='print')
