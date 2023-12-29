@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -19,6 +20,11 @@ from config_ninja.cli import app
 runner = CliRunner()
 
 
+def clean(text: str) -> str:
+    """Remove hex/ANSI codes and leading/trailing newlines from the given string."""
+    return re.sub(r'\x1b\[[0-9;]+m', '', text).strip()
+
+
 @pytest.fixture()
 def settings(settings_text: str) -> dict[str, Any]:
     """Parse the settings file and return its contents as a `dict`."""
@@ -29,14 +35,15 @@ def settings(settings_text: str) -> dict[str, Any]:
 @pytest.fixture()
 def settings_text() -> str:
     """Resolve the path to the settings file and return its contents as a string."""
-    return config_ninja.resolve_settings_path().read_text().strip()
+    out: str = config_ninja.resolve_settings_path().read_text().strip()
+    return out
 
 
 @pytest.mark.parametrize('args', [[], ['-h'], ['--help']])
 def test_help(args: Sequence[str]) -> None:
     """Verify the `-h` argument matches `--help` and the default command."""
     results = runner.invoke(app, args)
-    stdout = results.stdout.strip()
+    stdout = clean(results.stdout)
     assert results.exit_code == 0
     assert stdout.startswith('Usage')
 
