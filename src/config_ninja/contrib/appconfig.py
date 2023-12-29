@@ -4,10 +4,9 @@ from __future__ import annotations
 import logging
 import time
 import warnings
-from typing import TYPE_CHECKING, Any, Callable, Iterator, Literal
+from typing import TYPE_CHECKING, Any, Iterator, Literal
 
 import boto3
-import yaml
 
 from config_ninja.backend import AbstractBackend
 
@@ -106,10 +105,6 @@ class AppConfigBackend(AbstractBackend):
             )
 
         return ids[0]
-
-    def get(self, decoder: Callable[[str], dict[str, Any]] = yaml.safe_load) -> dict[str, Any]:
-        """Retrieve and decode the latest configuration deployment."""
-        return decoder(self.get_raw())
 
     def get_raw(self) -> str:
         """Retrieve the latest configuration deployment as a raw string."""

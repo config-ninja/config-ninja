@@ -1,6 +1,7 @@
 """Define fixtures for the test suite."""
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, TypeVar
 from unittest import mock
 
@@ -168,12 +169,30 @@ def mock_poll_too_early(
     return mock_client
 
 
+@pytest.fixture()
+def example_file(tmp_path: Path) -> Path:
+    """Write the test configuration to a file in the temporary directory."""
+    path = tmp_path / 'example.yaml'
+    path.write_bytes(MOCK_YAML_CONFIG)
+    return path
+
+
+example_file.__doc__ = f"""Write the test configuration to a file in the temporary directory.
+
+```yaml
+{MOCK_YAML_CONFIG.decode('utf-8')}
+```
+"""
+
+
 @pytest.fixture(autouse=True)
 def src_doctest_namespace(
     doctest_namespace: dict[str, Any],
     mock_appconfigdata_client: AppConfigDataClient,
+    example_file: Path,
 ) -> dict[str, Any]:
     """Add the `mock_client` fixture to the doctest namespace."""
+    doctest_namespace['example_file'] = example_file
     doctest_namespace['pytest'] = pytest
     doctest_namespace['appconfigdata_client'] = mock_appconfigdata_client
     return doctest_namespace

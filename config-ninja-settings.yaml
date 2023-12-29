@@ -1,21 +1,29 @@
 # the following top-level key is required
 CONFIG_NINJA_OBJECTS:
   # each second-level key identifies a config-ninja object
-  example-1:
+  example-local:
     # set the location that the object is written to
+    dest:
+      output: raw
+      path: /tmp/config-ninja-settings.yaml
+
+    # specify where the object is stored / retrieved from
+    source:
+      backend: local
+
+      init:
+        kwargs:
+          path: config-ninja-settings.yaml
+
+  example-appconfig:
     dest:
       output: raw
       path: /etc/datadog-agent/datadog.yaml
 
-    # specify where the object is stored / retrieved from
     source:
       backend: appconfig
 
-      # alternatively, identifiers can be passed directly to '__init__()'
-      # init:
-      #   kwargs: ...
-
-      # the backend class is instantiated from named resources with its 'new()' method
+      # instantiate the backend class using its 'new()' method
       new:
         kwargs:
           application_name: Hello World 1

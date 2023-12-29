@@ -87,6 +87,7 @@ repos:
           - typer[all]
           - types-pyyaml
           - typing_extensions
+          - watchfiles
 
   - repo: local
     hooks:

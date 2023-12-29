@@ -15,7 +15,7 @@ import config_ninja
 from config_ninja.backend import AbstractBackend
 from config_ninja.contrib import get_backend
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import pyspry
 
 app_kwargs: Dict[str, Any] = dict(
@@ -39,7 +39,7 @@ def handle_key_errors(objects: Dict[str, Any]) -> Iterator[None]:
     """Handle KeyError exceptions within the managed context."""
     try:
         yield
-    except KeyError as exc:
+    except KeyError as exc:  # pragma: no cover
         print(f'[red]ERROR[/]: Invalid key: [green]{exc.args[0]}[/]\n')
         print(yaml.dump(objects))
         typer.Exit(1)
@@ -47,7 +47,7 @@ def handle_key_errors(objects: Dict[str, Any]) -> Iterator[None]:
 
 def version_callback(ctx: typer.Context, value: Optional[bool] = None) -> None:
     """Print the version of the package."""
-    if ctx.resilient_parsing:
+    if ctx.resilient_parsing:  # pragma: no cover  # this is for tab completions
         return
 
     if value:
@@ -60,9 +60,9 @@ def print_obj_config(
     ctx: typer.Context,
     key: Annotated[str, typer.Argument(help='The key of the configuration object to retrieve')],
 ) -> None:
-    """Print the configuration file."""
+    """Print the value of the specified configuration object."""
     settings: pyspry.Settings = ctx.obj['settings']
-    if not settings:
+    if not settings:  # pragma: no cover
         print('[red]ERROR[/]: Could not load settings.')
         typer.Exit(1)
 
@@ -78,11 +78,38 @@ def print_obj_config(
     print(backend.get_raw())
 
 
+@app.command(name='poll')
+def poll_obj_config(
+    ctx: typer.Context,
+    key: Annotated[str, typer.Argument(help='The key of the configuration object to retrieve')],
+) -> None:
+    """Poll for changes to a configuration object.
+
+    Each time the configuration changes, print the new value to stdout.
+    """
+    settings: pyspry.Settings = ctx.obj['settings']
+    if not settings:  # pragma: no cover
+        print('[red]ERROR[/]: Could not load settings.')
+        typer.Exit(1)
+
+    objects = settings.OBJECTS
+    with handle_key_errors(objects):
+        source = objects[key]['source']
+        backend_class: Type[AbstractBackend] = get_backend(source['backend'])
+        if 'new' in source:
+            backend = backend_class.new(**source['new']['kwargs'])
+        else:
+            backend = backend_class(**source['init']['kwargs'])
+
+    for content in backend.poll():
+        print(content)
+
+
 @self_app.command(name='print')
 def print_self_config(ctx: typer.Context) -> None:
     """Print the configuration file."""
     if settings := ctx.obj['settings']:
-        print('\n'.join([f'{name} = {getattr(settings, name)}' for name in dir(settings)]))
+        print(yaml.dump(settings.OBJECTS))
     else:
         print('[yellow]WARNING[/]: No settings file found.')
 
@@ -134,7 +161,7 @@ def main(
     else:
         ctx.obj['settings'] = config_ninja.load_settings(settings_file)
 
-    if not ctx.invoked_subcommand:
+    if not ctx.invoked_subcommand:  # pragma: no cover
         print(ctx.get_help())
 
 
