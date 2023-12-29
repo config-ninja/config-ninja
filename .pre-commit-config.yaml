@@ -4,6 +4,7 @@ default_stages: [commit, manual]
 fail_fast: false
 ci:
   skip:
+    - pyright
     - shellcheck
     - poetry-check
 
