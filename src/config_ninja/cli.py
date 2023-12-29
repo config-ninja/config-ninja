@@ -5,8 +5,9 @@ Note: Typer currently does not support future annotations.
 import contextlib
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated, Any, Dict, Iterator, Optional, Type
+from typing import Annotated, Any, Dict, Iterator, Optional, Type
 
+import pyspry
 import typer
 import yaml
 from rich import print
@@ -14,9 +15,6 @@ from rich import print
 import config_ninja
 from config_ninja.backend import AbstractBackend
 from config_ninja.contrib import get_backend
-
-if TYPE_CHECKING:  # pragma: no cover
-    import pyspry
 
 app_kwargs: Dict[str, Any] = dict(
     context_settings={'help_option_names': ['-h', '--help']},
@@ -55,18 +53,14 @@ def version_callback(ctx: typer.Context, value: Optional[bool] = None) -> None:
         typer.Exit()
 
 
-@app.command(name='get', help='Get the value of a configuration object.')
-def print_obj_config(
-    ctx: typer.Context,
-    key: Annotated[str, typer.Argument(help='The key of the configuration object to retrieve')],
-) -> None:
-    """Print the value of the specified configuration object."""
-    settings: pyspry.Settings = ctx.obj['settings']
+def init_backend(settings: pyspry.Settings | None, key: str) -> AbstractBackend:
+    """Get the backend for the specified configuration object."""
     if not settings:  # pragma: no cover
         print('[red]ERROR[/]: Could not load settings.')
         typer.Exit(1)
 
-    objects = settings.OBJECTS
+    objects = settings.OBJECTS  # type: ignore[union-attr]
+
     with handle_key_errors(objects):
         source = objects[key]['source']
         backend_class: Type[AbstractBackend] = get_backend(source['backend'])
@@ -75,6 +69,16 @@ def print_obj_config(
         else:
             backend = backend_class(**source['init']['kwargs'])
 
+    return backend
+
+
+@app.command(name='get', help='Get the value of a configuration object.')
+def print_obj_config(
+    ctx: typer.Context,
+    key: Annotated[str, typer.Argument(help='The key of the configuration object to retrieve')],
+) -> None:
+    """Print the value of the specified configuration object."""
+    backend = init_backend(ctx.obj['settings'], key)
     print(backend.get_raw())
 
 
@@ -87,19 +91,7 @@ def poll_obj_config(
 
     Each time the configuration changes, print the new value to stdout.
     """
-    settings: pyspry.Settings = ctx.obj['settings']
-    if not settings:  # pragma: no cover
-        print('[red]ERROR[/]: Could not load settings.')
-        typer.Exit(1)
-
-    objects = settings.OBJECTS
-    with handle_key_errors(objects):
-        source = objects[key]['source']
-        backend_class: Type[AbstractBackend] = get_backend(source['backend'])
-        if 'new' in source:
-            backend = backend_class.new(**source['new']['kwargs'])
-        else:
-            backend = backend_class(**source['init']['kwargs'])
+    backend = init_backend(ctx.obj['settings'], key)
 
     for content in backend.poll():
         print(content)
