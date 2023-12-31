@@ -1,0 +1,31 @@
+# the following top-level key is required
+CONFIG_NINJA_OBJECTS:
+  # each second-level key identifies a config-ninja object
+  example-0:
+    # set the location that the object is written to
+    dest:
+      format: json
+      path: /tmp/config-ninja/local/settings.json
+
+    # specify where the object is stored / retrieved from
+    source:
+      backend: local
+      format: yaml
+
+      init:
+        kwargs:
+          path: config-ninja-settings.yaml
+
+  example-1:
+    dest:
+      # you can specify the path to a Jinja2 template:
+      format: templates/settings-subset.toml.j2
+      path: /tmp/config-ninja/local/subset.toml
+
+    source:
+      backend: local
+      format: yaml
+
+      new:
+        kwargs:
+          path: config-ninja-settings.yaml

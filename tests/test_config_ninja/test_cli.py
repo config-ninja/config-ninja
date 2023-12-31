@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, AsyncIterable, Sequence
 
 import boto3
+import pyspry
 import pytest
 import tomlkit
 import yaml
@@ -28,7 +29,7 @@ def clean(text: str) -> str:
 @pytest.fixture()
 def settings_text() -> str:
     """Resolve the path to the settings file and return its contents as a string."""
-    return config_ninja.resolve_settings_path().read_text().strip()
+    return str(config_ninja.resolve_settings_path().read_text()).strip()
 
 
 @pytest.fixture()
@@ -173,6 +174,36 @@ def test_apply_example_local_template_poll(settings: dict[str, Any]) -> None:
     assert result.exit_code == 0, result.exception
     assert (
         output
+        == tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
+            {
+                'CONFIG_NINJA_OBJECTS': {
+                    'example-local-template': {
+                        'dest': settings['CONFIG_NINJA_OBJECTS']['example-local-template']['dest']
+                    }
+                }
+            }
+        ).strip()
+    )
+
+
+@pytest.mark.usefixtures('_patch_awatch')
+def test_monitor_local(settings: dict[str, Any]) -> None:
+    """Test the `monitor` command with a local file backend."""
+    # Arrange
+    local_settings = pyspry.Settings.load('examples/local-backend.yaml', 'CONFIG_NINJA')
+
+    # Act
+    result = runner.invoke(app, ['--config', 'examples/local-backend.yaml', 'monitor'])
+    paths = [
+        Path(local_settings.OBJECTS[obj]['dest']['path']) for obj in ('example-0', 'example-1')
+    ]
+    outputs = [p.read_text().strip() for p in paths]
+
+    # Assert
+    assert result.exit_code == 0, result.exception
+    assert outputs[0] == json.dumps(settings)
+    assert (
+        outputs[1]
         == tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
             {
                 'CONFIG_NINJA_OBJECTS': {
