@@ -4,7 +4,7 @@ CONFIG_NINJA_OBJECTS:
   example-local:
     # set the location that the object is written to
     dest:
-      output: json
+      format: json
       path: /tmp/config-ninja/settings.json
 
     # specify where the object is stored / retrieved from
@@ -19,7 +19,7 @@ CONFIG_NINJA_OBJECTS:
   example-local-template:
     dest:
       path: /tmp/config-ninja/settings-subset.toml
-      template: templates/settings-subset.toml.j2
+      format: templates/settings-subset.toml.j2
 
     source:
       backend: local
@@ -31,7 +31,7 @@ CONFIG_NINJA_OBJECTS:
 
   example-appconfig:
     dest:
-      output: raw
+      format: raw
       path: /tmp/datadog-agent/datadog.yaml
 
     source:

@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 import json
 import logging
-from typing import Any, Callable, Iterator, Literal
+from typing import Any, AsyncIterator, Callable, Literal
 
 import tomlkit as toml
 import yaml
@@ -79,8 +79,9 @@ class Backend(abc.ABC):
         return cls(*args, **kwargs)
 
     @abc.abstractmethod
-    def poll(self, interval: int = 0) -> Iterator[str]:
+    async def poll(self, interval: int = 0) -> AsyncIterator[str]:
         """Poll the configuration for changes."""
+        yield ''
 
 
 logger.debug('successfully imported %s', __name__)

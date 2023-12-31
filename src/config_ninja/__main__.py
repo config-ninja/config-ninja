@@ -8,7 +8,7 @@ from config_ninja.cli import app
 logger = logging.getLogger(__name__)
 
 
-def main() -> None:  # noqa: D103
+def main() -> None:  # pylint: disable=missing-function-docstring  # noqa: D103
     logging.basicConfig(level=logging.INFO)
     app()
 

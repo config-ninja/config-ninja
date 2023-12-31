@@ -4,11 +4,13 @@ from __future__ import annotations
 import logging
 import warnings
 from pathlib import Path
-from typing import Iterator
+from typing import AsyncIterator
 
-from watchfiles import watch
+from watchfiles import awatch  # pyright: ignore[reportUnknownVariableType]
 
 from config_ninja.backend import Backend
+
+__all__ = ['LocalBackend']
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +18,7 @@ logger = logging.getLogger(__name__)
 class LocalBackend(Backend):
     """Read the configuration from a local file.
 
-    # Usage
+    ## Usage
 
     >>> backend = LocalBackend(example_file)
     >>> print(backend.get())
@@ -35,6 +37,7 @@ class LocalBackend(Backend):
     """
 
     path: Path
+    """Read the configuration from this file"""
 
     def __init__(self, path: str) -> None:
         """Set attributes to initialize the backend."""
@@ -44,14 +47,14 @@ class LocalBackend(Backend):
 
     def get(self) -> str:
         """Read the contents of the configuration file as a string."""
-        return self.path.read_text()
+        return self.path.read_text(encoding='utf-8')
 
-    def poll(self, interval: int = 0) -> Iterator[str]:
+    async def poll(self, interval: int = 0) -> AsyncIterator[str]:
         """Poll the file's parent directory for changes, and yield the file contents on change.
 
         The `interval` parameter is ignored.
         """
-        for _ in watch(self.path):
+        async for _ in awatch(self.path):
             logger.info("detected change to '%s'", self.path)
             yield self.get()
 

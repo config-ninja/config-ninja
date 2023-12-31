@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, AsyncIterable, Sequence
 
 import boto3
 import pytest
@@ -26,6 +26,12 @@ def clean(text: str) -> str:
 
 
 @pytest.fixture()
+def settings_text() -> str:
+    """Resolve the path to the settings file and return its contents as a string."""
+    return config_ninja.resolve_settings_path().read_text().strip()
+
+
+@pytest.fixture()
 def settings(settings_text: str) -> dict[str, Any]:
     """Parse the settings file and return its contents as a `dict`."""
     out: dict[str, Any] = yaml.safe_load(settings_text)
@@ -33,10 +39,13 @@ def settings(settings_text: str) -> dict[str, Any]:
 
 
 @pytest.fixture()
-def settings_text() -> str:
-    """Resolve the path to the settings file and return its contents as a string."""
-    out: str = config_ninja.resolve_settings_path().read_text().strip()
-    return out
+def _patch_awatch(settings_text: str, mocker: MockerFixture) -> None:  # pyright: ignore[reportUnusedFunction]
+    """Patch `watchfiles.awatch` to yield a single string."""
+
+    async def mock_awatch(*_: Any, **__: Any) -> AsyncIterable[str]:
+        yield settings_text
+
+    mocker.patch('config_ninja.contrib.local.awatch', new=mock_awatch)
 
 
 @pytest.mark.parametrize('args', [[], ['-h'], ['--help']])
@@ -80,24 +89,20 @@ def test_get_example_appconfig(mock_full_session: boto3.Session) -> None:
     assert result.stdout.strip() == MOCK_YAML_CONFIG.decode('utf-8')
 
 
-def test_get_example_local(settings_text: str) -> None:
+def test_get_example_local(settings: dict[str, Any]) -> None:
     """Get the 'example-local' configuration (as specified in config-ninja-settings.yaml)."""
     result = runner.invoke(app, ['get', 'example-local'])
     assert result.exit_code == 0, result.exception
-    assert result.stdout.strip() == settings_text
+    assert result.stdout.replace('\n', '').strip() == json.dumps(settings)
 
 
-def test_get_example_local_poll(mocker: MockerFixture, settings_text: str) -> None:
+@pytest.mark.usefixtures('_patch_awatch')
+def test_get_example_local_poll(settings: dict[str, Any]) -> None:
     """Test the `poll` command with a local file."""
-    # Arrange
-    mocker.patch('config_ninja.contrib.local.watch', return_value=iter([None]))
-
-    # Act
     result = runner.invoke(app, ['get', '--poll', 'example-local'])
 
-    # Assert
     assert result.exit_code == 0, result.exception
-    assert result.stdout.strip() == settings_text
+    assert result.stdout.replace('\n', '').strip() == json.dumps(settings)
 
 
 def test_self_print() -> None:
@@ -144,31 +149,20 @@ def test_apply_example_local_template(settings: dict[str, Any]) -> None:
     )
 
 
-def test_apply_example_local_poll(
-    mocker: MockerFixture, settings_text: str, settings: dict[str, Any]
-) -> None:
+@pytest.mark.usefixtures('_patch_awatch')
+def test_apply_example_local_poll(settings: dict[str, Any]) -> None:
     """Test the `apply --poll` command with a local file backend."""
-    # Arrange
-    mocker.patch('config_ninja.contrib.local.watch', return_value=iter([settings_text]))
-
-    # Act
     result = runner.invoke(app, ['apply', '--poll', 'example-local'])
 
-    # Assert
     assert result.exit_code == 0, result.exception
     assert Path(
         settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path']
     ).read_text().strip() == json.dumps(settings)
 
 
-def test_apply_example_local_template_poll(
-    mocker: MockerFixture, settings_text: str, settings: dict[str, Any]
-) -> None:
+@pytest.mark.usefixtures('_patch_awatch')
+def test_apply_example_local_template_poll(settings: dict[str, Any]) -> None:
     """Test the `apply --poll` command with a local file backend."""
-    # Arrange
-    mocker.patch('config_ninja.contrib.local.watch', return_value=iter([settings_text]))
-
-    # Act
     result = runner.invoke(app, ['apply', '--poll', 'example-local-template'])
     output = (
         Path(settings['CONFIG_NINJA_OBJECTS']['example-local-template']['dest']['path'])

@@ -208,8 +208,18 @@ cmd = """
     --mermaid
     --docformat google
     --output-directory docs
+    boto3
     config_ninja
+    mypy_boto3_appconfig
+    mypy_boto3_appconfig.client
+    mypy_boto3_appconfigdata
+    mypy_boto3_appconfigdata.client
+    pathlib
+    pyspry
+    pyspry.base
     tests
+    typer
+    typing
 """
 
 [tool.poe.tasks.serve-docs]
@@ -218,8 +228,18 @@ cmd = """
   pdoc
     --mermaid
     --docformat google
+    boto3
     config_ninja
+    mypy_boto3_appconfig
+    mypy_boto3_appconfig.client
+    mypy_boto3_appconfigdata
+    mypy_boto3_appconfigdata.client
+    pathlib
+    pyspry
+    pyspry.base
     tests
+    typer
+    typing
 """
 
 [tool.poe.tasks.lab]

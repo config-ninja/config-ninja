@@ -1,10 +1,10 @@
 """Integrate with the AWS AppConfig service."""
 from __future__ import annotations
 
+import asyncio
 import logging
-import time
 import warnings
-from typing import TYPE_CHECKING, Any, Iterator, Literal
+from typing import TYPE_CHECKING, Any, AsyncIterator, Literal
 
 import boto3
 
@@ -21,6 +21,8 @@ if TYPE_CHECKING:  # pragma: no cover
     from mypy_boto3_appconfig.client import AppConfigClient
     from mypy_boto3_appconfigdata import AppConfigDataClient
 
+__all__ = ['AppConfigBackend']
+
 MINIMUM_POLL_INTERVAL_SECONDS = 60
 
 
@@ -34,7 +36,9 @@ logger = logging.getLogger(__name__)
 class AppConfigBackend(Backend):
     """Retrieve the deployed configuration from AWS AppConfig.
 
-    # Usage
+    ## Usage
+
+    To retrieve the configuration, use the `AppConfigBackend.get()` method:
 
     >>> backend = AppConfigBackend(appconfigdata_client, 'app-id', 'conf-id', 'env-id')
     >>> print(backend.get())
@@ -48,10 +52,14 @@ class AppConfigBackend(Backend):
     """
 
     client: AppConfigDataClient
+    """The `boto3` client used to communicate with the AWS AppConfig service."""
 
     application_id: str
+    """See [Creating a namespace for your application in AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-namespace.html)"""
     configuration_profile_id: str
+    """See [Creating a configuration profile in AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-profile.html)"""
     environment_id: str
+    """See [Creating environments for your application in AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-environment.html)"""
 
     def __init__(
         self,
@@ -64,7 +72,10 @@ class AppConfigBackend(Backend):
         *_: Any,
         **__: Any,
     ) -> None:
-        """Start a configuration session with the given parameters."""
+        """Initialize the backend.
+
+        Variadic arguments are ignored.
+        """
         self.client = client
 
         self.application_id = app_id
@@ -104,7 +115,7 @@ class AppConfigBackend(Backend):
         return ids[0]
 
     def get(self) -> str:
-        """Retrieve the latest configuration deployment as a raw string."""
+        """Retrieve the latest configuration deployment as a string."""
         token = self.client.start_configuration_session(
             ApplicationIdentifier=self.application_id,
             EnvironmentIdentifier=self.environment_id,
@@ -144,28 +155,35 @@ class AppConfigBackend(Backend):
         environment_name: str,
         session: boto3.Session | None = None,
     ) -> AppConfigBackend:
-        """Create a new instance connected to the backend.
+        """Create a new instance of the backend.
 
-        # Usage
+        ## Usage: `AppConfigBackend.new()`
 
-        >>> session = getfixture('mock_session_with_1_id')
+        >>> session = getfixture('mock_session_with_1_id')  # fixture for doctest
+
+        Use `boto3` to fetch IDs for based on name:
+
         >>> backend = AppConfigBackend.new('app-name', 'conf-name', 'env-name', session)
         >>> print(f"{backend}")
         AppConfigBackend(app_id='id-1', conf_profile_id='id-1', env_id='id-1')
 
-        ## Error: No IDs Found
+        ### Error: No IDs Found
 
-        >>> session = getfixture('mock_session_with_0_ids')
+        >>> session = getfixture('mock_session_with_0_ids')  # fixture for doctest
+
+        A `ValueError` is raised if no IDs are found for the given name:
+
         >>> backend = AppConfigBackend.new('app-name', 'conf-name', 'env-name', session)
         Traceback (most recent call last):
         ...
         ValueError: no "list_applications" results found for Name="app-name"
 
-        ## Warning: Multiple IDs Found
+        ### Warning: Multiple IDs Found
+
+        >>> session = getfixture('mock_session_with_2_ids')
 
         The first ID is used and the others ignored.
 
-        >>> session = getfixture('mock_session_with_2_ids')
         >>> with pytest.warns(RuntimeWarning):
         ...     backend = AppConfigBackend.new('app-name', 'conf-name', 'env-name', session)
         """
@@ -189,13 +207,13 @@ class AppConfigBackend(Backend):
 
         return cls(client, application_id, configuration_profile_id, environment_id)
 
-    def poll(self, interval: int = MINIMUM_POLL_INTERVAL_SECONDS) -> Iterator[str]:
+    async def poll(self, interval: int = MINIMUM_POLL_INTERVAL_SECONDS) -> AsyncIterator[str]:
         """Poll the AppConfig service for configuration changes.
 
-        # Usage
+        ## Usage: `AppConfigBackend.poll()`
 
         >>> backend = AppConfigBackend(appconfigdata_client, 'app-id', 'conf-id', 'env-id')
-        >>> content = next(backend.poll())
+        >>> content = asyncio.run(anext(backend.poll()))
         >>> print(content)
         key_0: value_0
         key_1: 1
@@ -205,16 +223,16 @@ class AppConfigBackend(Backend):
             - 2
             - 3
 
-        ## Polling Too Quickly
+        ### Polling Too Quickly
+
+        >>> client = getfixture('mock_poll_too_early')    # seed a `BadRequestException`
 
         If polling is done too quickly, AWS AppConfig will raise a `BadRequestException`. This is
         handled automatically by the backend, which will retry the request after waiting for half
         the interval.
 
-        >>> client = getfixture('mock_poll_too_early')    # seed a `BadRequestException`
-
         >>> backend = AppConfigBackend(client, 'app-id', 'conf-id', 'env-id')
-        >>> content = next(backend.poll(interval=0.01))   # it is handled successfully
+        >>> content = asyncio.run(anext(backend.poll(interval=0.01)))   # it is handled successfully
         >>> print(content)
         key_0: value_0
         key_1: 1
@@ -238,7 +256,7 @@ class AppConfigBackend(Backend):
             except self.client.exceptions.BadRequestException as exc:
                 if exc.response['Error']['Message'] != 'Request too early':
                     raise
-                time.sleep(interval / 2)
+                await asyncio.sleep(interval / 2)
                 continue
 
             token = resp['NextPollConfigurationToken']
@@ -247,7 +265,7 @@ class AppConfigBackend(Backend):
             else:
                 logger.debug('no configuration changes')
 
-            time.sleep(resp['NextPollIntervalInSeconds'])
+            await asyncio.sleep(resp['NextPollIntervalInSeconds'])
 
 
 logger.debug('successfully imported %s', __name__)
