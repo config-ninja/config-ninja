@@ -13,7 +13,7 @@ def main() -> None:  # pylint: disable=missing-function-docstring  # noqa: D103
     app()
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     main()
 else:
     logger.debug('successfully imported %s', __name__)
