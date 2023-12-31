@@ -25,7 +25,7 @@ CONFIG_NINJA_OBJECTS:
       backend: local
       format: yaml
 
-      init:
+      new:
         kwargs:
           path: config-ninja-settings.yaml
 
