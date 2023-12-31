@@ -206,6 +206,7 @@ def get(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) ->
 def apply(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) -> None:
     """Apply the specified configuration to the system."""
     ctrl = BackendController(ctx.obj['settings'], key)
+    ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
 
     if poll:
         asyncio.run(ctrl.awrite())
@@ -218,6 +219,8 @@ def monitor(ctx: typer.Context) -> None:
     """Apply all configuration objects to the filesystem, and poll for changes."""
     settings: pyspry.Settings = ctx.obj['settings']
     controllers = [BackendController(settings, key) for key in settings.OBJECTS]
+    for ctrl in controllers:
+        ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
 
     async def poll_all() -> None:
         await asyncio.gather(*[ctrl.awrite() for ctrl in controllers])
