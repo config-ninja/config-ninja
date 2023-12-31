@@ -18,4 +18,4 @@ def get_backend(name: str) -> type[Backend]:
         if is_subclass and val is not Backend:
             return val  # type: ignore[no-any-return]  # is_subclass ensures the correct type
 
-    raise ValueError(f'No backend found for {name}')
+    raise ValueError(f'No backend found for {name}')  # pragma: no cover

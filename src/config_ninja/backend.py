@@ -58,7 +58,7 @@ def loads(fmt: FormatT, raw: str) -> dict[str, Any]:
     """Deserialize the given data using the given format."""
     try:
         return LOADERS[fmt](raw)
-    except KeyError as exc:
+    except KeyError as exc:  # pragma: no cover
         raise ValueError(f"unsupported format: '{fmt}'") from exc
 
 
@@ -81,7 +81,7 @@ class Backend(abc.ABC):
     @abc.abstractmethod
     async def poll(self, interval: int = 0) -> AsyncIterator[str]:
         """Poll the configuration for changes."""
-        yield ''
+        yield ''  # pragma: no cover
 
 
 logger.debug('successfully imported %s', __name__)
