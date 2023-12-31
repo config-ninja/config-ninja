@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def main() -> None:  # pylint: disable=missing-function-docstring  # noqa: D103
     logging.basicConfig(level=logging.INFO)
-    app()
+    app(prog_name='config-ninja')
 
 
 if __name__ == '__main__':  # pragma: no cover

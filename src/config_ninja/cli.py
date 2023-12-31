@@ -1,12 +1,17 @@
-"""Define the project's CLI.
+"""Create `config-ninja`_'s CLI with `typer`_.
 
-Note: Typer currently does not support future annotations.
+.. include:: cli.md
+
+.. note:: `typer`_ does not support `from __future__ import annotations` as of 2023-12-31
+
+.. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
+.. _typer: https://typer.tiangolo.com/
 """
 import asyncio
 import contextlib
+import dataclasses
 import logging
 import typing
-from dataclasses import dataclass
 from pathlib import Path
 
 import jinja2
@@ -19,6 +24,18 @@ import config_ninja
 from config_ninja.backend import DUMPERS, Backend, FormatT, dumps, loads
 from config_ninja.contrib import get_backend
 
+__all__ = [
+    'app',
+    'apply',
+    'BackendController',
+    'DestSpec',
+    'get',
+    'main',
+    'monitor',
+    'print_self_config',
+    'version',
+]
+
 logger = logging.getLogger(__name__)
 
 app_kwargs: typing.Dict[str, typing.Any] = {
@@ -28,6 +45,11 @@ app_kwargs: typing.Dict[str, typing.Any] = {
 }
 
 app = typer.Typer(**app_kwargs)
+"""The root `typer`_ application.
+
+.. _typer: https://typer.tiangolo.com/
+"""
+
 self_app = typer.Typer(**app_kwargs)
 
 app.add_typer(
@@ -93,12 +115,24 @@ def handle_key_errors(objects: typing.Dict[str, typing.Any]) -> typing.Iterator[
         raise typer.Exit(1) from exc
 
 
-@dataclass
+@dataclasses.dataclass
 class DestSpec:
-    """Container for the destination spec parsed from settings."""
+    """Container for the destination spec parsed from `config-ninja`_'s own configuration file.
+
+    .. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
+    """
 
     path: Path
+    """Write the configuration file to this path."""
+
     format: typing.Union[FormatT, jinja2.Template]
+    """Specify the format of the configuration file to write.
+
+    This property is either a `config_ninja.backend.FormatT` or a `jinja2.environment.Template`:
+    - if `config_ninja.backend.FormatT`, the identified `config_ninja.backend.DUMPERS` will be used
+        to serialize the configuration object
+    - if `jinja2.environment.Template`, this template will be used to render the configuration file
+    """
 
     @property
     def is_template(self) -> bool:
@@ -110,13 +144,36 @@ class BackendController:
     """Define logic for initializing a backend from settings and interacting with it."""
 
     backend: Backend
+    """The backend instance to use for retrieving configuration data."""
+
     dest: DestSpec
+    """Parameters for writing the configuration file."""
+
     key: str
+    """The key of the backend in the settings file"""
+
     settings: pyspry.Settings
+    """`config-ninja`_'s own configuration settings
+
+    .. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
+    """
+
     src_format: FormatT
+    """The format of the configuration object in the backend.
+
+    The named `config_ninja.backend.LOADERS` function will be used to deserialize the configuration
+    object from the backend.
+    """
 
     def __init__(self, settings: typing.Optional[pyspry.Settings], key: str) -> None:
-        """Parse the settings to initialize the backend."""
+        """Parse the settings to initialize the backend.
+
+        .. note::
+            The `settings` parameter is required and cannot be `None` (`typer.Exit(1)` is raised if
+            it is). This odd handling is due to the statement in `config_ninja.cli.main` that sets
+            `ctx.obj['settings'] = None`, which is needed to allow the `self` commands to function
+            without a settings file.
+        """
         if not settings:  # pragma: no cover
             print('[red]ERROR[/]: Could not load settings.')
             raise typer.Exit(1)
@@ -249,7 +306,7 @@ def main(
     settings_file: SettingsAnnotation = None,
     version: VersionAnnotation = None,  # pylint: disable=unused-argument,redefined-outer-name
 ) -> None:
-    """Manage system configuration files in the cloud."""
+    """Manage operating system configuration files based on data in the cloud."""
     ctx.ensure_object(dict)
 
     try:

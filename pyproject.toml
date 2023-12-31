@@ -27,10 +27,10 @@ classifiers = [
 ]
 
 [tool.poetry.scripts]
-config-ninja = "config_ninja.__main__:main"
+config-ninja = "config_ninja.cli:app"
 
 [tool.poetry-dynamic-versioning]
-enable = true
+enable = false
 # in plain english:
 #   1. is the current commit tagged?
 #      - if yes, convert the tag to PEP-440 format
@@ -193,6 +193,9 @@ show_error_codes = true
 show_error_context = true
 warn_unreachable = true
 
+[tool.poe]
+poetry_command = ""
+
 [tool.poe.tasks]
 _version.cmd = "poetry version"
 
@@ -208,8 +211,10 @@ cmd = """
     --mermaid
     --docformat google
     --output-directory docs
-    boto3
+    boto3.session
     config_ninja
+    dataclasses
+    jinja2
     mypy_boto3_appconfig
     mypy_boto3_appconfig.client
     mypy_boto3_appconfigdata
@@ -217,9 +222,13 @@ cmd = """
     pathlib
     pyspry
     pyspry.base
+    pytest
+    pytest_mock
     tests
-    typer
+    typer.models
+    typer.params
     typing
+    unittest
 """
 
 [tool.poe.tasks.serve-docs]
@@ -228,8 +237,10 @@ cmd = """
   pdoc
     --mermaid
     --docformat google
-    boto3
+    boto3.session
     config_ninja
+    dataclasses
+    jinja2
     mypy_boto3_appconfig
     mypy_boto3_appconfig.client
     mypy_boto3_appconfigdata
@@ -237,9 +248,13 @@ cmd = """
     pathlib
     pyspry
     pyspry.base
+    pytest
+    pytest_mock
     tests
-    typer
+    typer.models
+    typer.params
     typing
+    unittest
 """
 
 [tool.poe.tasks.lab]
