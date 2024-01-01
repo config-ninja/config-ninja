@@ -155,7 +155,7 @@ python-semantic-release = "^8.0.8"
 [tool.poetry.group.test.dependencies]
 # dependencies for testing
 coverage = { extras = ["toml"], version = ">=6.4,<8.0" }
-pytest = "^7.1.2"
+pytest = "^7.4.4"
 pytest-clarity = "^1.0.1"
 pytest-cov = ">=3,<5"
 pytest-mock = "^3.8"
