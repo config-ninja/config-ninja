@@ -201,6 +201,10 @@ warn_unreachable = true
 [tool.poe]
 poetry_command = ""
 
+[tool.poe.env]
+FAVICON_URL.default = "https://bryant-finney.github.io/config-ninja/favicon-32x32.png"
+LOGO_URL.default = "https://bryant-finney.github.io/config-ninja/config-ninja.png"
+
 [tool.poe.tasks]
 _version.cmd = "poetry version"
 
@@ -216,10 +220,12 @@ cmd = """
     --mermaid
     --docformat google
     --output-directory docs
+    --logo "$LOGO_URL"
+    --favicon "$FAVICON_URL"
     abc
     boto3.session
     config_ninja
-    config_ninja.backends
+    config_ninja.backend
     config_ninja.cli
     config_ninja.contrib
     dataclasses
@@ -247,10 +253,12 @@ cmd = """
   pdoc
     --mermaid
     --docformat google
+    --logo "$LOGO_URL"
+    --favicon "$FAVICON_URL"
     abc
     boto3.session
     config_ninja
-    config_ninja.backends
+    config_ninja.backend
     config_ninja.cli
     config_ninja.contrib
     dataclasses
