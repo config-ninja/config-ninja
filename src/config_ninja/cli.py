@@ -24,6 +24,11 @@ import config_ninja
 from config_ninja.backend import DUMPERS, Backend, FormatT, dumps, loads
 from config_ninja.contrib import get_backend
 
+try:
+    from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
+except ImportError:  # pragma: no cover
+    from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment]
+
 __all__ = [
     'app',
     'apply',
@@ -57,11 +62,11 @@ app.add_typer(
 )
 
 ActionType = typing.Callable[[str], typing.Any]
-KeyAnnotation = typing.Annotated[
+KeyAnnotation: TypeAlias = Annotated[
     str,
     typer.Argument(help='The key of the configuration object to retrieve', show_default=False),
 ]
-PollAnnotation = typing.Annotated[
+PollAnnotation: TypeAlias = Annotated[
     typing.Optional[bool],
     typer.Option(
         '-p',
@@ -70,7 +75,7 @@ PollAnnotation = typing.Annotated[
         show_default=False,
     ),
 ]
-SettingsAnnotation = typing.Annotated[
+SettingsAnnotation: TypeAlias = Annotated[
     typing.Optional[Path],
     typer.Option(
         '-c',
@@ -91,7 +96,7 @@ def version_callback(ctx: typer.Context, value: typing.Optional[bool] = None) ->
         raise typer.Exit()
 
 
-VersionAnnotation = typing.Annotated[
+VersionAnnotation = Annotated[
     typing.Optional[bool],
     typer.Option(
         '-v',

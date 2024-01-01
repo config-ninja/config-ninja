@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 import json
 import logging
-from typing import Any, AsyncIterator, Callable, Literal
+from typing import Any, AsyncIterator, Callable, Dict, Literal
 
 import tomlkit as toml
 import yaml
@@ -13,8 +13,8 @@ import yaml
 logger = logging.getLogger(__name__)
 
 FormatT = Literal['json', 'raw', 'toml', 'yaml', 'yml']
-LoadT = Callable[[str], dict[str, Any]]
-DumpT = Callable[[dict[str, Any]], str]
+LoadT = Callable[[str], Dict[str, Any]]
+DumpT = Callable[[Dict[str, Any]], str]
 
 
 def load_raw(raw: str) -> dict[str, str]:
