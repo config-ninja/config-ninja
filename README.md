@@ -62,7 +62,7 @@ To demonstrate the mechanics locally:
    }
    ```
 
-Chances are, you'll want to update the `config-ninja-settings.yaml` file to use a remote backend (instead of `local`). See [config_ninja.backends](https://bryant-finney.github.io/config-ninja/config_ninja.backends.html) for a list of supported config providers.
+Chances are, you'll want to update the `config-ninja-settings.yaml` file to use a remote backend (instead of `local`). See [config_ninja.contrib](https://bryant-finney.github.io/config-ninja/config_ninja/contrib.html) for a list of supported config providers.
 
 ## Configuration Architecture
 

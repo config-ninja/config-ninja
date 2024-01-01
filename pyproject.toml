@@ -216,8 +216,11 @@ cmd = """
     --mermaid
     --docformat google
     --output-directory docs
+    abc
     boto3.session
     config_ninja
+    config_ninja.backends
+    config_ninja.cli
     config_ninja.contrib
     dataclasses
     jinja2
@@ -247,7 +250,7 @@ cmd = """
     abc
     boto3.session
     config_ninja
-    config_ninja.backend
+    config_ninja.backends
     config_ninja.cli
     config_ninja.contrib
     dataclasses
