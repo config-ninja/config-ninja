@@ -49,7 +49,7 @@ jobs:
 
       - run: |
           mkdir -p ./docs/reports
-          mv ./reports ./docs/reports
+          mv ./reports/* ./docs/reports
 
       - uses: ./.github/actions/poe
         with:
