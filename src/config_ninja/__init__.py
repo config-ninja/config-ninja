@@ -1,4 +1,11 @@
-""".. include:: ../../README.md"""  # noqa: D415
+""".. include:: ../../README.md
+
+# Navigation
+- `config_ninja.contrib` for supported backends:
+    - `config_ninja.contrib.appconfig`
+    - `config_ninja.contrib.local`
+- `config_ninja.cli` for commands and CLI documentation
+"""  # noqa: D415
 from __future__ import annotations
 
 __version__ = '0.0.0'

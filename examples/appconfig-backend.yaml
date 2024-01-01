@@ -1,0 +1,20 @@
+# the following top-level key is required
+CONFIG_NINJA_OBJECTS:
+  # each second-level key identifies a config-ninja object
+  example-0:
+    # set the location that the object is written to
+    dest:
+      format: json
+      path: /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+
+    # specify where the object is stored / retrieved from
+    source:
+      backend: appconfig
+      format: json
+
+    # instantiate the backend class using its 'new()' method
+    new:
+      kwargs:
+        application_name: Sample Application
+        configuration_profile_name: /dev/amazon-cloudwatch-agent.json
+        environment_name: dev

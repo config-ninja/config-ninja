@@ -1,4 +1,17 @@
-"""Integrate with the AWS AppConfig service."""
+"""Integrate with the AWS AppConfig service.
+
+## Example
+
+The following `config-ninja`_ settings file configures the `AppConfigBackend` to install
+`/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json` from the latest version deployed
+through AWS AppConfig:
+
+```yaml
+.. include:: ../../../examples/appconfig-backend.yaml
+```
+
+.. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
+"""
 from __future__ import annotations
 
 import asyncio
@@ -67,15 +80,8 @@ class AppConfigBackend(Backend):
         app_id: str,
         config_profile_id: str,
         env_id: str,
-        #
-        # note: the following are required for compatibility with AbstractBackend
-        *_: Any,
-        **__: Any,
     ) -> None:
-        """Initialize the backend.
-
-        Variadic arguments are ignored.
-        """
+        """Initialize the backend."""
         self.client = client
 
         self.application_id = app_id
@@ -210,11 +216,18 @@ class AppConfigBackend(Backend):
     async def poll(self, interval: int = MINIMUM_POLL_INTERVAL_SECONDS) -> AsyncIterator[str]:
         """Poll the AppConfig service for configuration changes.
 
+        .. note::
+            Methods written for `asyncio` need to jump through hoops to run as `doctest` tests.
+            To improve the readability of this documentation, each Python code block corresponds to
+            a `doctest` test a private method.
+
         ## Usage: `AppConfigBackend.poll()`
 
-        >>> backend = AppConfigBackend(appconfigdata_client, 'app-id', 'conf-id', 'env-id')
-        >>> content = asyncio.run(anext(backend.poll()))
-        >>> print(content)
+        ```py
+        In [1]: async for content in backend.poll():
+           ...:     print(content)  # ← executes each time the configuration changes
+        ```
+        ```yaml
         key_0: value_0
         key_1: 1
         key_2: true
@@ -222,25 +235,12 @@ class AppConfigBackend(Backend):
             - 1
             - 2
             - 3
+        ```
 
-        ### Polling Too Quickly
-
-        >>> client = getfixture('mock_poll_too_early')    # seed a `BadRequestException`
-
-        If polling is done too quickly, AWS AppConfig will raise a `BadRequestException`. This is
-        handled automatically by the backend, which will retry the request after waiting for half
-        the interval.
-
-        >>> backend = AppConfigBackend(client, 'app-id', 'conf-id', 'env-id')
-        >>> content = asyncio.run(anext(backend.poll(interval=0.01)))   # it is handled successfully
-        >>> print(content)
-        key_0: value_0
-        key_1: 1
-        key_2: true
-        key_3:
-            - 1
-            - 2
-            - 3
+        .. note::
+            If polling is done too quickly, the AWS AppConfig client will raise a
+            `BadRequestException`. This is handled automatically by the backend, which will retry
+            the request after waiting for half the given `interval`.
         """
         token = self.client.start_configuration_session(
             ApplicationIdentifier=self.application_id,
@@ -266,6 +266,35 @@ class AppConfigBackend(Backend):
                 logger.debug('no configuration changes')
 
             await asyncio.sleep(resp['NextPollIntervalInSeconds'])
+
+    def _async_doctests(self) -> None:
+        """Define `async` `doctest` tests in this method to improve documentation.
+
+        >>> backend = AppConfigBackend(appconfigdata_client, 'app-id', 'conf-id', 'env-id')
+        >>> content = asyncio.run(anext(backend.poll()))
+        >>> print(content)
+        key_0: value_0
+        key_1: 1
+        key_2: true
+        key_3:
+            - 1
+            - 2
+            - 3
+
+
+        >>> client = getfixture('mock_poll_too_early')    # seed a `BadRequestException`
+
+        >>> backend = AppConfigBackend(client, 'app-id', 'conf-id', 'env-id')
+        >>> content = asyncio.run(anext(backend.poll(interval=0.01)))   # it is handled successfully
+        >>> print(content)
+        key_0: value_0
+        key_1: 1
+        key_2: true
+        key_3:
+            - 1
+            - 2
+            - 3
+        """
 
 
 logger.debug('successfully imported %s', __name__)

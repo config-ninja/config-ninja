@@ -1,18 +1,23 @@
 """Define the API for config backends."""
 from __future__ import annotations
 
-# stdlib
 import abc
 import json
 import logging
-from typing import Any, AsyncIterator, Callable, Dict, Literal
+import typing
+from typing import Any, AsyncIterator, Callable, Dict
 
 import tomlkit as toml
 import yaml
 
+__all__ = ['FormatT', 'dumps', 'loads', 'Backend']
+
 logger = logging.getLogger(__name__)
 
-FormatT = Literal['json', 'raw', 'toml', 'yaml', 'yml']
+FormatT = typing.Literal['json', 'raw', 'toml', 'yaml', 'yml']
+"""The supported serialization formats (not including `jinja2` templates)"""
+
+# note: `3.8` was not respecting `from __future__ import annotations` for delayed evaluation
 LoadT = Callable[[str], Dict[str, Any]]
 DumpT = Callable[[Dict[str, Any]], str]
 
@@ -45,7 +50,7 @@ DUMPERS: dict[FormatT, DumpT] = {
 
 
 def dumps(fmt: FormatT, data: dict[str, Any]) -> str:
-    """Serialize the given data using the given format."""
+    """Serialize the given `data` object to the given `FormatT`."""
     try:
         dump = DUMPERS[fmt]
     except KeyError as exc:  # pragma: no cover
@@ -55,7 +60,7 @@ def dumps(fmt: FormatT, data: dict[str, Any]) -> str:
 
 
 def loads(fmt: FormatT, raw: str) -> dict[str, Any]:
-    """Deserialize the given data using the given format."""
+    """Deserialize the given `raw` string for the given `FormatT`."""
     try:
         return LOADERS[fmt](raw)
     except KeyError as exc:  # pragma: no cover
@@ -67,7 +72,7 @@ class Backend(abc.ABC):
 
     @abc.abstractmethod
     def get(self) -> str:
-        """Retrieve the raw configuration as a string."""
+        """Retrieve the configuration as a raw string."""
 
     @classmethod
     def new(

@@ -31,14 +31,14 @@ except ImportError:  # pragma: no cover
 
 __all__ = [
     'app',
-    'apply',
-    'BackendController',
     'DestSpec',
-    'get',
+    'BackendController',
     'main',
-    'monitor',
-    'print_self_config',
     'version',
+    'self_print',
+    'get',
+    'apply',
+    'monitor',
 ]
 
 logger = logging.getLogger(__name__)
@@ -291,7 +291,7 @@ def monitor(ctx: typer.Context) -> None:
 
 
 @self_app.command(name='print')
-def print_self_config(ctx: typer.Context) -> None:
+def self_print(ctx: typer.Context) -> None:
     """Print the configuration file."""
     if settings := ctx.obj['settings']:
         print(yaml.dump(settings.OBJECTS))

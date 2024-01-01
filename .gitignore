@@ -27,6 +27,7 @@ config.yml
 # Jupyter
 *.ipynb
 .ipynb_checkpoints/
+.local
 notebooks/
 
 # macOS

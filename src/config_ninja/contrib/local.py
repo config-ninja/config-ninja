@@ -1,4 +1,17 @@
-"""Use a local file as the backend."""
+"""Use a local file as the backend.
+
+## Example
+
+The following `config-ninja`_ settings file configures the `LocalBackend` to render two files
+(`/tmp/config-ninja/local/settings.json` and `/tmp/config-ninja/local/subset.toml`) from a single
+local source file (`config-ninja-settings.yaml`):
+
+```yaml
+.. include:: ../../../examples/local-backend.yaml
+```
+
+.. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
+"""
 from __future__ import annotations
 
 import logging
@@ -29,18 +42,19 @@ class LocalBackend(Backend):
         - 1
         - 2
         - 3
-
-    If the file doesn't exist, emit a warning and continue.
-
-    >>> with pytest.warns(RuntimeWarning):
-    ...     backend = LocalBackend('does_not_exist')
     """
 
     path: Path
     """Read the configuration from this file"""
 
     def __init__(self, path: str) -> None:
-        """Set attributes to initialize the backend."""
+        """Set attributes to initialize the backend.
+
+        If the given `path` doesn't exist, emit a warning and continue.
+
+        >>> with pytest.warns(RuntimeWarning):
+        ...     backend = LocalBackend('does_not_exist')
+        """
         self.path = Path(path)
         if not self.path.is_file():
             warnings.warn(f'could not read file: {path}', category=RuntimeWarning, stacklevel=2)
@@ -52,7 +66,8 @@ class LocalBackend(Backend):
     async def poll(self, interval: int = 0) -> AsyncIterator[str]:
         """Poll the file's parent directory for changes, and yield the file contents on change.
 
-        The `interval` parameter is ignored.
+        .. note::
+            The `interval` parameter is ignored
         """
         async for _ in awatch(self.path):
             logger.info("detected change to '%s'", self.path)

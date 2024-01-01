@@ -218,6 +218,7 @@ cmd = """
     --output-directory docs
     boto3.session
     config_ninja
+    config_ninja.contrib
     dataclasses
     jinja2
     mypy_boto3_appconfig
@@ -229,6 +230,7 @@ cmd = """
     pyspry.base
     pytest
     pytest_mock
+    pytest_mock.plugin
     tests
     typer.models
     typer.params
@@ -242,8 +244,12 @@ cmd = """
   pdoc
     --mermaid
     --docformat google
+    abc
     boto3.session
     config_ninja
+    config_ninja.backend
+    config_ninja.cli
+    config_ninja.contrib
     dataclasses
     jinja2
     mypy_boto3_appconfig
@@ -255,6 +261,7 @@ cmd = """
     pyspry.base
     pytest
     pytest_mock
+    pytest_mock.plugin
     tests
     typer.models
     typer.params
