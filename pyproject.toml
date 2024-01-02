@@ -30,7 +30,7 @@ classifiers = [
 config-ninja = "config_ninja.cli:app"
 
 [tool.poetry-dynamic-versioning]
-enable = false
+enable = true
 # in plain english:
 #   1. is the current commit tagged?
 #      - if yes, convert the tag to PEP-440 format
