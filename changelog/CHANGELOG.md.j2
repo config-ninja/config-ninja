@@ -1,9 +1,9 @@
-![pyspry](https://bfosi.gitlab.io/pyspry/pyspry.png){width=256}
+<img src="https://bryant-finney.github.io/config-ninja/config-ninja.png" width=256 />
 
 # What's Changed
 {% set version, release = context.history.released.items() | list | first %}
 {%- for type_, commits in release["elements"] | dictsort %}
-{%- if type_ in ["feature", "fix", "chore"] %}
+{%- if type_ in ["feature", "fix", "deps"] %}
 ## {{ type_ | capitalize }}
 
 {% for commit in commits -%}
