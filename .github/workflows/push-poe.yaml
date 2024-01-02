@@ -31,10 +31,41 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  docs:
+  release:
     needs:
       - lint
       - test
+
+    outputs:
+      new: ${{ steps.semantic-release.outputs.released }}
+      version: ${{ steps.semantic-release.outputs.version }}
+
+    permissions:
+      id-token: write
+      contents: write
+      packages: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - id: semantic-release
+        uses: python-semantic-release/python-semantic-release@v8.7.0
+        with:
+          commit: false
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: true
+          root_options: --strict -vv
+
+  docs:
+    if: needs.release.outputs.new != 'true'
+    needs:
+      - lint
+      - test
+      - release
 
     runs-on: ubuntu-latest
     steps:
@@ -78,11 +109,14 @@ jobs:
           path: docs
 
   deploy:
+    if: needs.release.outputs.new != 'true'
     environment:
       name: GitHub Pages
       url: ${{ steps.deploy.outputs.page_url }}
 
-    needs: docs
+    needs:
+      - release
+      - docs
 
     permissions:
       pages: write
