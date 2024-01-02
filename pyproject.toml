@@ -207,6 +207,7 @@ LOGO_URL.default = "https://bryant-finney.github.io/config-ninja/config-ninja.pn
 
 [tool.poe.tasks]
 _version.cmd = "poetry version --short"
+build-pkg.cmd = "poetry build"
 
 [tool.poe.tasks.check-for-prerelease]
 capture_stdout = "check-for-prerelease.out"

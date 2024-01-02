@@ -125,13 +125,13 @@ jobs:
           path: docs
 
   deploy:
-    if: needs.release.outputs.new != 'true'
+    if: needs.check.outputs.release != 'true'
     environment:
       name: GitHub Pages
       url: ${{ steps.deploy.outputs.page_url }}
 
     needs:
-      - release
+      - check
       - docs
 
     permissions:
@@ -144,3 +144,67 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           artifact_name: github-pages
+
+  test-pypi:
+    environment:
+      name: test.pypi.org
+      url: https://test.pypi.org/p/config-ninja
+
+    if: needs.check.outputs.release != 'true'  && github.ref_type == 'tag'
+    needs:
+      - check
+      - lint
+      - test
+
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: ./.github/actions/poe
+        with:
+          artifacts: ""
+          poe-task: setup-versioning
+
+      - uses: ./.github/actions/poe
+        with:
+          artifacts: ""
+          poe-task: build-pkg
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  pypi:
+    environment:
+      name: pypi.org
+      url: https://pypi.org/p/config-ninja
+
+    if: github.ref_type == 'tag'
+    needs:
+      - test-pypi
+
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: ./.github/actions/poe
+        with:
+          artifacts: ""
+          poe-task: setup-versioning
+
+      - uses: ./.github/actions/poe
+        with:
+          artifacts: ""
+          poe-task: build-pkg
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
