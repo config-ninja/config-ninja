@@ -208,6 +208,14 @@ LOGO_URL.default = "https://bryant-finney.github.io/config-ninja/config-ninja.pn
 [tool.poe.tasks]
 _version.cmd = "poetry version --short"
 
+[tool.poe.tasks.check-for-prerelease]
+capture_stdout = "check-for-prerelease.out"
+help = "Evaluate whether a new prerelease can be created"
+shell = """
+  semantic-release version --print --prerelease 2>&1 | grep -q "No release will be made" ||
+    echo true
+"""
+
 [tool.poe.tasks.setup-versioning]
 help = "Install the 'poetry-dynamic-versioning' plugin to the local 'poetry' installation"
 cmd = "poetry self add 'poetry-dynamic-versioning[plugin]'"

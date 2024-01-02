@@ -31,10 +31,26 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+  check:
+    outputs:
+      release: ${{ steps.check.outputs.release }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/poe
+        with:
+          artifacts: ""
+          poe-task: check-for-prerelease
+
+      - id: check
+        run: printf 'release=%s\n' "$(cat check-for-prerelease.out)"
+
   release:
+    if: needs.check.outputs.release == 'true'
     needs:
       - lint
       - test
+      - check
 
     outputs:
       new: ${{ steps.semantic-release.outputs.released }}
@@ -56,16 +72,16 @@ jobs:
         uses: python-semantic-release/python-semantic-release@v8.7.0
         with:
           commit: false
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ github.token }}
           prerelease: true
           root_options: --strict -vv
 
   docs:
-    if: needs.release.outputs.new != 'true'
+    if: needs.check.outputs.release != 'true'
     needs:
       - lint
       - test
-      - release
+      - check
 
     runs-on: ubuntu-latest
     steps:
