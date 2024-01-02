@@ -44,7 +44,7 @@ To demonstrate the mechanics locally:
    ```
 3. in a separate shell, create the `config.toml`:
    ```sh
-   cat <<EOF >config.toml
+   cat <<EOF >./.local/config.toml
    [example-0]
    a = "first value"
    b = "second value

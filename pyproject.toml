@@ -206,7 +206,7 @@ FAVICON_URL.default = "https://bryant-finney.github.io/config-ninja/favicon-32x3
 LOGO_URL.default = "https://bryant-finney.github.io/config-ninja/config-ninja.png"
 
 [tool.poe.tasks]
-_version.cmd = "poetry version"
+_version.cmd = "poetry version --short"
 
 [tool.poe.tasks.setup-versioning]
 help = "Install the 'poetry-dynamic-versioning' plugin to the local 'poetry' installation"
@@ -222,6 +222,7 @@ cmd = """
     --output-directory docs
     --logo "$LOGO_URL"
     --favicon "$FAVICON_URL"
+    --footer "$PACKAGE_VERSION"
     abc
     boto3.session
     config_ninja
@@ -246,6 +247,7 @@ cmd = """
     typing
     unittest
 """
+uses = {PACKAGE_VERSION = "_version"}
 
 [tool.poe.tasks.serve-docs]
 help = "Use 'pdoc' to launch an HTTP server for this package's docs"
@@ -255,6 +257,7 @@ cmd = """
     --docformat google
     --logo "$LOGO_URL"
     --favicon "$FAVICON_URL"
+    --footer "Version: $PACKAGE_VERSION"
     abc
     boto3.session
     config_ninja
@@ -279,6 +282,7 @@ cmd = """
     typing
     unittest
 """
+uses = {PACKAGE_VERSION = "_version"}
 
 [tool.poe.tasks.lab]
 help = "Run Jupyter Lab"

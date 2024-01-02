@@ -39,6 +39,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
       - uses: actions/download-artifact@v4
         with:
           name: lint-docs
@@ -50,6 +54,11 @@ jobs:
       - run: |
           mkdir -p ./docs/reports
           mv ./reports/* ./docs/reports
+
+      - uses: ./.github/actions/poe
+        with:
+          artifacts: ""
+          poe-task: setup-versioning
 
       - uses: ./.github/actions/poe
         with:
