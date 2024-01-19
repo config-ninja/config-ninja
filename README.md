@@ -29,7 +29,7 @@ To demonstrate the mechanics locally:
      example-0:
        dest:
          format: json
-         path: ./.local/config.json
+         path: ./.local/settings.json
        source:
          backend: local
          format: toml
@@ -52,7 +52,7 @@ To demonstrate the mechanics locally:
    ```
 4. inspect the generated `settings.json`:
    ```sh
-   cat settings.json
+   cat ./.local/settings.json
    ```
    ```json
    {
