@@ -12,15 +12,24 @@ Similar to [`confd`](https://github.com/kelseyhightower/confd), manage your syst
 
 ## Installation
 
-To install using `pip`:
+Install [all available backends] with `pip` (or choose a specific one):
 
 ```sh
-pip install config-ninja
+pip install 'config-ninja[all]'
 ```
 
-## Quick Start
+Then, install the `config-ninja` agent for the current user:
 
-To demonstrate the mechanics locally:
+```sh
+# omit '--user' to install the agent at the system level
+config-ninja self install --user
+```
+
+[all available backends]: https://bryant-finney.github.io/config-ninja/config_ninja/contrib.html#available-backends
+
+## How It Works
+
+To demonstrate how the mechanics work locally:
 
 1. create a settings file for `config-ninja`:
    ```sh
@@ -62,8 +71,28 @@ To demonstrate the mechanics locally:
      }
    }
    ```
-
-Chances are, you'll want to update the `config-ninja-settings.yaml` file to use a remote backend (instead of `local`). See [config_ninja.contrib](https://bryant-finney.github.io/config-ninja/config_ninja/contrib.html) for a list of supported config providers.
+5. Make changes to the data in `config.toml`, and `config-ninja` will update `settings.json` accordingly:
+   ```sh
+   cat <<EOF >>./.local/config.toml
+   [example-1]
+   c = "third value"
+   d = "fourth value
+   EOF
+   cat ./.local/settings.json
+   ```
+   ```json
+   {
+     "example-0": {
+       "a": "first value",
+       "b": "second value"
+     },
+     "example-1": {
+       "1": "third value",
+       "2": "fourth value"
+     }
+   }
+   ```
+   Chances are, you'll want to update the `config-ninja-settings.yaml` file to use a remote backend (instead of `local`). See [config_ninja.contrib](https://bryant-finney.github.io/config-ninja/config_ninja/contrib.html) for a list of supported config providers.
 
 ## Configuration Architecture
 

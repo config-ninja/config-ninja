@@ -11,16 +11,21 @@ import asyncio
 import contextlib
 import dataclasses
 import logging
+import os
+import sys
 import typing
 from pathlib import Path
 
 import jinja2
 import pyspry
+import sh
 import typer
 import yaml
 from rich import print  # pylint: disable=redefined-builtin
+from rich.markdown import Markdown
 
 import config_ninja
+from config_ninja import systemd
 from config_ninja.backend import DUMPERS, Backend, FormatT, dumps, loads
 from config_ninja.contrib import get_backend
 
@@ -33,13 +38,17 @@ __all__ = [
     'app',
     'DestSpec',
     'BackendController',
-    'main',
-    'version',
-    'self_print',
     'get',
     'apply',
     'monitor',
+    'self_print',
+    'install',
+    'uninstall',
+    'version',
+    'main',
 ]
+
+SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +67,7 @@ app = typer.Typer(**app_kwargs)
 self_app = typer.Typer(**app_kwargs)
 
 app.add_typer(
-    self_app, name='self', help="Operate on [bold blue]config-ninja[/]'s own configuration file."
+    self_app, name='self', help='Operate on this installation of [bold blue]config-ninja[/].'
 )
 
 ActionType = typing.Callable[[str], typing.Any]
@@ -75,6 +84,15 @@ PollAnnotation: TypeAlias = Annotated[
         show_default=False,
     ),
 ]
+PrintAnnotation: TypeAlias = Annotated[
+    typing.Optional[bool],
+    typer.Option(
+        '-p',
+        '--print-only',
+        help='Just print the [bold cyan]config-ninja.service[/] file; do not write.',
+        show_default=False,
+    ),
+]
 SettingsAnnotation: TypeAlias = Annotated[
     typing.Optional[Path],
     typer.Option(
@@ -82,6 +100,46 @@ SettingsAnnotation: TypeAlias = Annotated[
         '--config',
         help="Path to [bold blue]config-ninja[/]'s own configuration file.",
         show_default=False,
+    ),
+]
+UserAnnotation: TypeAlias = Annotated[
+    typing.Optional[bool],
+    typer.Option(
+        '-u',
+        '--user',
+        help='User mode installation (does not require [bold orange3]sudo[/])',
+        show_default=False,
+    ),
+]
+WorkdirAnnotation: TypeAlias = Annotated[
+    typing.Optional[Path],
+    typer.Option(
+        '-w', '--workdir', help='Run the service from this directory.', show_default=False
+    ),
+]
+
+
+def parse_env(
+    ctx: typer.Context, value: typing.Optional[typing.List[str]]
+) -> typing.Optional[typing.List[str]]:
+    """Parse the environment variables from the command line."""
+    if ctx.resilient_parsing:  # pragma: no cover  # this is for tab completions
+        return None
+
+    if not value:
+        return value
+
+    return [v for val in value for v in val.split(',')]
+
+
+EnvNamesAnnotation: TypeAlias = Annotated[
+    typing.Optional[typing.List[str]],
+    typer.Option(
+        '-e',
+        '--env',
+        help='Embed the unit file with these environment variables.',
+        show_default=False,
+        callback=parse_env,
     ),
 ]
 
@@ -133,11 +191,11 @@ class DestSpec:
     format: typing.Union[FormatT, jinja2.Template]
     """Specify the format of the configuration file to write.
 
-    This property is either a `config_ninja.backend.FormatT` or a `jinja2.environment.Template`:
-    - if `config_ninja.backend.FormatT`, the identified `config_ninja.backend.DUMPERS` will be used
-        to serialize the configuration object
-    - if `jinja2.environment.Template`, this template will be used to render the configuration file
-    """
+	This property is either a `config_ninja.backend.FormatT` or a `jinja2.environment.Template`:
+	- if `config_ninja.backend.FormatT`, the identified `config_ninja.backend.DUMPERS` will be used
+		to serialize the configuration object
+	- if `jinja2.environment.Template`, this template will be used to render the configuration file
+	"""
 
     @property
     def is_template(self) -> bool:
@@ -160,24 +218,24 @@ class BackendController:
     settings: pyspry.Settings
     """`config-ninja`_'s own configuration settings
 
-    .. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
-    """
+	.. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
+	"""
 
     src_format: FormatT
     """The format of the configuration object in the backend.
 
-    The named `config_ninja.backend.LOADERS` function will be used to deserialize the configuration
-    object from the backend.
-    """
+	The named `config_ninja.backend.LOADERS` function will be used to deserialize the configuration
+	object from the backend.
+	"""
 
     def __init__(self, settings: typing.Optional[pyspry.Settings], key: str) -> None:
         """Parse the settings to initialize the backend.
 
         .. note::
-            The `settings` parameter is required and cannot be `None` (`typer.Exit(1)` is raised if
-            it is). This odd handling is due to the statement in `config_ninja.cli.main` that sets
-            `ctx.obj['settings'] = None`, which is needed to allow the `self` commands to function
-            without a settings file.
+                The `settings` parameter is required and cannot be `None` (`typer.Exit(1)` is raised if
+                it is). This odd handling is due to the statement in `config_ninja.cli.main` that sets
+                `ctx.obj['settings'] = None`, which is needed to allow the `self` commands to function
+                without a settings file.
         """
         if not settings:  # pragma: no cover
             print('[red]ERROR[/]: Could not load settings.')
@@ -237,6 +295,9 @@ class BackendController:
 
     async def aget(self) -> None:
         """Poll to retrieve the latest configuration object, and print on each update."""
+        if SYSTEMD_AVAILABLE:  # pragma: no cover
+            systemd.notify()
+
         async for content in self.backend.poll():
             data = loads(self.src_format, content)
             self._do(print, data)
@@ -248,6 +309,9 @@ class BackendController:
 
     async def awrite(self) -> None:
         """Poll to retrieve the latest configuration object, and write to file on each update."""
+        if SYSTEMD_AVAILABLE:  # pragma: no cover
+            systemd.notify()
+
         async for content in self.backend.poll():
             data = loads(self.src_format, content)
             self._do(self.dest.path.write_text, data)
@@ -287,6 +351,7 @@ def monitor(ctx: typer.Context) -> None:
     async def poll_all() -> None:
         await asyncio.gather(*[ctrl.awrite() for ctrl in controllers])
 
+    print(f'Begin monitoring: {list(settings.OBJECTS.keys())}')
     asyncio.run(poll_all())
 
 
@@ -297,6 +362,69 @@ def self_print(ctx: typer.Context) -> None:
         print(yaml.dump(settings.OBJECTS))
     else:
         print('[yellow]WARNING[/]: No settings file found.')
+
+
+def _check_systemd() -> None:
+    if not SYSTEMD_AVAILABLE:
+        print('[red]ERROR[/]: Missing [bold gray93]systemd[/]!')
+        print('Currently, this command only works on linux.')
+        raise typer.Exit(1)
+
+
+@self_app.command()
+def install(
+    env_names: EnvNamesAnnotation = None,
+    print_only: PrintAnnotation = None,
+    user: UserAnnotation = None,
+    workdir: WorkdirAnnotation = None,
+) -> None:
+    """Install [bold blue]config-ninja[/] as a [bold gray93]systemd[/] service.
+
+    The --env argument can be passed multiple times with comma-separated strings.
+
+    Example:
+            config-ninja self install --env FOO,BAR,BAZ --env SPAM --env EGGS
+
+    The environment variables [purple]FOO[/], [purple]BAR[/], [purple]BAZ[/], [purple]SPAM[/], and [purple]EGGS[/] will be read from the current shell and written to the service file.
+    """
+    kwargs = {
+        # the command to use when invoking config-ninja from systemd
+        'config_ninja_cmd': sys.argv[0]
+        if sys.argv[0].endswith('config-ninja')
+        else f'{sys.executable} {sys.argv[0]}',
+        # write these environment variables into the systemd service file
+        'environ': {name: os.environ[name] for name in env_names or [] if name in os.environ},
+        # run `config-ninja` from this directory (if specified)
+        'workdir': workdir,
+    }
+
+    svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False)
+    if print_only:
+        rendered = svc.render(**kwargs)
+        print(Markdown(f'# {svc.path}\n```systemd\n{rendered}\n```'))
+        raise typer.Exit(0)
+
+    _check_systemd()
+
+    print(f'Installing {svc.path}')
+    print(svc.install(**kwargs))
+
+    print('[green]SUCCESS[/] :white_check_mark:')
+
+
+@self_app.command()
+def uninstall(print_only: PrintAnnotation = None, user: UserAnnotation = None) -> None:
+    """Uninstall the [bold blue]config-ninja[/] [bold gray93]systemd[/] service."""
+    svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False)
+    if print_only:
+        print(Markdown(f'# {svc.path}\n```systemd\n{svc.read()}\n```'))
+        raise typer.Exit(0)
+
+    _check_systemd()
+
+    print(f'Uninstalling {svc.path}')
+    svc.uninstall()
+    print('[green]SUCCESS[/] :white_check_mark:')
 
 
 @app.command()

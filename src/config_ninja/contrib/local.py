@@ -69,6 +69,7 @@ class LocalBackend(Backend):
         .. note::
             The `interval` parameter is ignored
         """
+        yield self.get()
         async for _ in awatch(self.path):
             logger.info("detected change to '%s'", self.path)
             yield self.get()

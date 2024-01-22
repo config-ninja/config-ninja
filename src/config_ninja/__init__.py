@@ -5,6 +5,7 @@
     - `config_ninja.contrib.appconfig`
     - `config_ninja.contrib.local`
 - `config_ninja.cli` for commands and CLI documentation
+- `config_ninja.systemd` for `systemd` integration
 """  # noqa: D415
 from __future__ import annotations
 

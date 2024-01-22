@@ -3,20 +3,27 @@ from __future__ import annotations
 
 import json
 import re
+import string
+import uuid
 from pathlib import Path
 from typing import Any, AsyncIterable, Sequence
 
-import boto3
 import pyspry
 import pytest
+import sh
 import tomlkit
 import yaml
 from pytest_mock import MockerFixture
-from tests.fixtures import MOCK_YAML_CONFIG
 from typer.testing import CliRunner
 
 import config_ninja
+from config_ninja import cli, systemd
 from config_ninja.cli import app
+from tests.fixtures import MOCK_YAML_CONFIG
+
+# pylint: disable=redefined-outer-name
+
+SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
 
 runner = CliRunner()
 
@@ -83,7 +90,8 @@ def test_missing_settings(mocker: MockerFixture) -> None:
     )
 
 
-def test_get_example_appconfig(mock_full_session: boto3.Session) -> None:
+@pytest.mark.usefixtures('mock_full_session')
+def test_get_example_appconfig() -> None:
     """Get the 'example-appconfig' configuration (as specified in config-ninja-settings.yaml)."""
     result = runner.invoke(app, ['get', 'example-appconfig'])
     assert result.exit_code == 0, result.exception
@@ -98,12 +106,24 @@ def test_get_example_local(settings: dict[str, Any]) -> None:
 
 
 @pytest.mark.usefixtures('_patch_awatch')
-def test_get_example_local_poll(settings: dict[str, Any]) -> None:
+@pytest.mark.usefixtures('monkeypatch_systemd')
+def test_get_example_local_poll(mocker: MockerFixture, settings: dict[str, Any]) -> None:
     """Test the `poll` command with a local file."""
+    # Arrange
+    mock_print = mocker.patch('config_ninja.cli.print')
+    expected_call_count = 2  # 1 for the initial print, 2 for the patched awatch()
+
+    # Act
     result = runner.invoke(app, ['get', '--poll', 'example-local'])
 
+    # Assert
     assert result.exit_code == 0, result.exception
-    assert result.stdout.replace('\n', '').strip() == json.dumps(settings)
+    assert mock_print.call_count == expected_call_count
+    assert (
+        mock_print.call_args_list[0][0][0].strip()
+        == mock_print.call_args_list[1][0][0].strip()
+        == json.dumps(settings)
+    )
 
 
 def test_self_print() -> None:
@@ -119,7 +139,9 @@ def test_apply_example_local(settings: dict[str, Any]) -> None:
     """Execute the `apply` command for a local file backend."""
     result = runner.invoke(app, ['apply', 'example-local'])
     output = (
-        Path(settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path']).read_text().strip()
+        Path(settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path'])
+        .read_text(encoding='utf-8')
+        .strip()
     )
 
     assert result.exit_code == 0, result.exception
@@ -131,7 +153,7 @@ def test_apply_example_local_template(settings: dict[str, Any]) -> None:
     result = runner.invoke(app, ['apply', 'example-local-template'])
     output = (
         Path(settings['CONFIG_NINJA_OBJECTS']['example-local-template']['dest']['path'])
-        .read_text()
+        .read_text(encoding='utf-8')
         .strip()
     )
 
@@ -151,23 +173,25 @@ def test_apply_example_local_template(settings: dict[str, Any]) -> None:
 
 
 @pytest.mark.usefixtures('_patch_awatch')
+@pytest.mark.usefixtures('monkeypatch_systemd')
 def test_apply_example_local_poll(settings: dict[str, Any]) -> None:
     """Test the `apply --poll` command with a local file backend."""
     result = runner.invoke(app, ['apply', '--poll', 'example-local'])
 
     assert result.exit_code == 0, result.exception
-    assert Path(
-        settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path']
-    ).read_text().strip() == json.dumps(settings)
+    assert Path(settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path']).read_text(
+        encoding='utf-8'
+    ).strip() == json.dumps(settings)
 
 
 @pytest.mark.usefixtures('_patch_awatch')
+@pytest.mark.usefixtures('monkeypatch_systemd')
 def test_apply_example_local_template_poll(settings: dict[str, Any]) -> None:
     """Test the `apply --poll` command with a local file backend."""
     result = runner.invoke(app, ['apply', '--poll', 'example-local-template'])
     output = (
         Path(settings['CONFIG_NINJA_OBJECTS']['example-local-template']['dest']['path'])
-        .read_text()
+        .read_text(encoding='utf-8')
         .strip()
     )
 
@@ -187,6 +211,7 @@ def test_apply_example_local_template_poll(settings: dict[str, Any]) -> None:
 
 
 @pytest.mark.usefixtures('_patch_awatch')
+@pytest.mark.usefixtures('monkeypatch_systemd')
 def test_monitor_local(settings: dict[str, Any]) -> None:
     """Test the `monitor` command with a local file backend."""
     # Arrange
@@ -214,3 +239,72 @@ def test_monitor_local(settings: dict[str, Any]) -> None:
             }
         ).strip()
     )
+
+
+def test_install_no_systemd(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify the `install` command fails gracefully when `systemd` is not available."""
+    # Arrange
+    monkeypatch.setattr(cli, 'SYSTEMD_AVAILABLE', False)
+
+    # Act
+    result = runner.invoke(app, ['self', 'install'])
+
+    # Assert
+    assert result.exit_code != 0
+    assert result.stdout.startswith('ERROR: Missing systemd!')
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
+def test_install() -> None:
+    """Verify the `install` command works as expected."""
+    result = runner.invoke(app, ['self', 'install'])
+
+    assert result.exit_code == 0, result.exception
+    assert result.stdout.startswith('Installing')
+    assert 'SUCCESS' in result.stdout
+
+
+def _clean_output(text: str) -> str:
+    return re.sub(f'[^{string.ascii_letters + string.digits + string.punctuation}]', '', text)
+
+
+def test_install_print_only() -> None:
+    """Verify the `install` command respects the `--print-only` argument."""
+    result = runner.invoke(app, ['self', 'install', '--print-only'])
+
+    assert result.exit_code == 0, result.exception
+    assert str(systemd.SYSTEM_INSTALL_PATH) in _clean_output(result.stdout)
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
+def test_uninstall() -> None:
+    """Verify the `uninstall` command works as expected."""
+    # Arrange
+    content = str(uuid.uuid4())
+    systemd.USER_INSTALL_PATH.mkdir(parents=True, exist_ok=True)
+    (systemd.USER_INSTALL_PATH / systemd.SERVICE_NAME).write_text(content)
+
+    # Act
+    result = runner.invoke(app, ['self', 'uninstall', '--user'])
+
+    # Assert
+    assert result.exit_code == 0, result.exception
+    assert result.stdout.startswith('Uninstalling')
+    assert 'SUCCESS' in result.stdout
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
+def test_uninstall_print_only() -> None:
+    """Verify the `uninstall` command respects the `--print-only` argument."""
+    # Arrange
+    content = str(uuid.uuid4())
+    systemd.SYSTEM_INSTALL_PATH.mkdir(parents=True, exist_ok=True)
+    (systemd.SYSTEM_INSTALL_PATH / systemd.SERVICE_NAME).write_text(content)
+
+    # Act
+    result = runner.invoke(app, ['self', 'uninstall', '--print-only'])
+
+    # Assert
+    assert result.exit_code == 0, result.exception
+    assert str(systemd.SYSTEM_INSTALL_PATH) in _clean_output(result.stdout)
+    assert content in result.stdout
