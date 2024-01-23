@@ -3,7 +3,7 @@
 Each backend is implemented as a subclass of `config_ninja.backend.Backend` in a module of this
 package. The `get_backend()` function is used to retrieve the backend class given its module name.
 
-Available backends:
+## Available Backends
 
 - `config_ninja.contrib.appconfig`
 - `config_ninja.contrib.local`

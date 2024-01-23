@@ -74,6 +74,8 @@ repos:
           - jinja2
           - pyspry
           - pyyaml
+          - sdnotify
+          - sh
           - tomlkit
           - typer[all]
           - types-pyyaml
@@ -92,6 +94,8 @@ repos:
           - pytest
           - pytest-mock
           - pyyaml
+          - sdnotify
+          - sh
           - tomlkit
           - typer[all]
           - types-pyyaml

@@ -1,0 +1,30 @@
+[Unit]
+Description=config synchronization daemon
+After=network.target
+
+[Service]
+Environment=PYTHONUNBUFFERED=true
+{% if environ -%}
+{% for key, value in environ.items() -%}
+Environment={{ key }}={{ value }}
+{% endfor -%}
+{% endif -%}
+ExecStartPre={{ config_ninja_cmd }} self print
+ExecStart={{ config_ninja_cmd }} monitor
+Restart=always
+RestartSec=30s
+Type=notify
+{%- if not user_mode %}
+# always run as the calling user, even when installed to the system
+User={{ user }}
+Group={{ group }}
+{%- endif %}
+{%- if workdir %}
+WorkingDirectory={{ workdir }}
+{%- endif %}
+
+[Install]
+{%- if not user_mode %}
+WantedBy=multi-user.target
+{%- endif %}
+Alias=config-ninja.service

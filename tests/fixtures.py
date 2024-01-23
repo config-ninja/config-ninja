@@ -1,9 +1,8 @@
 """Define fixtures for the test suite."""
 from __future__ import annotations
 
-import builtins
 from pathlib import Path
-from typing import Any, Iterator, TypeVar
+from typing import Any, TypeVar
 from unittest import mock
 
 import pytest
@@ -15,6 +14,10 @@ from mypy_boto3_appconfig import AppConfigClient
 from mypy_boto3_appconfigdata import AppConfigDataClient
 from mypy_boto3_appconfigdata.type_defs import GetLatestConfigurationResponseTypeDef
 from pytest_mock import MockerFixture
+
+from config_ninja import cli, systemd
+
+# pylint: disable=redefined-outer-name
 
 T = TypeVar('T')
 MOCK_YAML_CONFIG = b"""
@@ -149,7 +152,7 @@ def mock_poll_too_early(
     mock_client.exceptions.BadRequestException = ClientError
     call_count = 0
 
-    def side_effect(*args: Any, **kwargs: Any) -> GetLatestConfigurationResponseTypeDef:
+    def side_effect(*_: Any, **__: Any) -> GetLatestConfigurationResponseTypeDef:
         nonlocal call_count
         call_count += 1
         if call_count == 1:
@@ -171,6 +174,33 @@ def mock_poll_too_early(
 
 
 @pytest.fixture()
+def monkeypatch_systemd(
+    mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> tuple[Path, Path]:
+    """Monkeypatch various utilities for interfacing with `systemd` and the shell.
+
+    Returns:
+        tuple[pathlib.Path, pathlib.Path]: the patched `SYSTEM_INSTALL_PATH` and `USER_INSTALL_PATH`
+    """
+    monkeypatch.setattr(cli, 'SYSTEMD_AVAILABLE', True)
+
+    mocker.patch.context_manager(systemd, 'sudo')
+    mocker.patch('sdnotify.socket')
+    mocker.patch('config_ninja.systemd.sh.rm')
+    mocker.patch('config_ninja.systemd.sh.tee')
+
+    system_install_path = tmp_path / 'system'
+    user_install_path = tmp_path / 'user'
+
+    monkeypatch.setattr(systemd, 'SYSTEM_INSTALL_PATH', system_install_path)
+    monkeypatch.setattr(systemd, 'USER_INSTALL_PATH', user_install_path)
+
+    systemd.sh.systemctl = mocker.MagicMock()  # type: ignore[attr-defined,unused-ignore]
+
+    return (system_install_path, user_install_path)
+
+
+@pytest.fixture()
 def example_file(tmp_path: Path) -> Path:
     """Write the test configuration to a file in the temporary directory."""
     path = tmp_path / 'example.yaml'
@@ -184,55 +214,3 @@ example_file.__doc__ = f"""Write the test configuration to a file in the tempora
 {MOCK_YAML_CONFIG.decode('utf-8')}
 ```
 """
-
-_no_default = object()
-
-
-# note: the following is needed for testing on Python < 3.10
-# ref: https://docs.python.org/3/library/functions.html#anext
-def py_anext(iterator: Iterator[Any], default: Any = _no_default) -> Any:  # pragma: no cover
-    """Pure-Python implementation of anext() for testing purposes.
-
-    Closely matches the builtin anext() C implementation.
-    Can be used to compare the built-in implementation of the inner
-    coroutines machinery to C-implementation of __anext__() and send()
-    or throw() on the returned generator.
-
-    ref: https://github.com/python/cpython/blob/ea786a882b9ed4261eafabad6011bc7ef3b5bf94/Lib/test/test_asyncgen.py#L52-L80
-    """
-    try:
-        __anext__ = type(iterator).__anext__  # type: ignore[attr-defined]
-    except AttributeError as exc:
-        raise TypeError(f'{iterator!r} is not an async iterator') from exc
-
-    if default is _no_default:
-        return __anext__(iterator)  # pyright: ignore[reportUnknownVariableType]
-
-    async def anext_impl() -> Any:
-        try:
-            # The C code is way more low-level than this, as it implements
-            # all methods of the iterator protocol. In this implementation
-            # we're relying on higher-level coroutine concepts, but that's
-            # exactly what we want -- crosstest pure-Python high-level
-            # implementation and low-level C anext() iterators.
-            return await __anext__(iterator)  # pyright: ignore[reportUnknownVariableType]
-        except StopAsyncIteration:
-            return default
-
-    return anext_impl()
-
-
-@pytest.fixture(autouse=True)
-def src_doctest_namespace(
-    doctest_namespace: dict[str, Any],
-    mock_appconfigdata_client: AppConfigDataClient,
-    example_file: Path,
-) -> dict[str, Any]:
-    """Add the `mock_client` fixture to the doctest namespace."""
-    if 'anext' not in builtins.__dict__:  # pragma: no cover
-        doctest_namespace['anext'] = py_anext
-
-    doctest_namespace['example_file'] = example_file
-    doctest_namespace['pytest'] = pytest
-    doctest_namespace['appconfigdata_client'] = mock_appconfigdata_client
-    return doctest_namespace
