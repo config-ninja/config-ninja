@@ -137,7 +137,7 @@ EnvNamesAnnotation: TypeAlias = Annotated[
     typer.Option(
         '-e',
         '--env',
-        help='Embed the unit file with these environment variables.',
+        help='Embed these environment variables into the unit file.',
         show_default=False,
         callback=parse_env,
     ),
@@ -357,7 +357,7 @@ def monitor(ctx: typer.Context) -> None:
 
 @self_app.command(name='print')
 def self_print(ctx: typer.Context) -> None:
-    """Print the configuration file."""
+    """Print [bold blue]config-ninja[/]'s settings."""
     if settings := ctx.obj['settings']:
         print(yaml.dump(settings.OBJECTS))
     else:
