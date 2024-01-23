@@ -7,6 +7,8 @@
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/bryant-finney/config-ninja/main.svg)](https://results.pre-commit.ci/latest/github/bryant-finney/config-ninja/main)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://bryant-finney.github.io/config-ninja/reports/mypy-html)
 [![docs: pdoc](https://img.shields.io/badge/docs-pdoc-blueviolet?logo=github)](https://bryant-finney.github.io/config-ninja/config_ninja.html)
+[![PyPI version](https://badge.fury.io/py/config-ninja.svg)](https://badge.fury.io/py/config-ninja)
+[![Downloads](https://static.pepy.tech/badge/config-ninja)](https://pepy.tech/project/config-ninja)
 
 Similar to [`confd`](https://github.com/kelseyhightower/confd), manage your system configuration files by populating [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) templates with data from a remote provider.
 
