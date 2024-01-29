@@ -6,7 +6,6 @@ from typing import Any, Callable, TypeAlias
 from unittest.mock import MagicMock
 
 import pytest
-import pytest_mock
 
 # pylint: disable=redefined-outer-name
 
@@ -14,11 +13,11 @@ PathT: TypeAlias = Callable[[str | Path], Path]  # pylint: disable=invalid-name
 
 
 @pytest.fixture()
-def mock_path(mocker: pytest_mock.MockerFixture, tmp_path: Path) -> PathT:
+def mock_path(tmp_path: Path) -> PathT:
     """Mock `pathlib.Path` to return a temporary directory."""
     count = 0
 
-    def mock_path(*args: str | Path) -> Path:
+    def _mock_path(*args: str | Path) -> Path:
         """Mock `pathlib.Path` to return a temporary directory instead of '.cn'."""
         if len(args) == 1 and args[0] == '.cn':
             nonlocal count, tmp_path
@@ -26,8 +25,7 @@ def mock_path(mocker: pytest_mock.MockerFixture, tmp_path: Path) -> PathT:
             count += 1
         return Path(*args)
 
-    mocker.patch('pathlib.Path', new=mock_path)
-    return mock_path
+    return _mock_path
 
 
 @pytest.fixture(autouse=True)

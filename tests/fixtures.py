@@ -86,6 +86,7 @@ def _mock_install_io(mocker: MockerFixture) -> None:  # pyright: ignore[reportUn
     mocker.patch('shutil.rmtree')
     mocker.patch('subprocess.run')
     mocker.patch('venv.EnvBuilder')
+    mocker.patch('runpy.run_path')
 
 
 @pytest.fixture()
