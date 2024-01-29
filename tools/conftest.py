@@ -2,30 +2,32 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, TypeAlias
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_mock
 
 # pylint: disable=redefined-outer-name
 
+PathT: TypeAlias = Callable[[str | Path], Path]  # pylint: disable=invalid-name
+
 
 @pytest.fixture()
-def mock_path(tmp_path: Path) -> type[Path]:
+def mock_path(mocker: pytest_mock.MockerFixture, tmp_path: Path) -> PathT:
     """Mock `pathlib.Path` to return a temporary directory."""
     count = 0
 
-    class MockPath(Path):
+    def mock_path(*args: str | Path) -> Path:
         """Mock `pathlib.Path` to return a temporary directory instead of '.cn'."""
+        if len(args) == 1 and args[0] == '.cn':
+            nonlocal count, tmp_path
+            args = (tmp_path / str(count) / '.cn',)
+            count += 1
+        return Path(*args)
 
-        def __init__(self, *args: str | Path) -> None:
-            if len(args) == 1 and args[0] == '.cn':
-                nonlocal count, tmp_path
-                args = (tmp_path / str(count) / '.cn',)
-                count += 1
-            super().__init__(*args)
-
-    return MockPath
+    mocker.patch('pathlib.Path', new=mock_path)
+    return mock_path
 
 
 @pytest.fixture(autouse=True)
@@ -33,7 +35,7 @@ def install_doctest_namespace(
     _mock_install_io: None,  # pylint: disable=unused-argument
     _mock_contextlib_closing: None,  # pylint: disable=unused-argument
     _mock_urlopen_for_pypi: MagicMock,  # pylint: disable=unused-argument
-    mock_path: Path,
+    mock_path: PathT,
     doctest_namespace: dict[str, Any],
 ) -> dict[str, Any]:
     """Configure globals for `doctest` tests in the `install` script."""
