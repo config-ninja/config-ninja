@@ -183,7 +183,7 @@ skip_covered = true
 # https://coverage.readthedocs.io/en/latest/config.html#run
 command_line = "--module pytest"
 data_file = ".coverage"
-source = ["src"]
+source = ["src", "tools"]
 
 [tool.coverage.xml]
 # https://coverage.readthedocs.io/en/latest/config.html#xml
@@ -257,6 +257,8 @@ cmd = """
     pytest_mock
     pytest_mock.plugin
     tests
+    tools
+    tools.install
     typer.models
     typer.params
     typing
@@ -293,6 +295,8 @@ cmd = """
     pytest_mock
     pytest_mock.plugin
     tests
+    tools
+    tools.install
     typer.models
     typer.params
     typing
@@ -342,6 +346,7 @@ help = "Test this package and report coverage"
 cmd = """
   pytest
     --cov=./src/
+    --cov=./tools/
     --cov-branch
     --cov-fail-under=90
     --cov-report=term
@@ -835,7 +840,7 @@ filterwarnings = [
   "ignore:The --looponfail command line argument and looponfailroots config variable are deprecated:DeprecationWarning",
   "ignore::DeprecationWarning:dateutil.tz.tz"
 ]
-testpaths = ["src", "tests"]
+testpaths = ["src", "tests", "tools"]
 xfail_strict = true
 
 [tool.ruff]
@@ -844,13 +849,13 @@ fix = true
 line-length = 100
 show-fixes = true
 show-source = true
-src = ["src", "tests"]
+src = ["src", "tests", "tools"]
 
 [tool.ruff.format]
 quote-style = "single"
 
 [tool.ruff.isort]
-known-first-party = ["tests"]
+known-first-party = ["tests", "tools"]
 
 [tool.ruff.lint]
 select = [
