@@ -41,7 +41,7 @@ def test_install_path_exists() -> None:
     # Assert
     with pytest.raises(FileExistsError):
         # Act
-        _run_installer()
+        _run_installer('--path', '.')
 
 
 @pytest.mark.usefixtures('_mock_ensurepip', '_mock_install_io', '_mock_urlopen_for_pypi')
