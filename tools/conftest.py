@@ -2,14 +2,21 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Callable, TypeAlias
+from typing import Any, Callable
 from unittest.mock import MagicMock
 
 import pytest
 
+try:
+    from typing import (  # pylint: disable=ungrouped-imports; type: ignore[unknown-import]
+        TypeAlias,  # pyright: ignore[reportGeneralTypeIssues,reportUnknownVariableType]
+    )
+except ImportError:
+    from typing_extensions import TypeAlias
+
 # pylint: disable=redefined-outer-name
 
-PathT: TypeAlias = Callable[[str | Path], Path]  # pylint: disable=invalid-name
+PathT: TypeAlias = Callable[..., Path]  # pylint: disable=invalid-name
 
 
 @pytest.fixture()

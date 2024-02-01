@@ -36,6 +36,7 @@ SUCCESS ✅
 """  # noqa: RUF002
 from __future__ import annotations
 
+import contextlib
 import logging
 import os
 import typing
@@ -57,7 +58,17 @@ USER_INSTALL_PATH = (
 
 __all__ = ['SYSTEM_INSTALL_PATH', 'USER_INSTALL_PATH', 'Service', 'notify']
 logger = logging.getLogger(__name__)
-sudo = sh.contrib.sudo
+
+try:
+    sudo = sh.contrib.sudo
+except AttributeError:  # pragma: no cover
+
+    @contextlib.contextmanager
+    def dummy() -> typing.Iterator[None]:
+        """We might be running inside a container."""
+        yield
+
+    sudo = dummy()
 
 
 def notify() -> None:  # pragma: no cover
