@@ -86,15 +86,16 @@ def test_symlink_already_exists(mocker: MockerFixture, tmp_path: Path) -> None:
 
 @pytest.mark.skipif(sys.platform == 'win32', reason='symlinks are not supported on Windows')
 @pytest.mark.usefixtures('_mock_ensurepip', '_mock_install_io', '_mock_urlopen_for_pypi')
-def test_no_symlink_perms(mocker: MockerFixture) -> None:
+def test_no_symlink_perms(mocker: MockerFixture, tmp_path: Path) -> None:
     """Test that errors are handled if the user lacks permissions to write the symlink."""
     # Arrange
+    path = tmp_path / 'install-dir'
     mock_stderr = mocker.patch('sys.stderr')
     mock_symlink = mocker.patch('os.symlink', side_effect=PermissionError)
     regex = re.compile(r'.*export.* PATH=.*".+:\$PATH"')
 
     # Act
-    _run_installer()
+    _run_installer('--path', str(path))
     stderr = '\n'.join([args[0][0] for args in mock_stderr.write.call_args_list])
 
     # Assert
