@@ -7,9 +7,10 @@ from typing import Any, Iterator
 
 import pytest
 from mypy_boto3_appconfigdata import AppConfigDataClient
-from pytest_mock import MockerFixture
 
 _no_default = object()
+
+# pylint: disable=too-complex
 
 
 # note: the following is needed for testing on Python < 3.10
@@ -51,7 +52,6 @@ def src_doctest_namespace(
     doctest_namespace: dict[str, Any],
     mock_appconfigdata_client: AppConfigDataClient,
     example_file: Path,
-    mocker: MockerFixture,
     monkeypatch_systemd: tuple[Path, Path],
 ) -> dict[str, Any]:
     """Add various mocks and patches to the doctest namespace."""

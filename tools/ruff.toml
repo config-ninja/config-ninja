@@ -1,0 +1,2 @@
+extend = "../pyproject.toml"
+extend-ignore = ["E402", "S310"]

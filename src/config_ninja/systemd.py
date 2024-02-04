@@ -36,14 +36,23 @@ SUCCESS ✅
 """  # noqa: RUF002
 from __future__ import annotations
 
+import contextlib
 import logging
 import os
 import typing
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import jinja2
-import sdnotify  # pyright: ignore[reportMissingTypeStubs]
-import sh
+import sdnotify
+
+if TYPE_CHECKING:  # pragma: no cover
+    import sh
+else:
+    try:
+        import sh
+    except ImportError:  # pragma: no cover
+        sh = None
 
 # pylint: disable=no-member
 SERVICE_NAME = 'config-ninja.service'
@@ -57,7 +66,17 @@ USER_INSTALL_PATH = (
 
 __all__ = ['SYSTEM_INSTALL_PATH', 'USER_INSTALL_PATH', 'Service', 'notify']
 logger = logging.getLogger(__name__)
-sudo = sh.contrib.sudo
+
+try:
+    sudo = sh.contrib.sudo
+except AttributeError:  # pragma: no cover
+
+    @contextlib.contextmanager
+    def dummy() -> typing.Iterator[None]:
+        """We might be running inside a container; or we might be on Windows."""
+        yield
+
+    sudo = dummy()
 
 
 def notify() -> None:  # pragma: no cover
@@ -178,8 +197,11 @@ class Service:
             kwargs['workdir'] = Path(workdir).absolute()
 
         kwargs.setdefault('user_mode', self.user_mode)
-        kwargs.setdefault('user', os.getuid())
-        kwargs.setdefault('group', os.getgid())
+        if hasattr(os, 'geteuid'):  # pragma: no cover  # windows
+            kwargs.setdefault('user', os.geteuid())
+
+        if hasattr(os, 'getegid'):  # pragma: no cover  # windows
+            kwargs.setdefault('group', os.getegid())
 
         return self.tmpl.render(**kwargs)
 

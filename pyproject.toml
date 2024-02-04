@@ -120,8 +120,11 @@ pyspry = "^1.0.2"
 watchfiles = { version = "^0.21.0", optional = true }
 jinja2 = "^3.1.2"
 tomlkit = "^0.12.3"
+# sdnotify is designed to handle errors when systemd is missing
 sdnotify = "^0.3.2"
-sh =  "^2.0.6"
+
+# sh encounters import errors on Windows
+sh =  { version = "^2.0.6",  markers = "sys_platform != 'win32'" }
 
 [tool.poetry.extras]
 # https://python-poetry.org/docs/pyproject/#extras
@@ -148,7 +151,6 @@ pre-commit = [
 [tool.poetry.group.misc.dependencies]
 certifi = ">=2023.07.22"
 cruft = "^2.11"
-darglint = "^1.8"
 gitpython = ">=3.1.32"             # https://nvd.nist.gov/vuln/detail/CVE-2023-40267
 jupyterlab = ">=3.4,<5.0"
 pdoc = "^14"
@@ -183,7 +185,10 @@ skip_covered = true
 # https://coverage.readthedocs.io/en/latest/config.html#run
 command_line = "--module pytest"
 data_file = ".coverage"
-source = ["src"]
+source = ["src", "tools"]
+
+[tool.coverage.html]
+show_contexts = true
 
 [tool.coverage.xml]
 # https://coverage.readthedocs.io/en/latest/config.html#xml
@@ -229,6 +234,9 @@ cmd = "poetry self add 'poetry-dynamic-versioning[plugin]'"
 # https://github.com/nat-n/poethepoet
 [tool.poe.tasks.docs]
 help = "Generate this package's docs"
+uses = {PACKAGE_VERSION = "_version"}
+
+[[tool.poe.tasks.docs.sequence]]
 cmd = """
   pdoc
     --mermaid
@@ -257,12 +265,16 @@ cmd = """
     pytest_mock
     pytest_mock.plugin
     tests
+    tools
+    tools.install
     typer.models
     typer.params
     typing
     unittest
 """
-uses = {PACKAGE_VERSION = "_version"}
+
+[[tool.poe.tasks.docs.sequence]]
+cmd = "cp tools/install.py docs/install.py"
 
 [tool.poe.tasks.serve-docs]
 help = "Use 'pdoc' to launch an HTTP server for this package's docs"
@@ -293,6 +305,8 @@ cmd = """
     pytest_mock
     pytest_mock.plugin
     tests
+    tools
+    tools.install
     typer.models
     typer.params
     typing
@@ -342,7 +356,9 @@ help = "Test this package and report coverage"
 cmd = """
   pytest
     --cov=./src/
+    --cov=./tools/
     --cov-branch
+    --cov-context=test
     --cov-fail-under=90
     --cov-report=term
     --cov-report=html:./docs/reports/pytest-html
@@ -835,7 +851,7 @@ filterwarnings = [
   "ignore:The --looponfail command line argument and looponfailroots config variable are deprecated:DeprecationWarning",
   "ignore::DeprecationWarning:dateutil.tz.tz"
 ]
-testpaths = ["src", "tests"]
+testpaths = ["src", "tests", "tools"]
 xfail_strict = true
 
 [tool.ruff]
@@ -844,18 +860,19 @@ fix = true
 line-length = 100
 show-fixes = true
 show-source = true
-src = ["src", "tests"]
+src = ["src", "tests", "tools"]
 
 [tool.ruff.format]
 quote-style = "single"
 
 [tool.ruff.isort]
-known-first-party = ["tests"]
+known-first-party = ["tests", "tools"]
 
 [tool.ruff.lint]
 select = [
   "B",
   "C90",
+  "E1",
   "E4",
   "E7",
   "E9",

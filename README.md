@@ -14,13 +14,48 @@ Similar to [`confd`](https://github.com/kelseyhightower/confd), manage your syst
 
 ## Installation
 
-Install [all available backends] with `pip` (or choose a specific one):
+`config-ninja` is installed using the official installer or with `pip` / `pipx`. If your system supports `systemd`, you can then enable `config-ninja` as a `systemd` service.
+
+### Official Installer
+
+The recommended way to install `config-ninja` is with the official installer:
+
+```sh
+curl -sSL https://bryant-finney.github.io/config-ninja/install.py | python3 -
+```
+
+To view available installation options, run the installer with the `--help` flag:
+
+```sh
+curl -sSL https://bryant-finney.github.io/config-ninja/install.py | python3 - --help
+```
+
+```
+usage: install [-h] [--version VERSION] [--pre] [--uninstall] [--force] [--path PATH] [--backends BACKENDS]
+
+Installs the latest (or given) version of config-ninja
+
+options:
+  -h, --help           show this help message and exit
+  --version VERSION    install named version
+  --pre                allow pre-release versions to be installed
+  --uninstall          uninstall config-ninja
+  --force              respond 'yes' to confirmation prompts; overwrite existing installations
+  --path PATH          install config-ninja to this directory
+  --backends BACKENDS  comma-separated list of package extras to install, or 'none' to install no backends
+```
+
+#### With `pip` / `pipx`
+
+Alternatively, use `pip` / `pipx` to install [all available backends] (or choose a specific one):
 
 ```sh
 pip install 'config-ninja[all]'
 ```
 
-Then, install the `config-ninja` agent for the current user:
+### Enable the `systemd` Service
+
+After installing `config-ninja`, enable it as a `systemd` service for the current user:
 
 ```sh
 # omit '--user' to install the agent at the system level

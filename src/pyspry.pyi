@@ -1,7 +1,9 @@
+"""Type stubs for the `pyspry` library."""
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Literal, TypeAlias, TypedDict
+
+from typing_extensions import Literal, TypeAlias, TypedDict
 
 from config_ninja.backend import FormatT
 

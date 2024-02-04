@@ -1,8 +1,10 @@
 """Define fixtures for the test suite."""
 from __future__ import annotations
 
+import contextlib
+import json
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, Iterator, TypeVar
 from unittest import mock
 
 import pytest
@@ -20,6 +22,8 @@ from config_ninja import cli, systemd
 # pylint: disable=redefined-outer-name
 
 T = TypeVar('T')
+
+MOCK_PYPI_RESPONSE = {'releases': {'1.0': 'ignore', '1.1': 'ignore', '1.2a0': 'ignore'}}
 MOCK_YAML_CONFIG = b"""
 key_0: value_0
 key_1: 1
@@ -31,10 +35,58 @@ key_3:
 """.strip()
 
 
+class MockFile(mock.MagicMock):
+    """Mock the file object returned by `contextlib.closing`."""
+
+    mock_bytes: bytes
+
+    def read(self) -> bytes:
+        """Mock the `read` method to return data used in tests."""
+        return self.mock_bytes
+
+
+def mock_file(mock_bytes: bytes) -> MockFile:
+    """Mock the file object returned by `contextlib.closing`."""
+    mock_file = MockFile()
+    mock_file.mock_bytes = mock_bytes
+    return mock_file
+
+
+@pytest.fixture()
+def _mock_contextlib_closing(mocker: MockerFixture) -> None:  # pyright: ignore[reportUnusedFunction]
+    """Mock `contextlib.closing`."""
+
+    @contextlib.contextmanager
+    def _mocked(request: Any) -> Iterator[Any]:
+        """Pass the input parameter straight through."""
+        yield request
+
+    mocker.patch('contextlib.closing', new=_mocked)
+
+
+@pytest.fixture()
+def _mock_urlopen_for_pypi(mocker: MockerFixture) -> None:  # pyright: ignore[reportUnusedFunction]
+    """Mock `urllib.request.urlopen` for PyPI requests."""
+
+    def _mocked(_: Any) -> MockFile:
+        return mock_file(json.dumps(MOCK_PYPI_RESPONSE).encode('utf-8'))
+
+    mocker.patch('urllib.request.urlopen', new=_mocked)
+
+
 @pytest.fixture()
 def mock_appconfig_client() -> AppConfigClient:
     """Mock the `boto3` client for the `AppConfig` service."""
     return mock.MagicMock(name='mock_appconfig_client', spec_set=AppConfigClient)
+
+
+@pytest.fixture()
+def _mock_install_io(mocker: MockerFixture) -> None:  # pyright: ignore[reportUnusedFunction]
+    """Mock various I/O utilities used by the `install` script."""
+    mocker.patch('shutil.rmtree')
+    mocker.patch('subprocess.run')
+    mocker.patch('venv.EnvBuilder')
+    mocker.patch('runpy.run_path')
 
 
 @pytest.fixture()
@@ -185,7 +237,13 @@ def monkeypatch_systemd(
     monkeypatch.setattr(cli, 'SYSTEMD_AVAILABLE', True)
 
     mocker.patch.context_manager(systemd, 'sudo')
-    mocker.patch('sdnotify.socket')
+
+    if systemd.sh is None:  # type: ignore[attr-defined,unused-ignore]  # windows
+        mocker.patch('config_ninja.systemd.sh')  # type: ignore[unreachable,unused-ignore]  # windows
+
+    mocker.patch('config_ninja.systemd.sdnotify')
+    mocker.patch('config_ninja.systemd.sdnotify.socket')
+    mocker.patch('config_ninja.systemd.sh.systemctl')
     mocker.patch('config_ninja.systemd.sh.rm')
     mocker.patch('config_ninja.systemd.sh.tee')
 
@@ -194,8 +252,6 @@ def monkeypatch_systemd(
 
     monkeypatch.setattr(systemd, 'SYSTEM_INSTALL_PATH', system_install_path)
     monkeypatch.setattr(systemd, 'USER_INSTALL_PATH', user_install_path)
-
-    systemd.sh.systemctl = mocker.MagicMock()  # type: ignore[attr-defined,unused-ignore]
 
     return (system_install_path, user_install_path)
 

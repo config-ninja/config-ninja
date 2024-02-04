@@ -18,7 +18,6 @@ from pathlib import Path
 
 import jinja2
 import pyspry
-import sh
 import typer
 import yaml
 from rich import print  # pylint: disable=redefined-builtin
@@ -32,7 +31,21 @@ from config_ninja.contrib import get_backend
 try:
     from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
 except ImportError:  # pragma: no cover
-    from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment]
+    from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment,unused-ignore]
+
+if typing.TYPE_CHECKING:  # pragma: no cover
+    import sh
+
+    SYSTEMD_AVAILABLE = True
+else:
+    try:
+        import sh
+    except ImportError:  # pragma: no cover
+        sh = None
+        SYSTEMD_AVAILABLE = False
+    else:
+        SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
+
 
 __all__ = [
     'app',
@@ -47,8 +60,6 @@ __all__ = [
     'version',
     'main',
 ]
-
-SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
 
 logger = logging.getLogger(__name__)
 
@@ -191,11 +202,11 @@ class DestSpec:
     format: typing.Union[FormatT, jinja2.Template]
     """Specify the format of the configuration file to write.
 
-	This property is either a `config_ninja.backend.FormatT` or a `jinja2.environment.Template`:
-	- if `config_ninja.backend.FormatT`, the identified `config_ninja.backend.DUMPERS` will be used
-		to serialize the configuration object
-	- if `jinja2.environment.Template`, this template will be used to render the configuration file
-	"""
+    This property is either a `config_ninja.backend.FormatT` or a `jinja2.environment.Template`:
+    - if `config_ninja.backend.FormatT`, the identified `config_ninja.backend.DUMPERS` will be used
+        to serialize the configuration object
+    - if `jinja2.environment.Template`, this template will be used to render the configuration file
+    """
 
     @property
     def is_template(self) -> bool:
@@ -218,23 +229,23 @@ class BackendController:
     settings: pyspry.Settings
     """`config-ninja`_'s own configuration settings
 
-	.. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
-	"""
+    .. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
+    """
 
     src_format: FormatT
     """The format of the configuration object in the backend.
 
-	The named `config_ninja.backend.LOADERS` function will be used to deserialize the configuration
-	object from the backend.
-	"""
+    The named `config_ninja.backend.LOADERS` function will be used to deserialize the configuration
+    object from the backend.
+    """
 
     def __init__(self, settings: typing.Optional[pyspry.Settings], key: str) -> None:
         """Parse the settings to initialize the backend.
 
         .. note::
-                The `settings` parameter is required and cannot be `None` (`typer.Exit(1)` is raised if
-                it is). This odd handling is due to the statement in `config_ninja.cli.main` that sets
-                `ctx.obj['settings'] = None`, which is needed to allow the `self` commands to function
+            The `settings` parameter is required and cannot be `None` (`typer.Exit(1)` is raised if
+            it is). This odd handling is due to the statement in `config_ninja.cli.main` that sets
+            `ctx.obj['settings'] = None`, which is needed to allow the `self` commands to function
                 without a settings file.
         """
         if not settings:  # pragma: no cover
@@ -255,7 +266,7 @@ class BackendController:
             dest = objects[self.key]['dest']
             path = Path(dest['path'])
             if dest['format'] in DUMPERS:
-                fmt: FormatT = dest['format']  # type: ignore[assignment]
+                fmt: FormatT = dest['format']  # type: ignore[assignment,unused-ignore]
                 return DestSpec(format=fmt, path=path)
 
             template_path = Path(dest['format'])
@@ -437,7 +448,7 @@ def version(ctx: typer.Context) -> None:
 def main(
     ctx: typer.Context,
     settings_file: SettingsAnnotation = None,
-    version: VersionAnnotation = None,  # pylint: disable=unused-argument,redefined-outer-name
+    version: VersionAnnotation = None,  # type: ignore[valid-type,unused-ignore]  # pylint: disable=unused-argument,redefined-outer-name
 ) -> None:
     """Manage operating system configuration files based on data in the cloud."""
     ctx.ensure_object(dict)
