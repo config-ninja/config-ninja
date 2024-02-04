@@ -197,10 +197,10 @@ class Service:
             kwargs['workdir'] = Path(workdir).absolute()
 
         kwargs.setdefault('user_mode', self.user_mode)
-        if hasattr(os, 'geteuid'):
+        if hasattr(os, 'geteuid'):  # pragma: no cover  # windows
             kwargs.setdefault('user', os.geteuid())
 
-        if hasattr(os, 'getegid'):
+        if hasattr(os, 'getegid'):  # pragma: no cover  # windows
             kwargs.setdefault('group', os.getegid())
 
         return self.tmpl.render(**kwargs)

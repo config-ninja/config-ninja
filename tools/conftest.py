@@ -11,7 +11,7 @@ try:
     from typing import (  # type: ignore[attr-defined,unused-ignore]  # pylint: disable=ungrouped-imports
         TypeAlias,  # pyright: ignore[reportGeneralTypeIssues,reportUnknownVariableType]
     )
-except ImportError:
+except ImportError:  # pragma: no cover
     from typing_extensions import TypeAlias
 
 PathT: TypeAlias = Callable[..., Path]

@@ -150,7 +150,9 @@ class _VirtualEnvironment:
         builder = venv.EnvBuilder(clear=True, with_pip=True, symlinks=False)
         context = builder.ensure_directories(target)
 
-        if WINDOWS and hasattr(context, 'env_exec_cmd') and context.env_exe != context.env_exec_cmd:
+        if (  # pragma: no cover  # windows
+            WINDOWS and hasattr(context, 'env_exec_cmd') and context.env_exe != context.env_exec_cmd
+        ):
             target = target.resolve()
 
         builder.create(target)
@@ -407,7 +409,9 @@ class Installer:
                 os.symlink(source, target)
             return target
 
-        if not check_target.parent or not check_target.parent.is_dir():
+        if (  # pragma: no cover  # windows
+            not check_target.parent or not check_target.parent.is_dir()
+        ):
             raise FileNotFoundError('Could not find directory for symlink')
 
         return self.symlink(source, check_target.parent, remove)
@@ -513,7 +517,7 @@ def cyan(text: Any) -> str:
     return f'\033[96m{text}\033[0m'
 
 
-def gray(text: Any) -> str:
+def gray(text: Any) -> str:  # pragma: no cover  # edge case / windows
     """Color the given text gray."""
     return f'\033[90m{text}\033[0m'
 
@@ -545,7 +549,9 @@ success = green('SUCCESS')
 
 
 def _maybe_create_symlink(installer: Installer, env: _VirtualEnvironment) -> None:
-    if env.bin in [Path(p) for p in os.getenv('PATH', '').split(os.pathsep)]:
+    if env.bin in [  # pragma: no cover  # edge case for installation to e.g. /usr/local
+        Path(p) for p in os.getenv('PATH', '').split(os.pathsep)
+    ]:
         # we're already on the PATH; no need to symlink
         return
 
@@ -608,7 +614,7 @@ def _do_uninstall(installer: Installer) -> None:
             sys.stdout.flush()
             with open('/dev/tty', encoding='utf-8') as tty:
                 uninstall = tty.readline().strip()
-        else:
+        else:  # pragma: no cover  # windows
             uninstall = input(prompt)
 
         if not uninstall.lower().startswith('y'):
@@ -620,7 +626,7 @@ def _do_uninstall(installer: Installer) -> None:
     sys.stdout.write(
         f"{success}: Uninstalled {blue('config-ninja')} from path {cyan(installer.path)} ✅\n"
     )
-    if not WINDOWS or MINGW:
+    if not WINDOWS or MINGW:  # pragma: no cover  # windows
         installer.symlink(
             installer.path / 'bin' / 'config-ninja', installer.path.parent, remove=True
         )

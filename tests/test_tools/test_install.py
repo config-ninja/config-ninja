@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib
+import os
 import re
 import sys
 from importlib import import_module
@@ -14,13 +15,15 @@ from pytest_mock import MockerFixture
 
 from tools import install
 
+# pylint: disable=redefined-outer-name
+
 
 def _run_installer(*argv: str) -> None:
     importlib.reload(install).main(*argv)
 
 
 @pytest.fixture()
-def _mock_ensurepip(mocker: MockerFixture) -> None:  # pyright: ignore[reportUnusedFunction]
+def _mock_ensurepip_missing(mocker: MockerFixture) -> None:  # pyright: ignore[reportUnusedFunction]
     """Raise an `ImportError` if `importlib.import_module` is passed 'ensurepip'."""
 
     def _mock_import_module(name: str, package: str | None = None) -> ModuleType:
@@ -29,6 +32,13 @@ def _mock_ensurepip(mocker: MockerFixture) -> None:  # pyright: ignore[reportUnu
         return import_module(name, package=package)
 
     mocker.patch('importlib.import_module', new=_mock_import_module)
+
+
+@pytest.fixture()
+def mock_ensurepip_present(mocker: MockerFixture) -> mock.MagicMock:
+    """Patch `importlib.import_module` to mimic `ensurepip` is installed."""
+    mock_import_module: mock.MagicMock = mocker.patch('importlib.import_module')
+    return mock_import_module
 
 
 def test_unsupported_python(mocker: MockerFixture) -> None:
@@ -47,11 +57,12 @@ def test_install_path_exists() -> None:
         _run_installer('--path', '.')
 
 
-@pytest.mark.usefixtures('_mock_ensurepip', '_mock_install_io', '_mock_urlopen_for_pypi')
+@pytest.mark.usefixtures('_mock_ensurepip_missing', '_mock_install_io', '_mock_urlopen_for_pypi')
 def test_uses_virtualenv(mocker: MockerFixture, tmp_path: Path) -> None:
     """Test that the install script falls back to using virtualenv."""
     # Arrange
     mocker.patch('os.symlink')
+    # override the patch from _mock_install_io so we can access it in this test
     mock_run_path = mocker.patch('runpy.run_path')
 
     # Act
@@ -63,8 +74,48 @@ def test_uses_virtualenv(mocker: MockerFixture, tmp_path: Path) -> None:
     assert mock_run_path.call_args.args[0].endswith('virtualenv.pyz')
 
 
+@pytest.mark.usefixtures('_mock_install_io', '_mock_urlopen_for_pypi')
+def test_respects_config_ninja_home(
+    mock_ensurepip_present: mock.MagicMock, mocker: MockerFixture, tmp_path: Path
+) -> None:
+    """Verify the environment variable `CONFIG_NINJA_HOME` is referenced during install."""
+    # Arrange
+    install_path = tmp_path / '.cn'
+    mocker.patch('os.symlink')
+    mocker.patch.dict(os.environ, {'CONFIG_NINJA_HOME': str(install_path)})
+    mock_stdout = mocker.patch('sys.stdout')
+
+    # Act
+    _run_installer('--force')
+    stdout = '\n'.join([args[0][0] for args in mock_stdout.write.call_args_list])
+
+    # Assert
+    mock_ensurepip_present.assert_called_once()
+    assert str(install_path).lower() in stdout.lower()
+
+
+@pytest.mark.usefixtures('_mock_install_io', '_mock_urlopen_for_pypi')
+def test_respects_xdg_home(
+    mock_ensurepip_present: mock.MagicMock, mocker: MockerFixture, tmp_path: Path
+) -> None:
+    """Verify the environment variable `XDG_DATA_HOME` is referenced during install."""
+    # Arrange
+    install_path = tmp_path / '.cn'
+    mocker.patch('os.symlink')
+    mocker.patch.dict(os.environ, {'XDG_DATA_HOME': str(install_path)})
+    mock_stdout = mocker.patch('sys.stdout')
+
+    # Act
+    _run_installer('--force')
+    stdout = '\n'.join([args[0][0] for args in mock_stdout.write.call_args_list])
+
+    # Assert
+    mock_ensurepip_present.assert_called_once()
+    assert str(install_path).lower() in stdout.lower()
+
+
 @pytest.mark.skipif(sys.platform == 'win32', reason='symlinks are not supported on Windows')
-@pytest.mark.usefixtures('_mock_ensurepip', '_mock_install_io', '_mock_urlopen_for_pypi')
+@pytest.mark.usefixtures('_mock_ensurepip_missing', '_mock_install_io', '_mock_urlopen_for_pypi')
 def test_symlink_already_exists(mocker: MockerFixture, tmp_path: Path) -> None:
     """Test that the install script fails if the symlink already exists."""
     # Arrange
@@ -85,7 +136,7 @@ def test_symlink_already_exists(mocker: MockerFixture, tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(sys.platform == 'win32', reason='symlinks are not supported on Windows')
-@pytest.mark.usefixtures('_mock_ensurepip', '_mock_install_io', '_mock_urlopen_for_pypi')
+@pytest.mark.usefixtures('_mock_ensurepip_missing', '_mock_install_io', '_mock_urlopen_for_pypi')
 def test_no_symlink_perms(mocker: MockerFixture, tmp_path: Path) -> None:
     """Test that errors are handled if the user lacks permissions to write the symlink."""
     # Arrange
@@ -109,14 +160,14 @@ def test_uninstall_dne(mocker: MockerFixture, tmp_path: Path) -> None:
     """Verify the '--uninstall' option prints a warning if the install path does not exist."""
     # Arrange
     dne = tmp_path / 'does-not-exist'
-    stdout = mocker.patch('sys.stdout')
+    mock_stdout = mocker.patch('sys.stdout')
 
     # Act
     _run_installer('--uninstall', '--path', str(dne))
 
     # Assert
-    assert 'path does not exist:' in stdout.write.call_args[0][0].lower()
-    assert str(dne) in stdout.write.call_args[0][0]
+    assert 'path does not exist:' in mock_stdout.write.call_args[0][0].lower()
+    assert str(dne) in mock_stdout.write.call_args[0][0]
 
 
 def test_uninstall_aborted(mocker: MockerFixture, tmp_path: Path) -> None:
