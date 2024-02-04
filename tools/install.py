@@ -464,7 +464,7 @@ def _extras_type(value: str) -> str:
 
 def _parse_args(argv: tuple[str, ...]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description='Installs the latest (or given) version of config-ninja'
+        prog='install', description='Installs the latest (or given) version of config-ninja'
     )
     parser.add_argument('--version', help='install named version', dest='version')
     parser.add_argument(

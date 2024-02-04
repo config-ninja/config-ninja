@@ -12,9 +12,9 @@ CONFIG_NINJA_OBJECTS:
       backend: appconfig
       format: json
 
-    # instantiate the backend class using its 'new()' method
-    new:
-      kwargs:
-        application_name: Sample Application
-        configuration_profile_name: /dev/amazon-cloudwatch-agent.json
-        environment_name: dev
+      # instantiate the backend class using its 'new()' method
+      new:
+        kwargs:
+          application_name: Sample Application
+          configuration_profile_name: /dev/amazon-cloudwatch-agent.json
+          environment_name: dev

@@ -234,6 +234,9 @@ cmd = "poetry self add 'poetry-dynamic-versioning[plugin]'"
 # https://github.com/nat-n/poethepoet
 [tool.poe.tasks.docs]
 help = "Generate this package's docs"
+uses = {PACKAGE_VERSION = "_version"}
+
+[[tool.poe.tasks.docs.sequence]]
 cmd = """
   pdoc
     --mermaid
@@ -269,7 +272,9 @@ cmd = """
     typing
     unittest
 """
-uses = {PACKAGE_VERSION = "_version"}
+
+[[tool.poe.tasks.docs.sequence]]
+cmd = "cp tools/install.py docs/install.py"
 
 [tool.poe.tasks.serve-docs]
 help = "Use 'pdoc' to launch an HTTP server for this package's docs"
