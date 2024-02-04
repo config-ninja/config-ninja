@@ -238,12 +238,10 @@ def monkeypatch_systemd(
 
     mocker.patch.context_manager(systemd, 'sudo')
 
-    if systemd.sh is None:  # type: ignore[attr-defined]  # windows
-        mocker.patch('config_ninja.systemd.sh')  # type: ignore[unreachable]  # windows
+    if systemd.sh is None:  # type: ignore[attr-defined,unused-ignore]  # windows
+        mocker.patch('config_ninja.systemd.sh')  # type: ignore[unreachable,unused-ignore]  # windows
 
-    if systemd.sdnotify is None:  # type: ignore[attr-defined]
-        mocker.patch('config_ninja.systemd.sdnotify')
-
+    mocker.patch('config_ninja.systemd.sdnotify')
     mocker.patch('config_ninja.systemd.sdnotify.socket')
     mocker.patch('config_ninja.systemd.sh.systemctl')
     mocker.patch('config_ninja.systemd.sh.rm')
