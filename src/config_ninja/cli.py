@@ -33,13 +33,18 @@ try:
 except ImportError:  # pragma: no cover
     from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment,unused-ignore]
 
-try:
-    import sh  # pyright: ignore[reportMissingModuleSource]
-except ImportError:
-    sh = None  # type: ignore[assignment,unused-ignore]
-    SYSTEMD_AVAILABLE = False  # pyright: ignore[reportConstantRedefinition]
+if typing.TYPE_CHECKING:  # pragma: no cover
+    import sh
+
+    SYSTEMD_AVAILABLE = True
 else:
-    SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
+    try:
+        import sh
+    except ImportError:  # pragma: no cover
+        sh = None
+        SYSTEMD_AVAILABLE = False
+    else:
+        SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
 
 
 __all__ = [

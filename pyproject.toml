@@ -120,7 +120,10 @@ pyspry = "^1.0.2"
 watchfiles = { version = "^0.21.0", optional = true }
 jinja2 = "^3.1.2"
 tomlkit = "^0.12.3"
-sdnotify = { version = "^0.3.2", markers = "sys_platform == 'linux'"}
+# sdnotify is designed to handle errors when systemd is missing
+sdnotify = "^0.3.2"
+
+# sh encounters import errors on Windows
 sh =  { version = "^2.0.6",  markers = "sys_platform != 'win32'" }
 
 [tool.poetry.extras]

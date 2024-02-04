@@ -4153,4 +4153,4 @@ local = ["watchfiles"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "37d76acc78a6cfc0a49594ebb597053bed78ad21acc7d6672cc36604257af34b"
+content-hash = "c59aaf0158d094457972b9d8c03c23cd4fb09117d3054f9ad1a745b6d9c595dd"

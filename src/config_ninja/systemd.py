@@ -41,18 +41,18 @@ import logging
 import os
 import typing
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import jinja2
+import sdnotify
 
-try:
-    import sdnotify
-except ImportError:  # pragma: no cover
-    sdnotify = None  # type: ignore[assignment,unused-ignore]
-
-try:
+if TYPE_CHECKING:  # pragma: no cover
     import sh
-except ImportError:  # pragma: no cover
-    sh = None  # type: ignore[assignment,unused-ignore]
+else:
+    try:
+        import sh
+    except ImportError:  # pragma: no cover
+        sh = None
 
 # pylint: disable=no-member
 SERVICE_NAME = 'config-ninja.service'
