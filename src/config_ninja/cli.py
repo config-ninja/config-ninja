@@ -32,7 +32,7 @@ from config_ninja.contrib import get_backend
 try:
     from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
 except ImportError:  # pragma: no cover
-    from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment]
+    from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment,unused-ignore]
 
 __all__ = [
     'app',
@@ -255,7 +255,7 @@ class BackendController:
             dest = objects[self.key]['dest']
             path = Path(dest['path'])
             if dest['format'] in DUMPERS:
-                fmt: FormatT = dest['format']  # type: ignore[assignment]
+                fmt: FormatT = dest['format']  # type: ignore[assignment,unused-ignore]
                 return DestSpec(format=fmt, path=path)
 
             template_path = Path(dest['format'])
@@ -437,7 +437,7 @@ def version(ctx: typer.Context) -> None:
 def main(
     ctx: typer.Context,
     settings_file: SettingsAnnotation = None,
-    version: VersionAnnotation = None,  # pylint: disable=unused-argument,redefined-outer-name
+    version: VersionAnnotation = None,  # type: ignore[valid-type,unused-ignore]  # pylint: disable=unused-argument,redefined-outer-name
 ) -> None:
     """Manage operating system configuration files based on data in the cloud."""
     ctx.ensure_object(dict)

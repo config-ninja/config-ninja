@@ -5,32 +5,35 @@
 """
 from __future__ import annotations
 
-import shutil
 import sys
-import warnings
+
+RC_INVALID_PYTHON = 1
+RC_PATH_EXISTS = 2
 
 # Eager version check so we fail nicely before possible syntax errors
 if sys.version_info < (3, 8):  # noqa: UP036
     sys.stdout.write('config-ninja installer requires Python 3.8 or newer to run!\n')
-    sys.exit(1)
+    sys.exit(RC_INVALID_PYTHON)
 
 # pylint: disable=wrong-import-position,import-outside-toplevel
 
 import argparse
+import contextlib
 import copy
 import importlib
 import json
 import os
 import re
 import runpy
+import shutil
 import subprocess
 import sysconfig
 import tempfile
-from contextlib import closing
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 # note: must be synchronized with 'tool.poetry.extras' in pyproject.toml
 PACKAGE_EXTRAS = ['all', 'appconfig', 'local']
@@ -160,7 +163,7 @@ class _VirtualEnvironment:
         with tempfile.TemporaryDirectory(prefix='config-ninja-installer') as temp_dir:
             virtualenv_pyz = Path(temp_dir) / 'virtualenv.pyz'
             request = Request(bootstrap_url, headers={'User-Agent': USER_AGENT})
-            with closing(urlopen(request)) as response:
+            with contextlib.closing(urllib.request.urlopen(request)) as response:
                 virtualenv_pyz.write_bytes(response.read())
 
         # copy `argv` so we can override it and then restore it
@@ -192,9 +195,9 @@ class _VirtualEnvironment:
 
         try:
             env.pip('install', '--disable-pip-version-check', '--upgrade', 'pip')
-        except subprocess.CalledProcessError as exc:
+        except subprocess.CalledProcessError as exc:  # pragma: no cover
             sys.stderr.write(exc.stderr.decode('utf-8') + '\n')
-            sys.stdout.write('Failed to upgrade pip; additional errors may occur.\n')
+            sys.stderr.write(f'{warning}: Failed to upgrade pip; additional errors may occur.\n')
 
         return env
 
@@ -301,8 +304,8 @@ class Installer:
 
     >>> spec = Installer.Spec(Path('.cn'), version='1.0')
     >>> installer = Installer(spec)
-    >>> installer.install()[0]
-    _Version('1.0')
+    >>> installer.install()
+    _VirtualEnvironment(...)
 
     If the specified version is not available, a `ValueError` is raised:
 
@@ -315,22 +318,21 @@ class Installer:
 
     >>> spec = Installer.Spec(Path('.cn'))
     >>> installer = Installer(spec)
-    >>> installer.install()[0]
-    _Version('1.1')
+    >>> installer.install()
+    _VirtualEnvironment(...)
 
     Pre-release versions are excluded unless the `pre` argument is passed:
 
     >>> spec = Installer.Spec(Path('.cn'), pre=True)
     >>> installer = Installer(spec)
-    >>> installer.install()[0]
-    _Version('1.2a0')
+    >>> installer.install()
+    _VirtualEnvironment(...)
     """
 
     METADATA_URL = 'https://pypi.org/pypi/config-ninja/json'
     """Retrieve the latest version of config-ninja from this URL."""
 
     _allow_pre_releases: bool
-    _can_symlink: bool
     _extras: str
     _force: bool
     _path: Path
@@ -354,13 +356,12 @@ class Installer:
         self._allow_pre_releases = spec.pre
         self._extras = spec.extras
         self._force = spec.force
-        self._can_symlink = not WINDOWS or MINGW
         self._version = _Version(spec.version) if spec.version else None
 
     def _get_releases_from_pypi(self) -> list[_Version]:
         request = Request(self.METADATA_URL, headers={'User-Agent': USER_AGENT})
 
-        with closing(urlopen(request)) as response:
+        with contextlib.closing(urllib.request.urlopen(request)) as response:
             resp_bytes: bytes = response.read()
 
         metadata: dict[str, Any] = json.loads(resp_bytes.decode('utf-8'))
@@ -390,22 +391,28 @@ class Installer:
 
         return self._version
 
-    def _symlink(self, path: Path, delete: bool = False) -> Path | None:
-        if (bin_dir := path / 'bin').is_dir():
-            if delete:
-                (bin_dir / 'config-ninja').unlink(missing_ok=True)
-                return None
-            symlink = bin_dir / 'config-ninja'
-            os.symlink(self._path / 'bin' / 'config-ninja', symlink)
-            return symlink
+    @property
+    def force(self) -> bool:
+        """If truthy, skip overwrite existing paths."""
+        return self._force
 
-        if not path.parent or not path.parent.is_dir():
-            warnings.warn('unable to install symlink', stacklevel=0)
-            return None
+    def symlink(self, source: Path, check_target: Path, remove: bool = False) -> Path:
+        """Recurse up parent directories until the first 'bin' is found."""
+        if (bin_dir := check_target / 'bin').is_dir():
+            if (target := bin_dir / 'config-ninja').exists() and not self._force:
+                raise FileExistsError(target)
 
-        return self._symlink(path.parent, delete)
+            target.unlink(missing_ok=True)
+            if not remove:
+                os.symlink(source, target)
+            return target
 
-    def install(self) -> tuple[_VirtualEnvironment, Path | None]:
+        if not check_target.parent or not check_target.parent.is_dir():
+            raise FileNotFoundError('Could not find directory for symlink')
+
+        return self.symlink(source, check_target.parent, remove)
+
+    def install(self) -> _VirtualEnvironment:
         """Install the config-ninja package."""
         if self._path.exists() and not self._force:
             raise FileExistsError(f'Path already exists: {self._path}')
@@ -421,18 +428,12 @@ class Installer:
 
         env.pip(*args)
 
-        return env, self._symlink(self._path.parent) if self._can_symlink else None
+        return env
 
     @property
     def path(self) -> Path:
         """Get the installation path."""
         return self._path
-
-    def uninstall(self) -> None:
-        """Uninstall the config-ninja package."""
-        shutil.rmtree(self._path, ignore_errors=True)
-        if self._can_symlink:
-            self._symlink(self._path.parent, delete=True)
 
 
 def _extras_type(value: str) -> str:
@@ -478,7 +479,7 @@ def _parse_args(argv: tuple[str, ...]) -> argparse.Namespace:
     )
     parser.add_argument(
         '--force',
-        help='install on top of existing version',
+        help="respond 'yes' to confirmation prompts; overwrite existing installations",
         dest='force',
         action='store_true',
         default=False,
@@ -512,29 +513,118 @@ def cyan(text: Any) -> str:
     return f'\033[96m{text}\033[0m'
 
 
+def gray(text: Any) -> str:
+    """Color the given text gray."""
+    return f'\033[90m{text}\033[0m'
+
+
 def green(text: Any) -> str:
     """Color the given text green."""
     return f'\033[92m{text}\033[0m'
 
 
-def _uninstall(installer: Installer) -> None:
-    if not installer.path.is_dir():
-        sys.stdout.write(f'Path does not exist: {cyan(installer.path)}\n')
+def orange(text: Any) -> str:
+    """Color the given text orange."""
+    return f'\033[33m{text}\033[0m'
+
+
+def red(text: Any) -> str:
+    """Color the given text red."""
+    return f'\033[91m{text}\033[0m'
+
+
+def yellow(text: Any) -> str:
+    """Color the given text yellow."""
+    return f'\033[93m{text}\033[0m'
+
+
+warning = yellow('WARNING')
+failure = red('FAILURE')
+prompts = blue('PROMPTS')
+success = green('SUCCESS')
+
+
+def _maybe_create_symlink(installer: Installer, env: _VirtualEnvironment) -> None:
+    if env.bin in [Path(p) for p in os.getenv('PATH', '').split(os.pathsep)]:
+        # we're already on the PATH; no need to symlink
         return
 
-    prompt = f"Uninstall 'config-ninja' from {installer.path}? [y/N]: "
-    if Path('/dev/tty').exists():
-        sys.stdout.write(prompt)
-        sys.stdout.flush()
-        with open('/dev/tty', encoding='utf-8') as tty:
-            uninstall = tty.readline().strip()
-    else:
-        uninstall = input(prompt)
+    if WINDOWS and not MINGW:  # pragma: no cover
+        sys.stdout.write(
+            f'{warning}: In order to run the {blue("config-ninja")} command, add '
+            f'the following line to {gray(os.getenv("USERPROFILE"))}:\n'
+        )
+        rhs = cyan(f'";{env.bin}"')
+        sys.stdout.write(f'{green("$Env:Path")} += {rhs}')
+        return
 
-    if uninstall.lower().startswith('y'):
-        installer.uninstall()
-    else:
-        sys.stdout.write('Aborting.\n')
+    try:
+        symlink = installer.symlink(env.bin / 'config-ninja', env.path.parent)
+    except FileExistsError as exc:
+        sys.stderr.write(f'{warning}: Already exists: {cyan(exc.args[0])}\n')
+        sys.stderr.write(f'Pass the {blue("--force")} argument to clobber it\n')
+        sys.exit(RC_PATH_EXISTS)
+    except (FileNotFoundError, PermissionError):
+        sys.stderr.write(f'{warning}: Failed to create symlink\n')
+        shell = os.getenv('SHELL', '').split(os.sep)[-1]
+        your_dotfile = (
+            cyan(Path.home() / f'.{shell}rc') if shell else f"your shell's {cyan('~/.*rc')} file"
+        )
+        sys.stderr.write(
+            f'In order to run the {blue("config-ninja")} command, add the following '
+            + f'line to {your_dotfile}:\n'
+        )
+        path = orange(f'"{env.bin}:$PATH"')
+        sys.stderr.write(f'{blue("export")} PATH={path}')
+        return
+
+    sys.stdout.write(f'A symlink was created at {green(symlink)}\n')
+
+
+def _do_install(installer: Installer) -> None:
+    sys.stdout.write(f'🥷 Installing {blue("config-ninja")} to path {cyan(installer.path)}...\n')
+    sys.stdout.flush()
+
+    try:
+        env = installer.install()
+    except FileExistsError as exc:
+        sys.stderr.write(f'{failure}: {exc}\n')
+        sys.stdout.write(
+            f"Pass the {blue('--force')} argument to clobber it or "
+            f"{blue('--uninstall')} to remove it.\n"
+        )
+        sys.exit(RC_PATH_EXISTS)
+
+    sys.stdout.write(f'{success}: Installation to virtual environment complete ✅\n')
+
+    _maybe_create_symlink(installer, env)
+
+
+def _do_uninstall(installer: Installer) -> None:
+    if not installer.path.is_dir():
+        sys.stdout.write(f'{warning}: Path does not exist: {cyan(installer.path)}\n')
+        return
+
+    if not installer.force:
+        prompt = f"Uninstall {blue('config-ninja')} from {cyan(installer.path)}? [y/N]: "
+        if Path('/dev/tty').exists():
+            sys.stdout.write(prompt)
+            sys.stdout.flush()
+            with open('/dev/tty', encoding='utf-8') as tty:
+                uninstall = tty.readline().strip()
+        else:
+            uninstall = input(prompt)
+
+        if not uninstall.lower().startswith('y'):
+            sys.stderr.write(f'{failure}: Aborted uninstallation ❌\n')
+            sys.exit(RC_PATH_EXISTS)
+
+    sys.stdout.write('...\n')
+    shutil.rmtree(installer.path)
+    installer.symlink(installer.path / 'bin' / 'config-ninja', installer.path.parent, remove=True)
+    sys.stdout.write(
+        f"{success}: Uninstalled {blue('config-ninja')} from path {cyan(installer.path)} ✅\n"
+    )
 
 
 def main(*argv: str) -> None:
@@ -552,28 +642,10 @@ def main(*argv: str) -> None:
 
     installer = Installer(spec)
     if args.uninstall:
-        _uninstall(installer)
+        _do_uninstall(installer)
         return
 
-    sys.stdout.write(f'🥷 Installing {blue("config-ninja")}...\n')
-    sys.stdout.flush()
-    try:
-        env, symlink = installer.install()
-    except FileExistsError as exc:
-        raise FileExistsError(
-            '\n'.join(
-                [
-                    str(exc),
-                    "Pass the '--force' argument to clobber it or '--uninstall' to remove it.\n",
-                ]
-            )
-        ) from exc
-
-    sys.stdout.write('Success! ✅\n')
-    if symlink:
-        sys.stdout.write(f'A symlink was created at {green(symlink)}\n')
-    else:
-        sys.stdout.write(f'Ensure {cyan(env.bin / "config-ninja")} is in your PATH\n')
+    _do_install(installer)
 
 
 if __name__ == '__main__':  # pragma: no cover

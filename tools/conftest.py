@@ -8,15 +8,16 @@ from unittest.mock import MagicMock
 import pytest
 
 try:
-    from typing import (  # pylint: disable=ungrouped-imports; type: ignore[unknown-import]
+    from typing import (  # type: ignore[attr-defined,unused-ignore]  # pylint: disable=ungrouped-imports
         TypeAlias,  # pyright: ignore[reportGeneralTypeIssues,reportUnknownVariableType]
     )
 except ImportError:
     from typing_extensions import TypeAlias
 
-# pylint: disable=redefined-outer-name
+PathT: TypeAlias = Callable[..., Path]
 
-PathT: TypeAlias = Callable[..., Path]  # pylint: disable=invalid-name
+
+# pylint: disable=redefined-outer-name
 
 
 @pytest.fixture()
