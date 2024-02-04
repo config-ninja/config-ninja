@@ -237,7 +237,15 @@ def monkeypatch_systemd(
     monkeypatch.setattr(cli, 'SYSTEMD_AVAILABLE', True)
 
     mocker.patch.context_manager(systemd, 'sudo')
-    mocker.patch('sdnotify.socket')
+
+    if systemd.sh is None:  # type: ignore[attr-defined]  # windows
+        mocker.patch('config_ninja.systemd.sh')  # type: ignore[unreachable]  # windows
+
+    if systemd.sdnotify is None:  # type: ignore[attr-defined]
+        mocker.patch('config_ninja.systemd.sdnotify')
+
+    mocker.patch('config_ninja.systemd.sdnotify.socket')
+    mocker.patch('config_ninja.systemd.sh.systemctl')
     mocker.patch('config_ninja.systemd.sh.rm')
     mocker.patch('config_ninja.systemd.sh.tee')
 
@@ -246,8 +254,6 @@ def monkeypatch_systemd(
 
     monkeypatch.setattr(systemd, 'SYSTEM_INSTALL_PATH', system_install_path)
     monkeypatch.setattr(systemd, 'USER_INSTALL_PATH', user_install_path)
-
-    systemd.sh.systemctl = mocker.MagicMock()  # type: ignore[attr-defined,unused-ignore]
 
     return (system_install_path, user_install_path)
 

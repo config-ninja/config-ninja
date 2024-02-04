@@ -56,11 +56,11 @@ def _get_win_folder_from_registry(
         'CSIDL_LOCAL_APPDATA': 'Local AppData',
     }[csidl_name]
 
-    key = _winreg.OpenKey(  # type: ignore[attr-defined]
-        _winreg.HKEY_CURRENT_USER,  # type: ignore[attr-defined]
+    key = _winreg.OpenKey(  # type: ignore[attr-defined,unused-ignore]
+        _winreg.HKEY_CURRENT_USER,  # type: ignore[attr-defined,unused-ignore]
         r'Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders',
     )
-    path, _ = _winreg.QueryValueEx(key, shell_folder_name)  # type: ignore[attr-defined]
+    path, _ = _winreg.QueryValueEx(key, shell_folder_name)  # type: ignore[attr-defined,unused-ignore]
 
     return path  # pyright: ignore[reportUnknownVariableType]
 
@@ -77,7 +77,7 @@ def _get_win_folder_with_ctypes(
     }[csidl_name]
 
     buf = ctypes.create_unicode_buffer(1024)
-    ctypes.windll.shell32.SHGetFolderPathW(None, csidl_const, None, 0, buf)  # type: ignore[attr-defined]
+    ctypes.windll.shell32.SHGetFolderPathW(None, csidl_const, None, 0, buf)  # type: ignore[attr-defined,unused-ignore]
 
     # Downgrade to short path name if have highbit chars. See
     # <http://bugs.activestate.com/show_bug.cgi?id=85099>.
@@ -88,7 +88,7 @@ def _get_win_folder_with_ctypes(
             break
     if has_high_char:
         buf2 = ctypes.create_unicode_buffer(1024)
-        if ctypes.windll.kernel32.GetShortPathNameW(buf.value, buf2, 1024):  # type: ignore[attr-defined]
+        if ctypes.windll.kernel32.GetShortPathNameW(buf.value, buf2, 1024):  # type: ignore[attr-defined,unused-ignore]
             buf = buf2
 
     return buf.value
@@ -100,7 +100,7 @@ def _get_data_dir() -> Path:
 
     if WINDOWS:  # pragma: no cover
         try:
-            from ctypes import (  # type: ignore[attr-defined]
+            from ctypes import (  # type: ignore[attr-defined,unused-ignore]
                 windll,  # pyright: ignore  # noqa: F401
             )
 
@@ -399,7 +399,7 @@ class Installer:
     def symlink(self, source: Path, check_target: Path, remove: bool = False) -> Path:
         """Recurse up parent directories until the first 'bin' is found."""
         if (bin_dir := check_target / 'bin').is_dir():
-            if (target := bin_dir / 'config-ninja').exists() and not self._force:
+            if (target := bin_dir / 'config-ninja').exists() and not self._force and not remove:
                 raise FileExistsError(target)
 
             target.unlink(missing_ok=True)
@@ -601,10 +601,6 @@ def _do_install(installer: Installer) -> None:
 
 
 def _do_uninstall(installer: Installer) -> None:
-    if not installer.path.is_dir():
-        sys.stdout.write(f'{warning}: Path does not exist: {cyan(installer.path)}\n')
-        return
-
     if not installer.force:
         prompt = f"Uninstall {blue('config-ninja')} from {cyan(installer.path)}? [y/N]: "
         if Path('/dev/tty').exists():
@@ -621,10 +617,13 @@ def _do_uninstall(installer: Installer) -> None:
 
     sys.stdout.write('...\n')
     shutil.rmtree(installer.path)
-    installer.symlink(installer.path / 'bin' / 'config-ninja', installer.path.parent, remove=True)
     sys.stdout.write(
         f"{success}: Uninstalled {blue('config-ninja')} from path {cyan(installer.path)} ✅\n"
     )
+    if not WINDOWS or MINGW:
+        installer.symlink(
+            installer.path / 'bin' / 'config-ninja', installer.path.parent, remove=True
+        )
 
 
 def main(*argv: str) -> None:
@@ -642,6 +641,9 @@ def main(*argv: str) -> None:
 
     installer = Installer(spec)
     if args.uninstall:
+        if not installer.path.is_dir():
+            sys.stdout.write(f'{warning}: Path does not exist: {cyan(installer.path)}\n')
+            return
         _do_uninstall(installer)
         return
 

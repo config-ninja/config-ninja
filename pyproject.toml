@@ -120,8 +120,8 @@ pyspry = "^1.0.2"
 watchfiles = { version = "^0.21.0", optional = true }
 jinja2 = "^3.1.2"
 tomlkit = "^0.12.3"
-sdnotify = "^0.3.2"
-sh =  "^2.0.6"
+sdnotify = { version = "^0.3.2", markers = "sys_platform == 'linux'"}
+sh =  { version = "^2.0.6",  markers = "sys_platform != 'win32'" }
 
 [tool.poetry.extras]
 # https://python-poetry.org/docs/pyproject/#extras
@@ -148,7 +148,6 @@ pre-commit = [
 [tool.poetry.group.misc.dependencies]
 certifi = ">=2023.07.22"
 cruft = "^2.11"
-darglint = "^1.8"
 gitpython = ">=3.1.32"             # https://nvd.nist.gov/vuln/detail/CVE-2023-40267
 jupyterlab = ">=3.4,<5.0"
 pdoc = "^14"
@@ -865,6 +864,7 @@ known-first-party = ["tests", "tools"]
 select = [
   "B",
   "C90",
+  "E1",
   "E4",
   "E7",
   "E9",

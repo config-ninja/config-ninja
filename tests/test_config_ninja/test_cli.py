@@ -10,7 +10,6 @@ from typing import Any, AsyncIterable, Sequence
 
 import pyspry
 import pytest
-import sh
 import tomlkit
 import yaml
 from pytest_mock import MockerFixture
@@ -21,9 +20,16 @@ from config_ninja import cli, systemd
 from config_ninja.cli import app
 from tests.fixtures import MOCK_YAML_CONFIG
 
+try:
+    import sh  # pyright: ignore[reportMissingModuleSource]
+except ImportError:
+    sh = None  # type: ignore[assignment]
+    SYSTEMD_AVAILABLE = False  # pyright: ignore[reportConstantRedefinition]
+else:
+    SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
+
 # pylint: disable=redefined-outer-name
 
-SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
 
 runner = CliRunner()
 
@@ -95,7 +101,9 @@ def test_get_example_appconfig() -> None:
     """Get the 'example-appconfig' configuration (as specified in config-ninja-settings.yaml)."""
     result = runner.invoke(app, ['get', 'example-appconfig'])
     assert result.exit_code == 0, result.exception
-    assert result.stdout.strip() == MOCK_YAML_CONFIG.decode('utf-8')
+    # note: logging on windows dislikes how the runner captures output and prints a traceback, so
+    # ... :      just make sure that the YAML config is included _in_ the output
+    assert MOCK_YAML_CONFIG.decode('utf-8') in result.stdout.strip()
 
 
 def test_get_example_local(settings: dict[str, Any]) -> None:
@@ -268,12 +276,13 @@ def _clean_output(text: str) -> str:
     return re.sub(f'[^{string.ascii_letters + string.digits + string.punctuation}]', '', text)
 
 
+@pytest.mark.usefixtures('monkeypatch_systemd')
 def test_install_print_only() -> None:
     """Verify the `install` command respects the `--print-only` argument."""
     result = runner.invoke(app, ['self', 'install', '--print-only'])
 
     assert result.exit_code == 0, result.exception
-    assert str(systemd.SYSTEM_INSTALL_PATH) in _clean_output(result.stdout)
+    assert _clean_output(str(systemd.SYSTEM_INSTALL_PATH)) in _clean_output(result.stdout)
 
 
 @pytest.mark.usefixtures('monkeypatch_systemd')
@@ -306,5 +315,5 @@ def test_uninstall_print_only() -> None:
 
     # Assert
     assert result.exit_code == 0, result.exception
-    assert str(systemd.SYSTEM_INSTALL_PATH) in _clean_output(result.stdout)
+    assert _clean_output(str(systemd.SYSTEM_INSTALL_PATH)) in _clean_output(result.stdout)
     assert content in result.stdout

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib
 import re
+import sys
 from importlib import import_module
 from pathlib import Path
 from types import ModuleType
@@ -62,6 +63,7 @@ def test_uses_virtualenv(mocker: MockerFixture, tmp_path: Path) -> None:
     assert mock_run_path.call_args.args[0].endswith('virtualenv.pyz')
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='symlinks are not supported on Windows')
 @pytest.mark.usefixtures('_mock_ensurepip', '_mock_install_io', '_mock_urlopen_for_pypi')
 def test_symlink_already_exists(mocker: MockerFixture, tmp_path: Path) -> None:
     """Test that the install script fails if the symlink already exists."""
@@ -82,6 +84,7 @@ def test_symlink_already_exists(mocker: MockerFixture, tmp_path: Path) -> None:
     assert str(target).lower() in stderr.lower()
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='symlinks are not supported on Windows')
 @pytest.mark.usefixtures('_mock_ensurepip', '_mock_install_io', '_mock_urlopen_for_pypi')
 def test_no_symlink_perms(mocker: MockerFixture) -> None:
     """Test that errors are handled if the user lacks permissions to write the symlink."""
@@ -119,7 +122,8 @@ def test_uninstall_aborted(mocker: MockerFixture, tmp_path: Path) -> None:
     """Verify that the uninstall operation is aborted if the user does not confirm."""
     # Arrange
     mock_stderr = mocker.patch('sys.stderr')
-    mock_open = mocker.patch('builtins.open', mock.mock_open(read_data='n'))
+    mock_open = mocker.patch('builtins.open', mock.mock_open(read_data='n'))  # /dev/tty exists
+    mock_input = mocker.patch('builtins.input', return_value='n')  # must be windows
     (tmp_path / '.cn').mkdir(parents=True, exist_ok=True)
 
     with pytest.raises(SystemExit, match=str(install.RC_PATH_EXISTS)):
@@ -129,8 +133,15 @@ def test_uninstall_aborted(mocker: MockerFixture, tmp_path: Path) -> None:
 
     # Assert
     assert (tmp_path / '.cn').exists()
-    mock_open.assert_called_once()
     assert 'aborted uninstallation' in stderr.lower()
+
+    if mock_open.call_count > 0:
+        mock_open.assert_called_once()
+        assert mock_input.call_count == 0
+
+    if mock_input.call_count > 0:
+        mock_input.assert_called_once()
+        assert mock_open.call_count == 0
 
 
 def test_uninstall(mocker: MockerFixture, tmp_path: Path) -> None:

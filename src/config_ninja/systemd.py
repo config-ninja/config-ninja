@@ -43,8 +43,16 @@ import typing
 from pathlib import Path
 
 import jinja2
-import sdnotify  # pyright: ignore[reportMissingTypeStubs]
-import sh
+
+try:
+    import sdnotify
+except ImportError:  # pragma: no cover
+    sdnotify = None  # type: ignore[assignment,unused-ignore]
+
+try:
+    import sh
+except ImportError:  # pragma: no cover
+    sh = None  # type: ignore[assignment,unused-ignore]
 
 # pylint: disable=no-member
 SERVICE_NAME = 'config-ninja.service'
@@ -65,7 +73,7 @@ except AttributeError:  # pragma: no cover
 
     @contextlib.contextmanager
     def dummy() -> typing.Iterator[None]:
-        """We might be running inside a container."""
+        """We might be running inside a container; or we might be on Windows."""
         yield
 
     sudo = dummy()
@@ -189,8 +197,11 @@ class Service:
             kwargs['workdir'] = Path(workdir).absolute()
 
         kwargs.setdefault('user_mode', self.user_mode)
-        kwargs.setdefault('user', os.getuid())
-        kwargs.setdefault('group', os.getgid())
+        if hasattr(os, 'geteuid'):
+            kwargs.setdefault('user', os.geteuid())
+
+        if hasattr(os, 'getegid'):
+            kwargs.setdefault('group', os.getegid())
 
         return self.tmpl.render(**kwargs)
 
