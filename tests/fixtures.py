@@ -234,22 +234,14 @@ def monkeypatch_systemd(
     Returns:
         tuple[pathlib.Path, pathlib.Path]: the patched `SYSTEM_INSTALL_PATH` and `USER_INSTALL_PATH`
     """
-    monkeypatch.setattr(cli, 'SYSTEMD_AVAILABLE', True)
-
+    mocker.patch('config_ninja.systemd.sh')
     mocker.patch.context_manager(systemd, 'sudo')
-
-    if systemd.sh is None:  # type: ignore[attr-defined,unused-ignore]  # windows
-        mocker.patch('config_ninja.systemd.sh')  # type: ignore[unreachable,unused-ignore]  # windows
-
     mocker.patch('config_ninja.systemd.sdnotify')
-    mocker.patch('config_ninja.systemd.sdnotify.socket')
-    mocker.patch('config_ninja.systemd.sh.systemctl')
-    mocker.patch('config_ninja.systemd.sh.rm')
-    mocker.patch('config_ninja.systemd.sh.tee')
 
     system_install_path = tmp_path / 'system'
     user_install_path = tmp_path / 'user'
 
+    monkeypatch.setattr(cli, 'SYSTEMD_AVAILABLE', True)
     monkeypatch.setattr(systemd, 'SYSTEM_INSTALL_PATH', system_install_path)
     monkeypatch.setattr(systemd, 'USER_INSTALL_PATH', user_install_path)
 

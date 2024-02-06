@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import importlib
-import os
 import re
 import sys
 from importlib import import_module
@@ -76,41 +75,72 @@ def test_uses_virtualenv(mocker: MockerFixture, tmp_path: Path) -> None:
 
 @pytest.mark.usefixtures('_mock_install_io', '_mock_urlopen_for_pypi')
 def test_respects_config_ninja_home(
-    mock_ensurepip_present: mock.MagicMock, mocker: MockerFixture, tmp_path: Path
+    mock_ensurepip_present: mock.MagicMock,
+    mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     """Verify the environment variable `CONFIG_NINJA_HOME` is referenced during install."""
     # Arrange
     install_path = tmp_path / '.cn'
     mocker.patch('os.symlink')
-    mocker.patch.dict(os.environ, {'CONFIG_NINJA_HOME': str(install_path)})
-    mock_stdout = mocker.patch('sys.stdout')
+
+    mock_stdout = mock.MagicMock(sys.stdout.__class__)
+    monkeypatch.setattr(sys, 'stdout', mock_stdout)
+    monkeypatch.setenv('CONFIG_NINJA_HOME', str(install_path))
 
     # Act
     _run_installer('--force')
     stdout = '\n'.join([args[0][0] for args in mock_stdout.write.call_args_list])
+    call_count = len(
+        [
+            args.args[0]
+            for args in mock_ensurepip_present.call_args_list
+            if args.args[0] == 'ensurepip'
+        ]
+    )
 
     # Assert
-    mock_ensurepip_present.assert_called_once()
+    assert (
+        call_count == 1
+    ), f'Expected \'import_module("ensurepip")\' to have been called once. Called {call_count} times.'
+
     assert str(install_path).lower() in stdout.lower()
 
 
 @pytest.mark.usefixtures('_mock_install_io', '_mock_urlopen_for_pypi')
 def test_respects_xdg_home(
-    mock_ensurepip_present: mock.MagicMock, mocker: MockerFixture, tmp_path: Path
+    mock_ensurepip_present: mock.MagicMock,
+    mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     """Verify the environment variable `XDG_DATA_HOME` is referenced during install."""
     # Arrange
     install_path = tmp_path / '.cn'
     mocker.patch('os.symlink')
-    mocker.patch.dict(os.environ, {'XDG_DATA_HOME': str(install_path)})
-    mock_stdout = mocker.patch('sys.stdout')
+
+    mock_stdout = mock.MagicMock(sys.stdout.__class__)
+    monkeypatch.setattr(sys, 'platform', 'linux')
+    monkeypatch.setattr(sys, 'stdout', mock_stdout)
+    monkeypatch.setenv('XDG_DATA_HOME', str(install_path))
 
     # Act
     _run_installer('--force')
-    stdout = '\n'.join([args[0][0] for args in mock_stdout.write.call_args_list])
+    stdout = '\n'.join([call[0][0] for call in mock_stdout.write.call_args_list])
+    call_count = len(
+        [
+            call.args[0]
+            for call in mock_ensurepip_present.call_args_list
+            if call.args[0] == 'ensurepip'
+        ]
+    )
 
     # Assert
-    mock_ensurepip_present.assert_called_once()
+    assert (
+        call_count == 1
+    ), f'Expected \'import_module("ensurepip")\' to have been called once. Called {call_count} times.'
+
     assert str(install_path).lower() in stdout.lower()
 
 
