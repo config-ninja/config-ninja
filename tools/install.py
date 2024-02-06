@@ -642,7 +642,7 @@ def main(*argv: str) -> None:
         version=args.version or os.getenv('CONFIG_NINJA_VERSION'),
         force=args.force or string_to_bool(os.getenv('CONFIG_NINJA_FORCE', 'false')),
         pre=args.pre or string_to_bool(os.getenv('CONFIG_NINJA_PRE', 'false')),
-        extras=args.backends or os.getenv('CONFIG_NINJA_BACKENDS', ''),
+        extras=args.backends or os.getenv('CONFIG_NINJA_BACKENDS', '[all]'),
     )
 
     installer = Installer(spec)
