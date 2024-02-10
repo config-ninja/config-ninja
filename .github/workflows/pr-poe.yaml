@@ -4,10 +4,11 @@ name: 🎨 poe (PR)
 on:
   pull_request:
     paths:
-      - "*.py"
       - "**/*.py"
-      - pyproject.toml
+      - "*.py"
+      - .pre-commit-config.yaml
       - poetry.lock
+      - pyproject.toml
 
 jobs:
   lint:

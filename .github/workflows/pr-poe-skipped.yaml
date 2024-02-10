@@ -1,0 +1,22 @@
+# Run this workflow to test Python code changes.
+name: 🎨 poe (PR)
+
+on:
+  pull_request:
+    paths-ignore:
+      - "**/*.py"
+      - "*.py"
+      - .pre-commit-config.yaml
+      - poetry.lock
+      - pyproject.toml
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: printf "skipping 'poe lint' job (no relevant changes) ✅"
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: printf "skipping 'poe test' job (no relevant changes) ✅"
