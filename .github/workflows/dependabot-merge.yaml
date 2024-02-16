@@ -38,14 +38,15 @@ jobs:
 
       # automatically approve boto3 updates that are not major updates
       - id: boto3
-        if: ! steps.dev-or-indirect.outputs.PR_APPROVED &&
+        if: steps.dev-or-indirect.outputs.PR_APPROVED != true &&
           needs.metadata.outputs.dependency-type == 'direct:production' &&
           contains(needs.metadata.outputs.dependency-names, 'boto3') &&
           needs.metadata.outputs.update-type != 'version-update:semver-major'
         run: eval $APPROVE
 
       # post a comment that the PR needs to be reviewed
-      - if: ! steps.dev-or-indirect.outputs.PR_APPROVED && ! steps.boto3.outputs.PR_APPROVED
+      - if: steps.dev-or-indirect.outputs.PR_APPROVED != true &&
+          steps.boto3.outputs.PR_APPROVED != true
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
