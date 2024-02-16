@@ -1,0 +1,65 @@
+on: pull_request
+
+jobs:
+  metadata:
+    if: github.actor == 'dependabot[bot]'
+
+    outputs:
+      dependency-names: ${{ steps.metadata.outputs.dependency-names }}
+      dependency-type: ${{ steps.metadata.outputs.dependency-type }}
+      update-type: ${{ steps.metadata.outputs.update-type }}
+    permissions:
+      pull-requests: read
+
+    runs-on: ubuntu-latest
+    steps:
+      - id: metadata
+        uses: dependabot/fetch-metadata@v1
+
+  auto-approve:
+    env:
+      APPROVE: gh pr review --approve ${{github.event.pull_request.html_url}} &&
+        echo PR_APPROVED=true >>$GITHUB_OUTPUT
+
+    if: github.actor == 'dependabot[bot]'
+
+    needs: metadata
+    permissions:
+      pull-requests: write
+
+    runs-on: ubuntu-lates
+    steps:
+      # automatically approve dev dependencies and indirect dependencies that are not major updates
+      - id: dev-or-indirect
+        if: ( needs.metadata.outputs.dependency-type == 'direct:development' ||
+          needs.metadata.outputs.dependency-type == 'indirect' ) &&
+          needs.metadata.outputs.update-type != 'version-update:semver-major'
+        run: eval $APPROVE
+
+      # automatically approve boto3 updates that are not major updates
+      - id: boto3
+        if: ! steps.dev-or-indirect.outputs.PR_APPROVED &&
+          needs.metadata.outputs.dependency-type == 'direct:production' &&
+          contains(needs.metadata.outputs.dependency-names, 'boto3') &&
+          needs.metadata.outputs.update-type != 'version-update:semver-major'
+        run: eval $APPROVE
+
+      # post a comment that the PR needs to be reviewed
+      - if: ! steps.dev-or-indirect.outputs.PR_APPROVED && ! steps.boto3.outputs.PR_APPROVED
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            > [!IMPORTANT]
+            > This PR should be reviewed by a maintainer.
+
+  auto-merge:
+    if: github.actor == 'dependabot[bot]'
+
+    needs: metadata
+    permissions:
+      contents: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh pr merge --auto --merge ${{github.event.pull_request.html_url}}
