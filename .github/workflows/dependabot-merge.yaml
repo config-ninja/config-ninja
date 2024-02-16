@@ -1,4 +1,8 @@
+name: Dependabot Auto
 on: pull_request
+
+env:
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   metadata:
