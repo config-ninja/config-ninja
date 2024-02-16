@@ -31,7 +31,7 @@ jobs:
     permissions:
       pull-requests: write
 
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     steps:
       # automatically approve dev dependencies and indirect dependencies that are not major updates
       - id: dev-or-indirect
