@@ -37,7 +37,7 @@ runs:
         path: ~/.cache
         key: ${{ inputs.python-version }}-${{ steps.poetry.outputs.groups }}
 
-    - run: poetry ${{ inputs.poetry-groups && format('install --only {0}', inputs.poetry-groups) || 'install'}} --all-extras
+    - run: poetry ${{ inputs.poetry-groups && format('install --only {0}', inputs.poetry-groups) || 'install'}} --all-extras --sync
       shell: sh
 
     - run: poetry run poe ${{ inputs.poe-task }}

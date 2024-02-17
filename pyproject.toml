@@ -377,6 +377,23 @@ cmd = "ptw --config ptw.ini"
 help = "Create a new pre-release and push it to GitHub"
 cmd = "semantic-release version --prerelease --no-changelog"
 
+[tool.poe.tasks.test-py]
+help = "Use 'poetry' to a virtual environment with the specified Python version"
+args = [{name = "py", positional = true}]
+shell = """
+  poetry env use $py
+  poetry install --all-extras --sync --only=dev,main,test
+  poetry run poe test
+"""
+
+[tool.poe.tasks.test-python-versions]
+help = "Run the test suite in separate virtual environments for each supported Python version"
+shell = """
+  for py in 3.8 3.9 3.10 3.11 3.12; do
+    poetry run poe test-py $py
+  done
+"""
+
 [tool.pylint.main]
 # Analyse import fallback blocks. This can be used to support both Python 2 and 3
 # compatible code, which means that the block might have code that exists only in
