@@ -98,14 +98,12 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: lint-docs-py3.12
+          path: docs
 
       - uses: actions/download-artifact@v4
         with:
           name: test-docs-py3.12
-
-      - run: |
-          mkdir -p ./docs/reports
-          mv ./reports/* ./docs/reports
+          path: docs
 
       - uses: ./.github/actions/poe
         with:

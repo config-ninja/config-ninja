@@ -50,6 +50,7 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.poe-task }}-${{ inputs.artifacts }}-py${{ inputs.python-version }}
+        overwrite: true
         path: ${{ inputs.artifacts }}
 
     - if: ${{ runner.debug }}
