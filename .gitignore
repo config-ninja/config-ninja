@@ -3,7 +3,9 @@ htmlcov/
 reports/
 
 # documentation
+_readthedocs/
 docs/
+reports/
 
 # cruft
 *.rej
@@ -12,6 +14,7 @@ docs/
 *.csv*
 *.dat*
 *.md5
+*.out
 *.pickle*
 *.xls*
 *.zip*

@@ -52,4 +52,8 @@ runs:
         name: ${{ inputs.poe-task }}-${{ inputs.artifacts }}-py${{ inputs.python-version }}
         path: ${{ inputs.artifacts }}
 
+    - if: ${{ runner.debug }}
+      run: git status
+      shell: sh
+
   using: composite
