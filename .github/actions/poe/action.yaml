@@ -37,7 +37,10 @@ runs:
         path: ~/.cache
         key: ${{ inputs.python-version }}-${{ steps.poetry.outputs.groups }}
 
-    - run: poetry ${{ inputs.poetry-groups && format('install --only {0}', inputs.poetry-groups) || 'install'}} --all-extras --sync
+    - run: poetry
+        ${{ inputs.poetry-groups && format('install --only {0}', inputs.poetry-groups) || 'install'}}
+        --all-extras
+        --sync
       shell: sh
 
     - run: poetry run poe ${{ inputs.poe-task }}
@@ -46,7 +49,7 @@ runs:
     - if: ${{ inputs.artifacts }}
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ inputs.poe-task }}-${{ inputs.artifacts }}
+        name: ${{ inputs.poe-task }}-${{ inputs.artifacts }}-py${{ inputs.python-version }}
         path: ${{ inputs.artifacts }}
 
   using: composite
