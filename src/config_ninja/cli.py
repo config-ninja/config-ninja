@@ -7,6 +7,7 @@
 .. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
 .. _typer: https://typer.tiangolo.com/
 """
+
 import asyncio
 import contextlib
 import dataclasses
@@ -85,6 +86,13 @@ ActionType = typing.Callable[[str], typing.Any]
 KeyAnnotation: TypeAlias = Annotated[
     str,
     typer.Argument(help='The key of the configuration object to retrieve', show_default=False),
+]
+OptionalKeyAnnotation: TypeAlias = Annotated[
+    typing.Optional[str],
+    typer.Argument(
+        help='The key of the configuration object to retrieve; required unless --all is passed',
+        show_default=False,
+    ),
 ]
 PollAnnotation: TypeAlias = Annotated[
     typing.Optional[bool],
@@ -340,15 +348,28 @@ def get(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) ->
 
 
 @app.command()
-def apply(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) -> None:
+def apply(
+    ctx: typer.Context, key: OptionalKeyAnnotation = None, poll: PollAnnotation = False
+) -> None:
     """Apply the specified configuration to the system."""
-    ctrl = BackendController(ctx.obj['settings'], key)
-    ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
+    settings: pyspry.Settings = ctx.obj['settings']
+    if poll and key is None:
+        print(ctx.get_help())
+        print('[red]ERROR[/]: Can only use the [cyan][bold]--poll[/][/] when a key is specified')
+        raise typer.Exit(1)
 
-    if poll:
-        asyncio.run(ctrl.awrite())
+    if key is None:
+        controllers = [BackendController(settings, key) for key in settings.OBJECTS]
     else:
-        ctrl.write()
+        controllers = [BackendController(settings, key)]
+
+    for ctrl in controllers:
+        ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
+        if poll:
+            # must have specified a key to get here
+            asyncio.run(ctrl.awrite())
+        else:
+            ctrl.write()
 
 
 @app.command()

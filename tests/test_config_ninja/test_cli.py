@@ -219,7 +219,6 @@ def test_apply_example_local_template_poll(settings: dict[str, Any]) -> None:
     )
 
 
-@pytest.mark.usefixtures('monkeypatch_systemd')
 def test_apply_all(settings: dict[str, Any]) -> None:
     """Test the `apply` command without specifying a key."""
     # Arrange
@@ -247,6 +246,12 @@ def test_apply_all(settings: dict[str, Any]) -> None:
             }
         ).strip()
     )
+
+
+def test_apply_all_poll(settings: dict[str, Any]) -> None:
+    """Ensure the `--poll` argument cannot be used without a key."""
+    result = runner.invoke(app, ['--config', 'examples/local-backend.yaml', 'apply', '--poll'])
+    assert result.exit_code != 0
 
 
 @pytest.mark.usefixtures('_patch_awatch')
