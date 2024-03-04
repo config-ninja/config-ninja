@@ -1,4 +1,5 @@
 """Execute tests for the CLI."""
+
 from __future__ import annotations
 
 import json
@@ -23,7 +24,7 @@ from tests.fixtures import MOCK_YAML_CONFIG
 try:
     import sh  # pyright: ignore[reportMissingModuleSource]
 except ImportError:
-    sh = None  # type: ignore[assignment]
+    sh = None  # type: ignore[unused-ignore,assignment]
     SYSTEMD_AVAILABLE = False  # pyright: ignore[reportConstantRedefinition]
 else:
     SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
@@ -216,6 +217,41 @@ def test_apply_example_local_template_poll(settings: dict[str, Any]) -> None:
             }
         ).strip()
     )
+
+
+def test_apply_all(settings: dict[str, Any]) -> None:
+    """Test the `apply` command without specifying a key."""
+    # Arrange
+    local_settings = pyspry.Settings.load('examples/local-backend.yaml', 'CONFIG_NINJA')
+
+    # Act
+    result = runner.invoke(app, ['--config', 'examples/local-backend.yaml', 'apply'])
+    paths = [
+        Path(local_settings.OBJECTS[obj]['dest']['path']) for obj in ('example-0', 'example-1')
+    ]
+    outputs = [p.read_text().strip() for p in paths]
+
+    # Assert
+    assert result.exit_code == 0, result.exception
+    assert outputs[0] == json.dumps(settings)
+    assert (
+        outputs[1]
+        == tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
+            {
+                'CONFIG_NINJA_OBJECTS': {
+                    'example-local-template': {
+                        'dest': settings['CONFIG_NINJA_OBJECTS']['example-local-template']['dest']
+                    }
+                }
+            }
+        ).strip()
+    )
+
+
+def test_apply_all_poll(settings: dict[str, Any]) -> None:
+    """Ensure the `--poll` argument cannot be used without a key."""
+    result = runner.invoke(app, ['--config', 'examples/local-backend.yaml', 'apply', '--poll'])
+    assert result.exit_code != 0
 
 
 @pytest.mark.usefixtures('_patch_awatch')
