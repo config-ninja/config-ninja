@@ -12,6 +12,7 @@ local source file (`config-ninja-settings.yaml`):
 
 .. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
 """
+
 from __future__ import annotations
 
 import logging

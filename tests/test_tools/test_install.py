@@ -1,4 +1,5 @@
 """Define tests for the `install` script."""
+
 from __future__ import annotations
 
 import importlib

@@ -7,6 +7,7 @@
 - `config_ninja.cli` for commands and CLI documentation
 - `config_ninja.systemd` for `systemd` integration
 """  # noqa: D415
+
 from __future__ import annotations
 
 __version__ = '0.0.0'

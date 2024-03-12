@@ -34,6 +34,7 @@ SUCCESS ✅
 
 .. _install: https://bryant-finney.github.io/config-ninja/config_ninja/cli.html#config-ninja-self-install
 """  # noqa: RUF002
+
 from __future__ import annotations
 
 import contextlib
