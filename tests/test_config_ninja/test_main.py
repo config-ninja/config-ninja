@@ -1,4 +1,5 @@
 """A simple test to check `config_ninja.__main__`."""
+
 from __future__ import annotations
 
 from pytest_mock import MockerFixture

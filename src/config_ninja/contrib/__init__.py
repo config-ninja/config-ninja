@@ -8,6 +8,7 @@ package. The `get_backend()` function is used to retrieve the backend class give
 - `config_ninja.contrib.appconfig`
 - `config_ninja.contrib.local`
 """
+
 from __future__ import annotations
 
 import importlib

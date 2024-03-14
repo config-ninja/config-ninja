@@ -1,4 +1,5 @@
 """Configure `doctest` tests for the `install` script."""
+
 from __future__ import annotations
 
 from pathlib import Path

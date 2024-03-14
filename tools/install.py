@@ -3,6 +3,7 @@
 .. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
 .. _Poetry installer: https://github.com/python-poetry/install.python-poetry.org/blob/d62875fc05fb20062175cd14d19a96dbefa48640/install-poetry.py
 """
+
 from __future__ import annotations
 
 import sys

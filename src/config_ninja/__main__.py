@@ -1,4 +1,5 @@
 """Allow invoking the CLI with `python -m config_ninja`."""
+
 from __future__ import annotations
 
 import logging

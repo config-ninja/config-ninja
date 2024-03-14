@@ -1,4 +1,5 @@
 """Stub the module `sdnotify`."""
+
 import socket
 
 class SystemdNotifier:
