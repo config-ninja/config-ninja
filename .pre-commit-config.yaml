@@ -53,7 +53,7 @@ repos:
       - id: prettier
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.2
+    rev: v0.3.3
     hooks:
       - id: ruff
         types_or: [python, pyi, jupyter, toml]
@@ -83,7 +83,7 @@ repos:
           - watchfiles
 
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.353
+    rev: v1.1.354
     hooks:
       - id: pyright
         additional_dependencies:
