@@ -25,7 +25,7 @@ repos:
       - id: text-unicode-replacement-char
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-added-large-files
       - id: check-ast
@@ -53,7 +53,7 @@ repos:
       - id: prettier
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.3
+    rev: v0.4.1
     hooks:
       - id: ruff
         types_or: [python, pyi, jupyter, toml]
@@ -83,7 +83,7 @@ repos:
           - watchfiles
 
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.354
+    rev: v1.1.359
     hooks:
       - id: pyright
         additional_dependencies:
