@@ -145,15 +145,10 @@ WorkdirAnnotation: TypeAlias = Annotated[
 ]
 
 
-def parse_env(
-    ctx: typer.Context, value: typing.Optional[typing.List[str]]
-) -> typing.Optional[typing.List[str]]:
+def parse_env(ctx: typer.Context, value: typing.Optional[typing.List[str]]) -> typing.List[str]:
     """Parse the environment variables from the command line."""
-    if ctx.resilient_parsing:  # pragma: no cover  # this is for tab completions
-        return None
-
-    if not value:
-        return value
+    if ctx.resilient_parsing or not value:
+        return []
 
     return [v for val in value for v in val.split(',')]
 
@@ -491,7 +486,7 @@ def install(  # noqa: PLR0913
     The environment variables [purple]FOO[/], [purple]BAR[/], [purple]BAZ[/], and [purple]SPAM[/] will be read from the current shell and written to the service file, while [purple]EGGS[/] will be set to [yellow]42[/].
     """
     environ = {name: os.environ[name] for name in env_names or [] if name in os.environ}
-    environ.update(variables)  # type: ignore[arg-type]
+    environ.update(variables or [])
 
     kwargs = {
         # the command to use when invoking config-ninja from systemd
