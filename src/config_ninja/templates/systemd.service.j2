@@ -15,7 +15,6 @@ Restart=always
 RestartSec=30s
 Type=notify
 {%- if not user_mode %}
-# always run as the calling user, even when installed to the system
 User={{ user }}
 Group={{ group }}
 {%- endif %}
