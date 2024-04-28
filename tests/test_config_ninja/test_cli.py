@@ -318,13 +318,33 @@ def test_install_env(monkeypatch: pytest.MonkeyPatch) -> None:
     # Arrange
     variables = {
         var: uuid.uuid4().hex
-        for var in ['AWS_PROFILE', 'AWS_DEFAULT_FORMAT', 'AWS_DEFAULT_REGION', 'ANOTHER_ENV']
+        for var in [
+            'AWS_PROFILE',
+            'AWS_DEFAULT_FORMAT',
+            'AWS_DEFAULT_REGION',
+            'ANOTHER_ENV',
+            'ALMOST_DONE',
+            'ONE_LAST_ONE',
+        ]
     }
     for name, value in variables.items():
         monkeypatch.setenv(name, value)
 
     # Act
-    result = runner.invoke(app, ['self', 'install', '--print-only', '--env', ','.join(variables)])
+    result = runner.invoke(
+        app,
+        [
+            'self',
+            'install',
+            '--print-only',
+            '--env',
+            ','.join(list(variables)[:3]),
+            '--env',
+            ','.join(list(variables)[3:-1]),
+            '--env',
+            list(variables)[-1],
+        ],
+    )
 
     # Assert
     assert result.exit_code == 0, result.exception
