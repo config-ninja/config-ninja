@@ -11,10 +11,10 @@ description = "Use special ninja powers to manage system configurations 🥷"
 authors = ["Bryant Finney <bryant.finney@outlook.com>"]
 documentation = "https://config-ninja.readthedocs.org/home.html"
 exclude = ["**/conftest.py"]
-homepage = "https://bryant-finney.github.io/config-ninja/config_ninja.html"
+homepage = "https://config-ninja.github.io/config-ninja/config_ninja.html"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/bryant-finney/config-ninja"
+repository = "https://github.com/config-ninja/config-ninja"
 classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
