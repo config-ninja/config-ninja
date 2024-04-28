@@ -329,7 +329,7 @@ def test_called_with_sudo() -> None:
     called with `sudo`.
     """
     # Arrange
-    sudo: mock.MagicMock = systemd.sudo  # pyright: ignore[reportAssignmentType]
+    sudo: mock.MagicMock = systemd.sudo  # type: ignore[assignment]
 
     # Act
     result = runner.invoke(app, ['self', 'install'])
@@ -362,9 +362,9 @@ def test_install_run_as(run_as: str) -> None:
 def test_install_variables() -> None:
     """Verify the `install` command supports the `--var NAME=VALUE` argument."""
     # Arrange
-    variables = {'FOO': 'BAR', 'BAZ': 'QUX'}
-    args = [f'--var {k}={v}' for k, v in variables.items()]
-    expected = [f'Environment={k}={v}' for k, v in variables.items()]
+    variables = [f'{k}={v}' for k, v in {'FOO': 'BAR', 'BAZ': 'QUX'}.items()]
+    args = [arg for var in variables for arg in ['--var', var]]
+    expected = [f'Environment={var}' for var in variables]
 
     # Act
     result = runner.invoke(app, ['self', 'install', '--print-only', *args])

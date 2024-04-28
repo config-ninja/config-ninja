@@ -163,9 +163,10 @@ EnvNamesAnnotation: TypeAlias = Annotated[
     typer.Option(
         '-e',
         '--env',
-        help='Embed these environment variables into the unit file.',
+        help='Embed these environment variables into the unit file. Can be used multiple times.',
         show_default=False,
         callback=parse_env,
+        metavar='NAME[,NAME...]',
     ),
 ]
 
@@ -200,10 +201,29 @@ class Variable(typing.NamedTuple):
     """The value of the variable."""
 
 
-def parse_var() -> Variable:
-    """Parse the `--var KEY=VALUE` arguments for setting variables in the `systemd` service."""
-    # TODO[#293]: define callback
-    return Variable('name', 'value')
+def parse_var(value: str) -> Variable:
+    """Parse the `--var VARIABLE=VALUE` arguments for setting variables in the `systemd` service."""
+    try:
+        parsed = Variable(*value.split('='))
+    except TypeError as exc:
+        print(
+            f'[red]ERROR[/]: Invalid argument (expected [yellow]VARIABLE=VALUE[/] pair): [purple]{value}[/]'
+        )
+        raise typer.Exit(1) from exc
+
+    return parsed
+
+
+VariableAnnotation: TypeAlias = Annotated[
+    typing.Optional[typing.List[Variable]],
+    typer.Option(
+        '--var',
+        help='Embed the specified [yellow]VARIABLE=VALUE[/] into the unit file. Can be used multiple times.',
+        metavar='VARIABLE=VALUE',
+        show_default=False,
+        parser=parse_var,
+    ),
+]
 
 
 def version_callback(ctx: typer.Context, value: typing.Optional[bool] = None) -> None:
@@ -452,7 +472,7 @@ def install(
     print_only: PrintAnnotation = None,
     # TODO[#293]: add run_as argument: `--run-as USER[:GROUP]`
     user: UserAnnotation = None,
-    # TODO[#293]: add var argument: '--var KEY=VALUE'
+    variables: VariableAnnotation = None,
     workdir: WorkdirAnnotation = None,
 ) -> None:
     """Install [bold blue]config-ninja[/] as a [bold gray93]systemd[/] service.
@@ -464,18 +484,20 @@ def install(
 
     The environment variables [purple]FOO[/], [purple]BAR[/], [purple]BAZ[/], [purple]SPAM[/], and [purple]EGGS[/] will be read from the current shell and written to the service file.
     """
+    environ = {name: os.environ[name] for name in env_names or [] if name in os.environ}
+    environ.update(variables)  # type: ignore[arg-type]
+
     kwargs = {
         # the command to use when invoking config-ninja from systemd
         'config_ninja_cmd': sys.argv[0]
         if sys.argv[0].endswith('config-ninja')
         else f'{sys.executable} {sys.argv[0]}',
         # write these environment variables into the systemd service file
-        'environ': {name: os.environ[name] for name in env_names or [] if name in os.environ},
+        'environ': environ,
         # run `config-ninja` from this directory (if specified)
         'workdir': workdir,
     }
     # TODO[#293]: merge `run_as` inputs into `kwargs`
-    # TODO[#293]: merge `var` inputs into the `environ` argument
 
     svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False)
     if print_only:
