@@ -30,6 +30,11 @@ classifiers = [
 [tool.poetry.scripts]
 config-ninja = "config_ninja.cli:app"
 
+[[tool.poetry.source]]
+name = "test-pypi"
+url = "https://test.pypi.org/legacy/"
+priority = "explicit"
+
 [tool.poetry-dynamic-versioning]
 enable = true
 # in plain english:
