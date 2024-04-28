@@ -322,7 +322,7 @@ def test_install_print_only() -> None:
 
 
 @pytest.mark.usefixtures('monkeypatch_systemd')
-def test_called_with_sudo() -> None:
+def test_called_with_sudo(mocker: MockerFixture) -> None:
     """Emulate when the `install` command is invoked with `sudo` (or is running as `root`).
 
     The user should not be prompted for their password if the command was run as `root` or was
@@ -330,6 +330,7 @@ def test_called_with_sudo() -> None:
     """
     # Arrange
     sudo: mock.MagicMock = systemd.sudo  # type: ignore[assignment]
+    mocker.patch('os.geteuid', return_value=0)
 
     # Act
     result = runner.invoke(app, ['self', 'install'])
