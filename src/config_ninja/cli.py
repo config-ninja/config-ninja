@@ -30,9 +30,15 @@ from config_ninja.backend import DUMPERS, Backend, FormatT, dumps, loads
 from config_ninja.contrib import get_backend
 
 try:
-    from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
+    from typing import (
+        Annotated,  # type: ignore[attr-defined,unused-ignore]
+        TypeAlias,
+    )
 except ImportError:  # pragma: no cover
-    from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment,unused-ignore]
+    from typing_extensions import (  # type: ignore[assignment,unused-ignore]
+        Annotated,
+        TypeAlias,
+    )
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     import sh
@@ -126,6 +132,7 @@ UserAnnotation: TypeAlias = Annotated[
     typer.Option(
         '-u',
         '--user',
+        '--user-mode',
         help='User mode installation (does not require [bold orange3]sudo[/])',
         show_default=False,
     ),
@@ -161,6 +168,42 @@ EnvNamesAnnotation: TypeAlias = Annotated[
         callback=parse_env,
     ),
 ]
+
+
+class UserGroup(typing.NamedTuple):
+    """Run the service using this user (and optionally group)."""
+
+    user: typing.Optional[str]
+    """The user to run the service as."""
+
+    group: typing.Optional[str]
+    """The group to run the service as."""
+
+
+def parse_run_as() -> UserGroup:
+    """Parse the `--run-as user[:group]` argument for the `systemd` service."""
+    # TODO[#293]: define callback
+    return UserGroup('user', 'group')
+
+
+# TODO[#293]: define annotation
+RunAsAnnotation: TypeAlias = None
+
+
+class Variable(typing.NamedTuple):
+    """Set this variable in the shell used to run the `systemd` service."""
+
+    name: str
+    """The name of the variable."""
+
+    value: str
+    """The value of the variable."""
+
+
+def parse_var() -> Variable:
+    """Parse the `--var KEY=VALUE` arguments for setting variables in the `systemd` service."""
+    # TODO[#293]: define callback
+    return Variable('name', 'value')
 
 
 def version_callback(ctx: typer.Context, value: typing.Optional[bool] = None) -> None:
@@ -407,7 +450,9 @@ def _check_systemd() -> None:
 def install(
     env_names: EnvNamesAnnotation = None,
     print_only: PrintAnnotation = None,
+    # TODO[#293]: add run_as argument: `--run-as USER[:GROUP]`
     user: UserAnnotation = None,
+    # TODO[#293]: add var argument: '--var KEY=VALUE'
     workdir: WorkdirAnnotation = None,
 ) -> None:
     """Install [bold blue]config-ninja[/] as a [bold gray93]systemd[/] service.
@@ -429,6 +474,8 @@ def install(
         # run `config-ninja` from this directory (if specified)
         'workdir': workdir,
     }
+    # TODO[#293]: merge `run_as` inputs into `kwargs`
+    # TODO[#293]: merge `var` inputs into the `environ` argument
 
     svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False)
     if print_only:

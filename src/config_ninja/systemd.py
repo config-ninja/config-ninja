@@ -148,6 +148,7 @@ class Service:
         self.path = (USER_INSTALL_PATH if user_mode else SYSTEM_INSTALL_PATH) / SERVICE_NAME
 
     def _install_system(self, content: str) -> str:
+        # TODO[#293]: don't use `sudo` if already running as root
         with sudo:
             logger.info('writing to %s', self.path)
             sh.mkdir('-p', str(self.path.parent))
@@ -167,6 +168,7 @@ class Service:
         return sh.systemctl.status('--user', self.path.name)
 
     def _uninstall_system(self) -> None:
+        # TODO[#293]: don't use `sudo` if already running as root
         with sudo:
             logger.info('stopping and disabling %s', self.path.name)
             sh.systemctl.disable('--now', self.path.name)
