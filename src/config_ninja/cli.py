@@ -30,9 +30,15 @@ from config_ninja.backend import DUMPERS, Backend, FormatT, dumps, loads
 from config_ninja.contrib import get_backend
 
 try:
-    from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
+    from typing import (
+        Annotated,  # type: ignore[attr-defined,unused-ignore]
+        TypeAlias,
+    )
 except ImportError:  # pragma: no cover
-    from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment,unused-ignore]
+    from typing_extensions import (  # type: ignore[assignment,unused-ignore]
+        Annotated,
+        TypeAlias,
+    )
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     import sh
@@ -122,10 +128,11 @@ SettingsAnnotation: TypeAlias = Annotated[
     ),
 ]
 UserAnnotation: TypeAlias = Annotated[
-    typing.Optional[bool],
+    bool,
     typer.Option(
         '-u',
         '--user',
+        '--user-mode',
         help='User mode installation (does not require [bold orange3]sudo[/])',
         show_default=False,
     ),
@@ -156,9 +163,71 @@ EnvNamesAnnotation: TypeAlias = Annotated[
     typer.Option(
         '-e',
         '--env',
-        help='Embed these environment variables into the unit file.',
+        help='Embed these environment variables into the unit file. Can be used multiple times.',
         show_default=False,
         callback=parse_env,
+        metavar='NAME[,NAME...]',
+    ),
+]
+
+
+class UserGroup(typing.NamedTuple):
+    """Run the service using this user (and optionally group)."""
+
+    user: str
+    """The user to run the service as."""
+
+    group: typing.Optional[str] = None
+    """The group to run the service as."""
+
+    @classmethod
+    def parse(cls, value: str) -> 'UserGroup':
+        """Parse the `--run-as user[:group]` argument for the `systemd` service."""
+        return cls(*value.split(':'))
+
+
+RunAsAnnotation: TypeAlias = typing.Annotated[
+    typing.Optional[UserGroup],
+    typer.Option(
+        '--run-as',
+        help='Configure the systemd unit to run the service as this user (and optionally group).',
+        metavar='user[:group]',
+        parser=UserGroup.parse,
+    ),
+]
+
+
+class Variable(typing.NamedTuple):
+    """Set this variable in the shell used to run the `systemd` service."""
+
+    name: str
+    """The name of the variable."""
+
+    value: str
+    """The value of the variable."""
+
+
+def parse_var(value: str) -> Variable:
+    """Parse the `--var VARIABLE=VALUE` arguments for setting variables in the `systemd` service."""
+    try:
+        parsed = Variable(*value.split('='))
+    except TypeError as exc:
+        print(
+            f'[red]ERROR[/]: Invalid argument (expected [yellow]VARIABLE=VALUE[/] pair): [purple]{value}[/]'
+        )
+        raise typer.Exit(1) from exc
+
+    return parsed
+
+
+VariableAnnotation: TypeAlias = Annotated[
+    typing.Optional[typing.List[Variable]],
+    typer.Option(
+        '--var',
+        help='Embed the specified [yellow]VARIABLE=VALUE[/] into the unit file. Can be used multiple times.',
+        metavar='VARIABLE=VALUE',
+        show_default=False,
+        parser=parse_var,
     ),
 ]
 
@@ -404,33 +473,42 @@ def _check_systemd() -> None:
 
 
 @self_app.command()
-def install(
+def install(  # noqa: PLR0913
     env_names: EnvNamesAnnotation = None,
     print_only: PrintAnnotation = None,
-    user: UserAnnotation = None,
+    run_as: RunAsAnnotation = None,
+    user_mode: UserAnnotation = False,
+    variables: VariableAnnotation = None,
     workdir: WorkdirAnnotation = None,
 ) -> None:
     """Install [bold blue]config-ninja[/] as a [bold gray93]systemd[/] service.
 
-    The --env argument can be passed multiple times with comma-separated strings.
+    Both --env and --var can be passed multiple times.
 
     Example:
-            config-ninja self install --env FOO,BAR,BAZ --env SPAM --env EGGS
+            config-ninja self install --env FOO,BAR,BAZ --env SPAM --var EGGS=42
 
-    The environment variables [purple]FOO[/], [purple]BAR[/], [purple]BAZ[/], [purple]SPAM[/], and [purple]EGGS[/] will be read from the current shell and written to the service file.
+    The environment variables [purple]FOO[/], [purple]BAR[/], [purple]BAZ[/], and [purple]SPAM[/] will be read from the current shell and written to the service file, while [purple]EGGS[/] will be set to [yellow]42[/].
     """
+    environ = {name: os.environ[name] for name in env_names or [] if name in os.environ}
+    environ.update(variables)  # type: ignore[arg-type]
+
     kwargs = {
         # the command to use when invoking config-ninja from systemd
         'config_ninja_cmd': sys.argv[0]
         if sys.argv[0].endswith('config-ninja')
         else f'{sys.executable} {sys.argv[0]}',
         # write these environment variables into the systemd service file
-        'environ': {name: os.environ[name] for name in env_names or [] if name in os.environ},
+        'environ': environ,
         # run `config-ninja` from this directory (if specified)
         'workdir': workdir,
     }
+    if run_as:
+        kwargs['user'] = run_as.user
+        if run_as.group:
+            kwargs['group'] = run_as.group
 
-    svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False)
+    svc = systemd.Service('config_ninja', 'systemd.service.j2', user_mode)
     if print_only:
         rendered = svc.render(**kwargs)
         print(Markdown(f'# {svc.path}\n```systemd\n{rendered}\n```'))
@@ -445,7 +523,7 @@ def install(
 
 
 @self_app.command()
-def uninstall(print_only: PrintAnnotation = None, user: UserAnnotation = None) -> None:
+def uninstall(print_only: PrintAnnotation = None, user: UserAnnotation = False) -> None:
     """Uninstall the [bold blue]config-ninja[/] [bold gray93]systemd[/] service."""
     svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False)
     if print_only:

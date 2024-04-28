@@ -68,15 +68,22 @@ USER_INSTALL_PATH = (
 __all__ = ['SYSTEM_INSTALL_PATH', 'USER_INSTALL_PATH', 'Service', 'notify']
 logger = logging.getLogger(__name__)
 
+
+@contextlib.contextmanager
+def dummy() -> typing.Iterator[None]:
+    """Define a dummy context manager to use instead of `sudo`.
+
+    There are a few scenarios where `sudo` is unavailable or unnecessary:
+    - running on Windows
+    - running in a container without `sudo` installed
+    - already running as root
+    """
+    yield  # pragma: no cover
+
+
 try:
     sudo = sh.contrib.sudo
 except AttributeError:  # pragma: no cover
-
-    @contextlib.contextmanager
-    def dummy() -> typing.Iterator[None]:
-        """We might be running inside a container; or we might be on Windows."""
-        yield
-
     sudo = dummy()
 
 
@@ -133,6 +140,8 @@ class Service:
     path: Path
     """The installation location of the `systemd` unit file."""
 
+    sudo: typing.ContextManager[None]
+
     tmpl: jinja2.Template
     """Load the template on initialization."""
 
@@ -147,15 +156,19 @@ class Service:
         self.user_mode = user_mode
         self.path = (USER_INSTALL_PATH if user_mode else SYSTEM_INSTALL_PATH) / SERVICE_NAME
 
-    def _install_system(self, content: str) -> str:
-        with sudo:
-            logger.info('writing to %s', self.path)
-            sh.mkdir('-p', str(self.path.parent))
-            sh.tee(str(self.path), _in=content, _out='/dev/null')
+        if os.geteuid() == 0:
+            self.sudo = dummy()
+        else:
+            self.sudo = sudo
 
-            logger.info('enabling and starting %s', self.path.name)
-            sh.systemctl.start(self.path.name)
-            return sh.systemctl.status(self.path.name)
+    def _install_system(self, content: str) -> str:
+        logger.info('writing to %s', self.path)
+        sh.mkdir('-p', str(self.path.parent))
+        sh.tee(str(self.path), _in=content, _out='/dev/null')
+
+        logger.info('enabling and starting %s', self.path.name)
+        sh.systemctl.start(self.path.name)
+        return sh.systemctl.status(self.path.name)
 
     def _install_user(self, content: str) -> str:
         logger.info('writing to %s', self.path)
@@ -167,12 +180,11 @@ class Service:
         return sh.systemctl.status('--user', self.path.name)
 
     def _uninstall_system(self) -> None:
-        with sudo:
-            logger.info('stopping and disabling %s', self.path.name)
-            sh.systemctl.disable('--now', self.path.name)
+        logger.info('stopping and disabling %s', self.path.name)
+        sh.systemctl.disable('--now', self.path.name)
 
-            logger.info('removing %s', self.path)
-            sh.rm(str(self.path))
+        logger.info('removing %s', self.path)
+        sh.rm(str(self.path))
 
     def _uninstall_user(self) -> None:
         logger.info('stopping and disabling %s', self.path.name)
@@ -186,7 +198,12 @@ class Service:
         rendered = self.render(**kwargs)
         if self.user_mode:
             return self._install_user(rendered)
-        return self._install_system(rendered)
+
+        if os.geteuid() == 0:
+            return self._install_system(rendered)
+
+        with sudo:
+            return self._install_system(rendered)
 
     def read(self) -> str:
         """Read the `systemd` service file."""
@@ -198,17 +215,16 @@ class Service:
             kwargs['workdir'] = Path(workdir).absolute()
 
         kwargs.setdefault('user_mode', self.user_mode)
-        if hasattr(os, 'geteuid'):  # pragma: no cover  # windows
-            kwargs.setdefault('user', os.geteuid())
-
-        if hasattr(os, 'getegid'):  # pragma: no cover  # windows
-            kwargs.setdefault('group', os.getegid())
 
         return self.tmpl.render(**kwargs)
 
     def uninstall(self) -> None:
         """Disable, stop, and delete the service."""
         if self.user_mode:
-            self._uninstall_user()
-        else:
-            self._uninstall_system()
+            return self._uninstall_user()
+
+        if os.geteuid() == 0:
+            return self._uninstall_system()
+
+        with sudo:
+            return self._uninstall_system()

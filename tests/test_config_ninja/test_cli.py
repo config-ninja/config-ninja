@@ -8,6 +8,7 @@ import string
 import uuid
 from pathlib import Path
 from typing import Any, AsyncIterable, Sequence
+from unittest import mock
 
 import pyspry
 import pytest
@@ -90,10 +91,8 @@ def test_missing_settings(mocker: MockerFixture) -> None:
     # Assert
     assert result.exit_code == 0
     assert all(
-        [
-            text in result.stdout
-            for text in ['WARNING', 'Could not find', 'config-ninja', 'settings file']
-        ]
+        text in result.stdout
+        for text in ['WARNING', 'Could not find', 'config-ninja', 'settings file']
     )
 
 
@@ -248,7 +247,8 @@ def test_apply_all(settings: dict[str, Any]) -> None:
     )
 
 
-def test_apply_all_poll(settings: dict[str, Any]) -> None:
+@pytest.mark.usefixtures('settings')
+def test_apply_all_poll() -> None:
     """Ensure the `--poll` argument cannot be used without a key."""
     result = runner.invoke(app, ['--config', 'examples/local-backend.yaml', 'apply', '--poll'])
     assert result.exit_code != 0
@@ -313,12 +313,99 @@ def _clean_output(text: str) -> str:
 
 
 @pytest.mark.usefixtures('monkeypatch_systemd')
+def test_install_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify the `install` command supports the `--env` argument."""
+    # Arrange
+    variables = {
+        var: uuid.uuid4().hex
+        for var in ['AWS_PROFILE', 'AWS_DEFAULT_FORMAT', 'AWS_DEFAULT_REGION', 'ANOTHER_ENV']
+    }
+    for name, value in variables.items():
+        monkeypatch.setenv(name, value)
+
+    # Act
+    result = runner.invoke(app, ['self', 'install', '--print-only', '--env', ','.join(variables)])
+
+    # Assert
+    assert result.exit_code == 0, result.exception
+    for name, value in variables.items():
+        assert f'Environment={name}={value}' in result.stdout
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
 def test_install_print_only() -> None:
     """Verify the `install` command respects the `--print-only` argument."""
     result = runner.invoke(app, ['self', 'install', '--print-only'])
 
     assert result.exit_code == 0, result.exception
     assert _clean_output(str(systemd.SYSTEM_INSTALL_PATH)) in _clean_output(result.stdout)
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
+def test_install_called_with_sudo(mocker: MockerFixture) -> None:
+    """Emulate when the `install` command is invoked with `sudo` (or is running as `root`).
+
+    The user should not be prompted for their password if the command was run as `root` or was
+    called with `sudo`.
+    """
+    # Arrange
+    sudo: mock.MagicMock = systemd.sudo  # type: ignore[assignment]
+    mocker.patch('os.geteuid', return_value=0)
+
+    # Act
+    result = runner.invoke(app, ['self', 'install'])
+
+    # Assert
+    assert result.exit_code == 0, result.exception
+    sudo.__enter__.assert_not_called()
+
+
+@pytest.mark.parametrize('run_as', ['somebody', 'a_user:a_group'])
+@pytest.mark.usefixtures('monkeypatch_systemd')
+def test_install_run_as(run_as: str) -> None:
+    """Verify the `install` command supports the `--run-as USER[:GROUP]` argument."""
+    # Arrange
+    split = run_as.split(':')
+    user = split[0]
+    group = split[1] if len(split) > 1 else None
+
+    # Act
+    result = runner.invoke(app, ['self', 'install', '--print-only', '--run-as', run_as])
+
+    # Assert
+    assert result.exit_code == 0, {result.exception: str(result.stdout)}
+    assert f'User={user}' in result.stdout
+    if group:
+        assert f'Group={group}' in result.stdout
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
+def test_install_variables() -> None:
+    """Verify the `install` command supports the `--var NAME=VALUE` argument."""
+    # Arrange
+    variables = [f'{k}={v}' for k, v in {'FOO': 'BAR', 'BAZ': 'QUX'}.items()]
+    args = [arg for var in variables for arg in ['--var', var]]
+    expected = [f'Environment={var}' for var in variables]
+
+    # Act
+    result = runner.invoke(app, ['self', 'install', '--print-only', *args])
+
+    # Assert
+    assert result.exit_code == 0, {result.exception: str(result.stdout)}
+    for line in expected:
+        assert line in result.stdout
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
+def test_install_variables_invalid() -> None:
+    """Verify the `install` command fails when an invalid variable is provided."""
+    # Arrange
+    pair = 'VARIABLE:INVALID'
+    result = runner.invoke(app, ['self', 'install', '--print-only', '--var', pair])
+
+    # Assert
+    assert result.exit_code == 1
+    assert f'Invalid argument (expected VARIABLE=VALUE pair): {pair}' in result.stdout
 
 
 @pytest.mark.usefixtures('monkeypatch_systemd')
@@ -353,3 +440,22 @@ def test_uninstall_print_only() -> None:
     assert result.exit_code == 0, result.exception
     assert _clean_output(str(systemd.SYSTEM_INSTALL_PATH)) in _clean_output(result.stdout)
     assert content in result.stdout
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
+def test_uninstall_called_with_sudo(mocker: MockerFixture) -> None:
+    """Emulate when the `uninstall` command is invoked with `sudo` (or is running as `root`).
+
+    The user should not be prompted for their password if the command was run as `root` or was
+    called with `sudo`.
+    """
+    # Arrange
+    sudo: mock.MagicMock = systemd.sudo  # type: ignore[assignment]
+    mocker.patch('os.geteuid', return_value=0)
+
+    # Act
+    result = runner.invoke(app, ['self', 'uninstall'])
+
+    # Assert
+    assert result.exit_code == 0, result.exception
+    sudo.__enter__.assert_not_called()
