@@ -78,7 +78,7 @@ def dummy() -> typing.Iterator[None]:
     - running in a container without `sudo` installed
     - already running as root
     """
-    yield
+    yield  # pragma: no cover
 
 
 try:

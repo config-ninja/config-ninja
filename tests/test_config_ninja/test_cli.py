@@ -313,6 +313,26 @@ def _clean_output(text: str) -> str:
 
 
 @pytest.mark.usefixtures('monkeypatch_systemd')
+def test_install_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify the `install` command supports the `--env` argument."""
+    # Arrange
+    variables = {
+        var: uuid.uuid4().hex
+        for var in ['AWS_PROFILE', 'AWS_DEFAULT_FORMAT', 'AWS_DEFAULT_REGION', 'ANOTHER_ENV']
+    }
+    for name, value in variables.items():
+        monkeypatch.setenv(name, value)
+
+    # Act
+    result = runner.invoke(app, ['self', 'install', '--print-only', '--env', ','.join(variables)])
+
+    # Assert
+    assert result.exit_code == 0, result.exception
+    for name, value in variables.items():
+        assert f'Environment={name}={value}' in result.stdout
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
 def test_install_print_only() -> None:
     """Verify the `install` command respects the `--print-only` argument."""
     result = runner.invoke(app, ['self', 'install', '--print-only'])
@@ -322,7 +342,7 @@ def test_install_print_only() -> None:
 
 
 @pytest.mark.usefixtures('monkeypatch_systemd')
-def test_called_with_sudo(mocker: MockerFixture) -> None:
+def test_install_called_with_sudo(mocker: MockerFixture) -> None:
     """Emulate when the `install` command is invoked with `sudo` (or is running as `root`).
 
     The user should not be prompted for their password if the command was run as `root` or was
@@ -377,6 +397,18 @@ def test_install_variables() -> None:
 
 
 @pytest.mark.usefixtures('monkeypatch_systemd')
+def test_install_variables_invalid() -> None:
+    """Verify the `install` command fails when an invalid variable is provided."""
+    # Arrange
+    pair = 'VARIABLE:INVALID'
+    result = runner.invoke(app, ['self', 'install', '--print-only', '--var', pair])
+
+    # Assert
+    assert result.exit_code == 1
+    assert f'Invalid argument (expected VARIABLE=VALUE pair): {pair}' in result.stdout
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
 def test_uninstall() -> None:
     """Verify the `uninstall` command works as expected."""
     # Arrange
@@ -408,3 +440,22 @@ def test_uninstall_print_only() -> None:
     assert result.exit_code == 0, result.exception
     assert _clean_output(str(systemd.SYSTEM_INSTALL_PATH)) in _clean_output(result.stdout)
     assert content in result.stdout
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
+def test_uninstall_called_with_sudo(mocker: MockerFixture) -> None:
+    """Emulate when the `uninstall` command is invoked with `sudo` (or is running as `root`).
+
+    The user should not be prompted for their password if the command was run as `root` or was
+    called with `sudo`.
+    """
+    # Arrange
+    sudo: mock.MagicMock = systemd.sudo  # type: ignore[assignment]
+    mocker.patch('os.geteuid', return_value=0)
+
+    # Act
+    result = runner.invoke(app, ['self', 'uninstall'])
+
+    # Assert
+    assert result.exit_code == 0, result.exception
+    sudo.__enter__.assert_not_called()
