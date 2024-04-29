@@ -181,7 +181,7 @@ class UserGroup(typing.NamedTuple):
         return cls(*value.split(':'))
 
 
-RunAsAnnotation: TypeAlias = typing.Annotated[
+RunAsAnnotation: TypeAlias = Annotated[
     typing.Optional[UserGroup],
     typer.Option(
         '--run-as',
