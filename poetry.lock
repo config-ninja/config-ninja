@@ -333,13 +333,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.34.94"
-description = "Type annotations for boto3 1.34.94 generated with mypy-boto3-builder 7.24.0"
+version = "1.34.95"
+description = "Type annotations for boto3 1.34.95 generated with mypy-boto3-builder 7.24.0"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3_stubs-1.34.94-py3-none-any.whl", hash = "sha256:6dc13d312ea2e7e045e71ba8d2796ee41e1ba1b98eaef7a84eb099e5b46ee450"},
-    {file = "boto3_stubs-1.34.94.tar.gz", hash = "sha256:6722b0b024293eb37713b8ec35d02e2c42c48b43615a8544c402972db053412d"},
+    {file = "boto3_stubs-1.34.95-py3-none-any.whl", hash = "sha256:4fb5830626de42446c238ca72ca1a53e461281396007fb900edf50ceeb044a10"},
+    {file = "boto3_stubs-1.34.95.tar.gz", hash = "sha256:412006b27ee707e9b51a084b02ac92b143af8a3b56727582afec2a76ce93c3b6"},
 ]
 
 [package.dependencies]
@@ -392,7 +392,7 @@ bedrock-agent = ["mypy-boto3-bedrock-agent (>=1.34.0,<1.35.0)"]
 bedrock-agent-runtime = ["mypy-boto3-bedrock-agent-runtime (>=1.34.0,<1.35.0)"]
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.34.0,<1.35.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.34.0,<1.35.0)"]
-boto3 = ["boto3 (==1.34.94)", "botocore (==1.34.94)"]
+boto3 = ["boto3 (==1.34.95)", "botocore (==1.34.95)"]
 braket = ["mypy-boto3-braket (>=1.34.0,<1.35.0)"]
 budgets = ["mypy-boto3-budgets (>=1.34.0,<1.35.0)"]
 ce = ["mypy-boto3-ce (>=1.34.0,<1.35.0)"]
@@ -2069,7 +2069,6 @@ files = [
     {file = "lxml-5.2.1-cp37-cp37m-musllinux_1_2_x86_64.whl", hash = "sha256:9e2addd2d1866fe112bc6f80117bcc6bc25191c5ed1bfbcf9f1386a884252ae8"},
     {file = "lxml-5.2.1-cp37-cp37m-win32.whl", hash = "sha256:f51969bac61441fd31f028d7b3b45962f3ecebf691a510495e5d2cd8c8092dbd"},
     {file = "lxml-5.2.1-cp37-cp37m-win_amd64.whl", hash = "sha256:b0b58fbfa1bf7367dde8a557994e3b1637294be6cf2169810375caf8571a085c"},
-    {file = "lxml-5.2.1-cp38-cp38-macosx_10_9_universal2.whl", hash = "sha256:3e183c6e3298a2ed5af9d7a356ea823bccaab4ec2349dc9ed83999fd289d14d5"},
     {file = "lxml-5.2.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:804f74efe22b6a227306dd890eecc4f8c59ff25ca35f1f14e7482bbce96ef10b"},
     {file = "lxml-5.2.1-cp38-cp38-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:08802f0c56ed150cc6885ae0788a321b73505d2263ee56dad84d200cab11c07a"},
     {file = "lxml-5.2.1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0f8c09ed18ecb4ebf23e02b8e7a22a05d6411911e6fabef3a36e4f371f4f2585"},
@@ -4399,4 +4398,4 @@ local = ["watchfiles"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "d016746ced57e5cba93f3679ac8cab688dbb8069d2218dd5125b5b5b818788ae"
+content-hash = "b77dec5bc4be48d14e28743751f4af89164d129cece3bcbbb9e683194af15b61"
