@@ -125,8 +125,8 @@ To demonstrate how the mechanics work locally:
        "b": "second value"
      },
      "example-1": {
-       "1": "third value",
-       "2": "fourth value"
+       "c": "third value",
+       "d": "fourth value"
      }
    }
    ```
