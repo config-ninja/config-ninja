@@ -96,7 +96,7 @@ KeyAnnotation: TypeAlias = Annotated[
 OptionalKeyAnnotation: TypeAlias = Annotated[
     typing.Optional[str],
     typer.Argument(
-        help='The key of the configuration object to retrieve; required unless --all is passed',
+        help='If specified, only apply the configuration object with this key.',
         show_default=False,
     ),
 ]
