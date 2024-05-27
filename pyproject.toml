@@ -875,15 +875,12 @@ xfail_strict = true
 extend-include = ["*.ipynb"]
 fix = true
 line-length = 100
+output-format = "full"
 show-fixes = true
-show-source = true
 src = ["src", "tests", "tools"]
 
 [tool.ruff.format]
 quote-style = "single"
-
-[tool.ruff.isort]
-known-first-party = ["tests", "tools"]
 
 [tool.ruff.lint]
 select = [
@@ -914,7 +911,10 @@ select = [
 # Disallow all relative imports.
 ban-relative-imports = "all"
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.isort]
+known-first-party = ["tests", "tools"]
+
+[tool.ruff.lint.mccabe]
 max-complexity = 5
 
 [tool.ruff.lint.pydocstyle]
