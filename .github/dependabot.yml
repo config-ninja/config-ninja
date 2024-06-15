@@ -10,3 +10,8 @@ updates:
     rebase-strategy: auto
     schedule:
       interval: daily
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
