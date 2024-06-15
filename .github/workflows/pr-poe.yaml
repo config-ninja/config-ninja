@@ -9,6 +9,8 @@ on:
       - .pre-commit-config.yaml
       - poetry.lock
       - pyproject.toml
+      - .github/workflows/pr-poe.yaml
+      - .github/actions/poe/*
 
 jobs:
   lint:
@@ -21,11 +23,11 @@ jobs:
           poetry-groups: main,dev,lint
 
   test:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         py: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/poe
