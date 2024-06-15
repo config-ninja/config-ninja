@@ -21,5 +21,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        py: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
     steps:
       - run: printf "skipping 'poe test' job (no relevant changes) ✅"
