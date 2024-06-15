@@ -3,13 +3,16 @@ name: 🎨 poe (PR)
 
 on:
   pull_request:
-    paths-ignore:
-      - "**/*.py"
-      - "*.py"
-      - .pre-commit-config.yaml
-      - poetry.lock
-      - pyproject.toml
-
+    paths:
+      - "*"
+      - "**"
+      - "!**/*.py"
+      - "!*.py"
+      - "!.pre-commit-config.yaml"
+      - "!poetry.lock"
+      - "!pyproject.toml"
+      - "!.github/workflows/pr-poe.yaml"
+      - "!.github/actions/poe/*"
 jobs:
   lint:
     runs-on: ubuntu-latest

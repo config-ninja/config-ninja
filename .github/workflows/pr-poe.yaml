@@ -9,6 +9,8 @@ on:
       - .pre-commit-config.yaml
       - poetry.lock
       - pyproject.toml
+      - .github/workflows/pr-poe.yaml
+      - .github/actions/poe/*
 
 jobs:
   lint:
