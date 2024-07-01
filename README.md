@@ -15,7 +15,7 @@ Similar to [`confd`](https://github.com/kelseyhightower/confd), manage your syst
 
 ## Installation
 
-`config-ninja` is installed using the official installer or with `pip` / `pipx`. If your system supports `systemd`, you can then enable `config-ninja` as a `systemd` service.
+`config-ninja` is installed using the official installer or with `pip` / `pipx`. After installation, you can enable `config-ninja` as a `systemd` service.
 
 ### Official Installer
 
