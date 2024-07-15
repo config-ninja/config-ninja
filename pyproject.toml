@@ -119,7 +119,7 @@ boto3 = { version = "^1.34.11", optional = true }
 pyspry = "^1.0.2"
 watchfiles = { version = ">=0.21,<0.23", optional = true }
 jinja2 = "^3.1.2"
-tomlkit = "^0.12.3"
+tomlkit = ">=0.12.3,<0.14.0"
 # sdnotify is designed to handle errors when systemd is missing
 sdnotify = "^0.3.2"
 
