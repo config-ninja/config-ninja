@@ -21,7 +21,7 @@ PathT: TypeAlias = Callable[..., Path]
 # pylint: disable=redefined-outer-name
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_path(tmp_path: Path) -> PathT:
     """Mock `pathlib.Path` to return a temporary directory."""
     count = 0
