@@ -134,7 +134,7 @@ local = ["watchfiles"]
 
 
 [tool.poetry.group.dev.dependencies]
-boto3-stubs = {version = "1.35.1", extras = ["appconfig", "appconfigdata"]}
+boto3-stubs = {version = "1.35.2", extras = ["appconfig", "appconfigdata"]}
 poethepoet = ">=0.20,<0.28"
 types-pyyaml = "^6"
 
