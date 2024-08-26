@@ -41,20 +41,20 @@ def clean(text: str) -> str:
     return re.sub(r'\x1b\[[0-9;]+m', '', text).strip()
 
 
-@pytest.fixture()
+@pytest.fixture
 def settings_text() -> str:
     """Resolve the path to the settings file and return its contents as a string."""
     return str(config_ninja.resolve_settings_path().read_text()).strip()
 
 
-@pytest.fixture()
+@pytest.fixture
 def settings(settings_text: str) -> dict[str, Any]:
     """Parse the settings file and return its contents as a `dict`."""
     out: dict[str, Any] = yaml.safe_load(settings_text)
     return out
 
 
-@pytest.fixture()
+@pytest.fixture
 def _patch_awatch(settings_text: str, mocker: MockerFixture) -> None:  # pyright: ignore[reportUnusedFunction]
     """Patch `watchfiles.awatch` to yield a single string."""
 

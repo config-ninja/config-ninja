@@ -22,7 +22,7 @@ def _run_installer(*argv: str) -> None:
     importlib.reload(install).main(*argv)
 
 
-@pytest.fixture()
+@pytest.fixture
 def _mock_ensurepip_missing(mocker: MockerFixture) -> None:  # pyright: ignore[reportUnusedFunction]
     """Raise an `ImportError` if `importlib.import_module` is passed 'ensurepip'."""
 
@@ -34,7 +34,7 @@ def _mock_ensurepip_missing(mocker: MockerFixture) -> None:  # pyright: ignore[r
     mocker.patch('importlib.import_module', new=_mock_import_module)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_ensurepip_present(mocker: MockerFixture) -> mock.MagicMock:
     """Patch `importlib.import_module` to mimic `ensurepip` is installed."""
     mock_import_module: mock.MagicMock = mocker.patch('importlib.import_module')
