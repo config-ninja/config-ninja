@@ -53,7 +53,7 @@ def mock_file(mock_bytes: bytes) -> MockFile:
     return mock_file
 
 
-@pytest.fixture()
+@pytest.fixture
 def _mock_contextlib_closing(mocker: MockerFixture) -> None:  # pyright: ignore[reportUnusedFunction]
     """Mock `contextlib.closing`."""
 
@@ -65,7 +65,7 @@ def _mock_contextlib_closing(mocker: MockerFixture) -> None:  # pyright: ignore[
     mocker.patch('contextlib.closing', new=_mocked)
 
 
-@pytest.fixture()
+@pytest.fixture
 def _mock_urlopen_for_pypi(mocker: MockerFixture) -> None:  # pyright: ignore[reportUnusedFunction]
     """Mock `urllib.request.urlopen` for PyPI requests."""
 
@@ -75,13 +75,13 @@ def _mock_urlopen_for_pypi(mocker: MockerFixture) -> None:  # pyright: ignore[re
     mocker.patch('urllib.request.urlopen', new=_mocked)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_appconfig_client() -> AppConfigClient:
     """Mock the `boto3` client for the `AppConfig` service."""
     return mock.MagicMock(name='mock_appconfig_client', spec_set=AppConfigClient)
 
 
-@pytest.fixture()
+@pytest.fixture
 def _mock_install_io(mocker: MockerFixture) -> None:  # pyright: ignore[reportUnusedFunction]
     """Mock various I/O utilities used by the `install` script."""
     mocker.patch('shutil.rmtree')
@@ -90,7 +90,7 @@ def _mock_install_io(mocker: MockerFixture) -> None:  # pyright: ignore[reportUn
     mocker.patch('runpy.run_path')
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_session(mocker: MockerFixture) -> Session:
     """Mock the `boto3.Session` class."""
     mock_session = mock.MagicMock(name='mock_session', spec_set=Session)
@@ -98,7 +98,7 @@ def mock_session(mocker: MockerFixture) -> Session:
     return mock_session
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_session_with_0_ids(
     mock_appconfig_client: mock.MagicMock, mock_session: mock.MagicMock
 ) -> AppConfigClient:
@@ -114,7 +114,7 @@ def mock_session_with_0_ids(
     return mock_session
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_session_with_1_id(
     mock_appconfig_client: mock.MagicMock, mock_session: mock.MagicMock
 ) -> AppConfigClient:
@@ -131,7 +131,7 @@ def mock_session_with_1_id(
     return mock_session
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_session_with_2_ids(
     mock_appconfig_client: mock.MagicMock, mock_session: mock.MagicMock
 ) -> AppConfigClient:
@@ -148,7 +148,7 @@ def mock_session_with_2_ids(
     return mock_session
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_latest_config() -> GetLatestConfigurationResponseTypeDef:
     """Mock the response from `get_latest_configuration`."""
     mock_config_stream = mock.MagicMock(spec_set=StreamingBody)
@@ -169,7 +169,7 @@ def mock_latest_config() -> GetLatestConfigurationResponseTypeDef:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_appconfigdata_client(mock_latest_config: mock.MagicMock) -> AppConfigDataClient:
     """Mock the low-level `boto3` client for the `AppConfigData` service."""
     mock_client = mock.MagicMock(name='mock_appconfigdata_client', spec_set=AppConfigDataClient)
@@ -177,7 +177,7 @@ def mock_appconfigdata_client(mock_latest_config: mock.MagicMock) -> AppConfigDa
     return mock_client
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_full_session(
     mock_session_with_1_id: mock.MagicMock,
     mock_appconfig_client: mock.MagicMock,
@@ -196,7 +196,7 @@ def mock_full_session(
     return mock_session_with_1_id
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_poll_too_early(
     mock_latest_config: GetLatestConfigurationResponseTypeDef,
 ) -> AppConfigDataClient:
@@ -226,7 +226,7 @@ def mock_poll_too_early(
     return mock_client
 
 
-@pytest.fixture()
+@pytest.fixture
 def monkeypatch_systemd(
     mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> tuple[Path, Path]:
@@ -249,7 +249,7 @@ def monkeypatch_systemd(
     return (system_install_path, user_install_path)
 
 
-@pytest.fixture()
+@pytest.fixture
 def example_file(tmp_path: Path) -> Path:
     """Write the test configuration to a file in the temporary directory."""
     path = tmp_path / 'example.yaml'

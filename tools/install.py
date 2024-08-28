@@ -206,8 +206,8 @@ class _VirtualEnvironment:
 
     def pip(self, *args: str) -> subprocess.CompletedProcess[bytes]:
         """Run the 'pip' installation inside the virtual environment."""
-        return subprocess.run(
-            [str(self.python), '-m', 'pip', *args],  # noqa: S603  # is trusted
+        return subprocess.run(  # noqa: S603
+            [str(self.python), '-m', 'pip', *args],  # is trusted
             capture_output=True,
             check=True,
         )
