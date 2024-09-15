@@ -93,13 +93,7 @@ def test_respects_config_ninja_home(
     # Act
     _run_installer('--force')
     stdout = '\n'.join([args[0][0] for args in mock_stdout.write.call_args_list])
-    call_count = len(
-        [
-            args.args[0]
-            for args in mock_ensurepip_present.call_args_list
-            if args.args[0] == 'ensurepip'
-        ]
-    )
+    call_count = len([args.args[0] for args in mock_ensurepip_present.call_args_list if args.args[0] == 'ensurepip'])
 
     # Assert
     assert (
@@ -129,13 +123,7 @@ def test_respects_xdg_home(
     # Act
     _run_installer('--force')
     stdout = '\n'.join([call[0][0] for call in mock_stdout.write.call_args_list])
-    call_count = len(
-        [
-            call.args[0]
-            for call in mock_ensurepip_present.call_args_list
-            if call.args[0] == 'ensurepip'
-        ]
-    )
+    call_count = len([call.args[0] for call in mock_ensurepip_present.call_args_list if call.args[0] == 'ensurepip'])
 
     # Assert
     assert (

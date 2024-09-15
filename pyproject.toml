@@ -611,7 +611,7 @@ indent-after-paren = 4
 # tab).
 indent-string = "    "
 # Maximum number of characters on a single line.
-max-line-length = 100
+max-line-length = 120
 # Maximum number of lines in a module.
 max-module-lines = 1000
 
@@ -875,7 +875,7 @@ xfail_strict = true
 [tool.ruff]
 extend-include = ["*.ipynb"]
 fix = true
-line-length = 100
+line-length = 120
 output-format = "full"
 show-fixes = true
 src = ["src", "tests", "tools"]

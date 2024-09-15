@@ -84,9 +84,7 @@ app = typer.Typer(**app_kwargs)
 
 self_app = typer.Typer(**app_kwargs)
 
-app.add_typer(
-    self_app, name='self', help='Operate on this installation of [bold blue]config-ninja[/].'
-)
+app.add_typer(self_app, name='self', help='Operate on this installation of [bold blue]config-ninja[/].')
 
 ActionType = typing.Callable[[str], typing.Any]
 KeyAnnotation: TypeAlias = Annotated[
@@ -139,9 +137,7 @@ UserAnnotation: TypeAlias = Annotated[
 ]
 WorkdirAnnotation: TypeAlias = Annotated[
     typing.Optional[Path],
-    typer.Option(
-        '-w', '--workdir', help='Run the service from this directory.', show_default=False
-    ),
+    typer.Option('-w', '--workdir', help='Run the service from this directory.', show_default=False),
 ]
 
 
@@ -207,9 +203,7 @@ def parse_var(value: str) -> Variable:
     try:
         parsed = Variable(*value.split('='))
     except TypeError as exc:
-        print(
-            f'[red]ERROR[/]: Invalid argument (expected [yellow]VARIABLE=VALUE[/] pair): [purple]{value}[/]'
-        )
+        print(f'[red]ERROR[/]: Invalid argument (expected [yellow]VARIABLE=VALUE[/] pair): [purple]{value}[/]')
         raise typer.Exit(1) from exc
 
     return parsed
@@ -412,9 +406,7 @@ def get(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) ->
 
 
 @app.command()
-def apply(
-    ctx: typer.Context, key: OptionalKeyAnnotation = None, poll: PollAnnotation = False
-) -> None:
+def apply(ctx: typer.Context, key: OptionalKeyAnnotation = None, poll: PollAnnotation = False) -> None:
     """Apply the specified configuration to the system."""
     settings: pyspry.Settings = ctx.obj['settings']
     if poll and key is None:
@@ -490,9 +482,7 @@ def install(  # noqa: PLR0913
 
     kwargs = {
         # the command to use when invoking config-ninja from systemd
-        'config_ninja_cmd': sys.argv[0]
-        if sys.argv[0].endswith('config-ninja')
-        else f'{sys.executable} {sys.argv[0]}',
+        'config_ninja_cmd': sys.argv[0] if sys.argv[0].endswith('config-ninja') else f'{sys.executable} {sys.argv[0]}',
         # write these environment variables into the systemd service file
         'environ': environ,
         # run `config-ninja` from this directory (if specified)
@@ -552,9 +542,7 @@ def main(
     except FileNotFoundError as exc:
         message = "[yellow]WARNING[/]: Could not find [bold blue]config-ninja[/]'s settings file"
         if len(exc.args) > 1:
-            message += ' at any of the following locations:\n' + '\n'.join(
-                f'    {p}' for p in exc.args[1]
-            )
+            message += ' at any of the following locations:\n' + '\n'.join(f'    {p}' for p in exc.args[1])
         print(message)
         ctx.obj['settings'] = None
 

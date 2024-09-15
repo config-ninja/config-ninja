@@ -40,9 +40,7 @@ __all__ = ['AppConfigBackend']
 MINIMUM_POLL_INTERVAL_SECONDS = 60
 
 
-OperationName: TypeAlias = Literal[
-    'list_applications', 'list_configuration_profiles', 'list_environments'
-]
+OperationName: TypeAlias = Literal['list_applications', 'list_configuration_profiles', 'list_environments']
 
 logger = logging.getLogger(__name__)
 
@@ -102,9 +100,7 @@ class AppConfigBackend(Backend):
         )
 
     @staticmethod
-    def _get_id_from_name(
-        name: str, operation_name: OperationName, client: AppConfigClient, **kwargs: Any
-    ) -> str:
+    def _get_id_from_name(name: str, operation_name: OperationName, client: AppConfigClient, **kwargs: Any) -> str:
         page_iterator: PageIterator = client.get_paginator(operation_name).paginate(**kwargs)
         ids: list[str] = list(page_iterator.search(f'Items[?Name == `{name}`].Id'))
 
@@ -139,20 +135,14 @@ class AppConfigBackend(Backend):
         return cls._get_id_from_name(name, 'list_applications', client)
 
     @classmethod
-    def get_configuration_profile_id(
-        cls, name: str, client: AppConfigClient, application_id: str
-    ) -> str:
+    def get_configuration_profile_id(cls, name: str, client: AppConfigClient, application_id: str) -> str:
         """Retrieve the configuration profile ID for the given configuration profile name."""
-        return cls._get_id_from_name(
-            name, 'list_configuration_profiles', client, ApplicationId=application_id
-        )
+        return cls._get_id_from_name(name, 'list_configuration_profiles', client, ApplicationId=application_id)
 
     @classmethod
     def get_environment_id(cls, name: str, client: AppConfigClient, application_id: str) -> str:
         """Retrieve the environment ID for the given environment name & application ID."""
-        return cls._get_id_from_name(
-            name, 'list_environments', client, ApplicationId=application_id
-        )
+        return cls._get_id_from_name(name, 'list_environments', client, ApplicationId=application_id)
 
     @classmethod
     def new(  # pyright: ignore[reportIncompatibleMethodOverride]

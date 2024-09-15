@@ -90,10 +90,7 @@ def test_missing_settings(mocker: MockerFixture) -> None:
 
     # Assert
     assert result.exit_code == 0
-    assert all(
-        text in result.stdout
-        for text in ['WARNING', 'Could not find', 'config-ninja', 'settings file']
-    )
+    assert all(text in result.stdout for text in ['WARNING', 'Could not find', 'config-ninja', 'settings file'])
 
 
 @pytest.mark.usefixtures('mock_full_session')
@@ -128,9 +125,7 @@ def test_get_example_local_poll(mocker: MockerFixture, settings: dict[str, Any])
     assert result.exit_code == 0, result.exception
     assert mock_print.call_count == expected_call_count
     assert (
-        mock_print.call_args_list[0][0][0].strip()
-        == mock_print.call_args_list[1][0][0].strip()
-        == json.dumps(settings)
+        mock_print.call_args_list[0][0][0].strip() == mock_print.call_args_list[1][0][0].strip() == json.dumps(settings)
     )
 
 
@@ -146,11 +141,7 @@ def test_self_print() -> None:
 def test_apply_example_local(settings: dict[str, Any]) -> None:
     """Execute the `apply` command for a local file backend."""
     result = runner.invoke(app, ['apply', 'example-local'])
-    output = (
-        Path(settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path'])
-        .read_text(encoding='utf-8')
-        .strip()
-    )
+    output = Path(settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path']).read_text(encoding='utf-8').strip()
 
     assert result.exit_code == 0, result.exception
     assert output == json.dumps(settings)
@@ -225,9 +216,7 @@ def test_apply_all(settings: dict[str, Any]) -> None:
 
     # Act
     result = runner.invoke(app, ['--config', 'examples/local-backend.yaml', 'apply'])
-    paths = [
-        Path(local_settings.OBJECTS[obj]['dest']['path']) for obj in ('example-0', 'example-1')
-    ]
+    paths = [Path(local_settings.OBJECTS[obj]['dest']['path']) for obj in ('example-0', 'example-1')]
     outputs = [p.read_text().strip() for p in paths]
 
     # Assert
@@ -263,9 +252,7 @@ def test_monitor_local(settings: dict[str, Any]) -> None:
 
     # Act
     result = runner.invoke(app, ['--config', 'examples/local-backend.yaml', 'monitor'])
-    paths = [
-        Path(local_settings.OBJECTS[obj]['dest']['path']) for obj in ('example-0', 'example-1')
-    ]
+    paths = [Path(local_settings.OBJECTS[obj]['dest']['path']) for obj in ('example-0', 'example-1')]
     outputs = [p.read_text().strip() for p in paths]
 
     # Assert

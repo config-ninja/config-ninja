@@ -60,9 +60,7 @@ SERVICE_NAME = 'config-ninja.service'
 SYSTEM_INSTALL_PATH = Path('/etc/systemd/system')
 """The file path for system-wide installation."""
 
-USER_INSTALL_PATH = (
-    Path(os.getenv('XDG_CONFIG_HOME') or Path.home() / '.config') / 'systemd' / 'user'
-)
+USER_INSTALL_PATH = Path(os.getenv('XDG_CONFIG_HOME') or Path.home() / '.config') / 'systemd' / 'user'
 """The file path for user-local installation."""
 
 __all__ = ['SYSTEM_INSTALL_PATH', 'USER_INSTALL_PATH', 'Service', 'notify']

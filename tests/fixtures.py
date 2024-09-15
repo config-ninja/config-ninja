@@ -99,9 +99,7 @@ def mock_session(mocker: MockerFixture) -> Session:
 
 
 @pytest.fixture
-def mock_session_with_0_ids(
-    mock_appconfig_client: mock.MagicMock, mock_session: mock.MagicMock
-) -> AppConfigClient:
+def mock_session_with_0_ids(mock_appconfig_client: mock.MagicMock, mock_session: mock.MagicMock) -> AppConfigClient:
     """Mock the `boto3` client for the `AppConfig` service to return no IDs."""
     mock_page_iterator = mock.MagicMock(spec_set=PageIterator)
     mock_page_iterator.search.return_value = []
@@ -115,9 +113,7 @@ def mock_session_with_0_ids(
 
 
 @pytest.fixture
-def mock_session_with_1_id(
-    mock_appconfig_client: mock.MagicMock, mock_session: mock.MagicMock
-) -> AppConfigClient:
+def mock_session_with_1_id(mock_appconfig_client: mock.MagicMock, mock_session: mock.MagicMock) -> AppConfigClient:
     """Mock the `boto3` client for the `AppConfig` service to return a single ID."""
     mock_page_iterator = mock.MagicMock(name='mock_page_iterator', spec_set=PageIterator)
     mock_page_iterator.search.return_value = ['id-1']
@@ -132,9 +128,7 @@ def mock_session_with_1_id(
 
 
 @pytest.fixture
-def mock_session_with_2_ids(
-    mock_appconfig_client: mock.MagicMock, mock_session: mock.MagicMock
-) -> AppConfigClient:
+def mock_session_with_2_ids(mock_appconfig_client: mock.MagicMock, mock_session: mock.MagicMock) -> AppConfigClient:
     """Mock the `boto3` client for the `AppConfig` service to return two IDs."""
     mock_page_iterator = mock.MagicMock(spec_set=PageIterator)
     mock_page_iterator.search.return_value = ['id-1', 'id-2']
@@ -227,9 +221,7 @@ def mock_poll_too_early(
 
 
 @pytest.fixture
-def monkeypatch_systemd(
-    mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> tuple[Path, Path]:
+def monkeypatch_systemd(mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> tuple[Path, Path]:
     """Monkeypatch various utilities for interfacing with `systemd` and the shell.
 
     Returns:

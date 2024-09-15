@@ -260,9 +260,7 @@ class _Version:
             raise ValueError(f'Invalid version (does not match regex {self.REGEX}): {version}')
 
         groups = match.groups()
-        self.major, self.minor, self.patch = tuple(
-            None if ver is None else int(ver) for ver in groups[:3]
-        )
+        self.major, self.minor, self.patch = tuple(None if ver is None else int(ver) for ver in groups[:3])
         self.pre: str = groups[4]
 
     def __eq__(self, other: Any) -> bool:
@@ -379,8 +377,7 @@ class Installer:
                 return version
 
         raise ValueError(  # pragma: no cover
-            'Unable to find a valid release; try installing a pre-release '
-            "by passing the '--pre' argument"
+            'Unable to find a valid release; try installing a pre-release ' "by passing the '--pre' argument"
         )
 
     def _get_version(self) -> _Version:
@@ -574,12 +571,9 @@ def _maybe_create_symlink(installer: Installer, env: _VirtualEnvironment) -> Non
     except (FileNotFoundError, PermissionError):
         sys.stderr.write(f'{warning}: Failed to create symlink\n')
         shell = os.getenv('SHELL', '').split(os.sep)[-1]
-        your_dotfile = (
-            cyan(Path.home() / f'.{shell}rc') if shell else f"your shell's {cyan('~/.*rc')} file"
-        )
+        your_dotfile = cyan(Path.home() / f'.{shell}rc') if shell else f"your shell's {cyan('~/.*rc')} file"
         sys.stderr.write(
-            f'In order to run the {blue("config-ninja")} command, add the following '
-            + f'line to {your_dotfile}:\n'
+            f'In order to run the {blue("config-ninja")} command, add the following ' + f'line to {your_dotfile}:\n'
         )
         path = orange(f'"{env.bin}:$PATH"')
         sys.stderr.write(f'{blue("export")} PATH={path}')
@@ -597,8 +591,7 @@ def _do_install(installer: Installer) -> None:
     except FileExistsError as exc:
         sys.stderr.write(f'{failure}: {exc}\n')
         sys.stdout.write(
-            f"Pass the {blue('--force')} argument to clobber it or "
-            f"{blue('--uninstall')} to remove it.\n"
+            f"Pass the {blue('--force')} argument to clobber it or " f"{blue('--uninstall')} to remove it.\n"
         )
         sys.exit(RC_PATH_EXISTS)
 
@@ -624,13 +617,9 @@ def _do_uninstall(installer: Installer) -> None:
 
     sys.stdout.write('...\n')
     shutil.rmtree(installer.path)
-    sys.stdout.write(
-        f"{success}: Uninstalled {blue('config-ninja')} from path {cyan(installer.path)} ✅\n"
-    )
+    sys.stdout.write(f"{success}: Uninstalled {blue('config-ninja')} from path {cyan(installer.path)} ✅\n")
     if not WINDOWS or MINGW:  # pragma: no cover  # windows
-        installer.symlink(
-            installer.path / 'bin' / 'config-ninja', installer.path.parent, remove=True
-        )
+        installer.symlink(installer.path / 'bin' / 'config-ninja', installer.path.parent, remove=True)
 
 
 def main(*argv: str) -> None:
