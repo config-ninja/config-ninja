@@ -26,7 +26,11 @@ except ImportError:
 
 
 CONFIG_OBJECTS = ['example-local', 'example-local-template']
-GLOBAL_OPTION_ANNOTATIONS = {'verbose': cli.VerbosityAnnotation, 'version': cli.VersionAnnotation}
+GLOBAL_OPTION_ANNOTATIONS = {
+    'config': cli.SettingsAnnotation,
+    'verbose': cli.VerbosityAnnotation,
+    'version': cli.VersionAnnotation,
+}
 
 
 def _recurse_sub_apps(app: typer.Typer | None) -> list[typer.Typer]:

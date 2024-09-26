@@ -236,7 +236,7 @@ def configure_logging(ctx: typer.Context, verbose: typing.Optional[bool] = None)
     >>> caplog.messages
     ['logging verbosity set to [green]DEBUG[/green]']
     """
-    if ctx.resilient_parsing:
+    if ctx.resilient_parsing:  # pragma: no cover  # this is for tab completions
         return
 
     verbosity = logging.DEBUG if verbose else logging.INFO
@@ -257,6 +257,7 @@ VerbosityAnnotation = Annotated[
         '-v',
         '--verbose',
         callback=configure_logging,
+        rich_help_panel='Global',
         help='Log messages at the [black]DEBUG[/] level.',
         is_eager=True,
         show_default=False,
@@ -280,6 +281,7 @@ VersionAnnotation = Annotated[
         '-V',
         '--version',
         callback=version_callback,
+        rich_help_panel='Global',
         show_default=False,
         is_eager=True,
         help='Print the version and exit.',
