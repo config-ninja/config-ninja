@@ -611,7 +611,7 @@ def _do_uninstall(installer: Installer) -> None:
         else:  # pragma: no cover  # windows
             uninstall = input(prompt)
 
-        if not uninstall.lower().startswith('y'):
+        if not uninstall.lower().startswith('y'):  # pragma: no cover
             sys.stderr.write(f'{failure}: Aborted uninstallation ❌\n')
             sys.exit(RC_PATH_EXISTS)
 

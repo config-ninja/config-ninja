@@ -9,6 +9,7 @@ from typing import Any, Iterator, TypeVar
 from unittest import mock
 
 import pytest
+import pytest_mock
 from boto3 import Session
 from botocore.exceptions import ClientError
 from botocore.paginate import PageIterator, Paginator
@@ -164,10 +165,51 @@ def mock_latest_config() -> GetLatestConfigurationResponseTypeDef:
 
 
 @pytest.fixture
+def mock_latest_config_first_empty() -> GetLatestConfigurationResponseTypeDef:
+    """Mock the response from `get_latest_configuration`.
+
+    Return an empty `bytes` on the first iteration, and `MOCK_YAML_CONFIG` on the second. This supports testing
+        `config_ninja.contrib.appconfig.AppConfig`'s response to an empty return value.
+    """
+    was_called: list[bool] = []
+
+    def mock_read(*_: Any, **__: Any) -> bytes:
+        if was_called:
+            return MOCK_YAML_CONFIG
+        was_called.append(True)
+        return b''
+
+    mock_config_stream = mock.MagicMock(spec_set=StreamingBody)
+    mock_config_stream.read = mock_read
+    return {
+        'NextPollConfigurationToken': 'token',
+        'NextPollIntervalInSeconds': 0,
+        'ContentType': 'application/json',
+        'Configuration': mock_config_stream,
+        'VersionLabel': 'v1',
+        'ResponseMetadata': {
+            'RequestId': '',
+            'HostId': '',
+            'HTTPStatusCode': 200,
+            'HTTPHeaders': {},
+            'RetryAttempts': 3,
+        },
+    }
+
+
+@pytest.fixture
 def mock_appconfigdata_client(mock_latest_config: mock.MagicMock) -> AppConfigDataClient:
     """Mock the low-level `boto3` client for the `AppConfigData` service."""
     mock_client = mock.MagicMock(name='mock_appconfigdata_client', spec_set=AppConfigDataClient)
     mock_client.get_latest_configuration.return_value = mock_latest_config
+    return mock_client
+
+
+@pytest.fixture
+def mock_appconfigdata_client_first_empty(mock_latest_config_first_empty: mock.MagicMock) -> AppConfigDataClient:
+    """Mock the low-level `boto3` client for the `AppConfigData` service."""
+    mock_client = mock.MagicMock(name='mock_appconfigdata_client', spec_set=AppConfigDataClient)
+    mock_client.get_latest_configuration.return_value = mock_latest_config_first_empty
     return mock_client
 
 
@@ -255,3 +297,9 @@ example_file.__doc__ = f"""Write the test configuration to a file in the tempora
 {MOCK_YAML_CONFIG.decode('utf-8')}
 ```
 """
+
+
+@pytest.fixture(autouse=True)
+def mock_logging_basic_config(mocker: pytest_mock.MockerFixture) -> mock.MagicMock:
+    """Mock the `logging.basicConfig` function."""
+    return mocker.patch('logging.basicConfig')

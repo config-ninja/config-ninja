@@ -10,54 +10,34 @@
 
 import asyncio
 import contextlib
-import dataclasses
 import logging
 import os
 import sys
 import typing
 from pathlib import Path
 
-import jinja2
 import pyspry
+import rich
 import typer
 import yaml
-from rich import print  # pylint: disable=redefined-builtin
+from rich.logging import RichHandler
 from rich.markdown import Markdown
 
 import config_ninja
-from config_ninja import systemd
-from config_ninja.backend import DUMPERS, Backend, FormatT, dumps, loads
-from config_ninja.contrib import get_backend
+from config_ninja import controller, systemd
+from config_ninja.controller import SYSTEMD_AVAILABLE
 
 try:
-    from typing import (
-        Annotated,  # type: ignore[attr-defined,unused-ignore]
-        TypeAlias,
-    )
+    from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
 except ImportError:  # pragma: no cover
-    from typing_extensions import (  # type: ignore[assignment,unused-ignore]
-        Annotated,
-        TypeAlias,
-    )
+    from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment,attr-defined,unused-ignore]
 
-if typing.TYPE_CHECKING:  # pragma: no cover
-    import sh
 
-    SYSTEMD_AVAILABLE = True
-else:
-    try:
-        import sh
-    except ImportError:  # pragma: no cover
-        sh = None
-        SYSTEMD_AVAILABLE = False
-    else:
-        SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
-
+# ruff: noqa: PLR0913
+# pylint: disable=redefined-outer-name,unused-argument,too-many-arguments
 
 __all__ = [
     'app',
-    'DestSpec',
-    'BackendController',
     'get',
     'apply',
     'monitor',
@@ -67,6 +47,9 @@ __all__ = [
     'version',
     'main',
 ]
+
+LOG_MISSING_SETTINGS_MESSAGE = "Could not find [bold blue]config-ninja[/]'s settings file"
+LOG_VERBOSITY_MESSAGE = 'logging verbosity set to [green]%s[/green]'
 
 logger = logging.getLogger(__name__)
 
@@ -87,15 +70,42 @@ self_app = typer.Typer(**app_kwargs)
 app.add_typer(self_app, name='self', help='Operate on this installation of [bold blue]config-ninja[/].')
 
 ActionType = typing.Callable[[str], typing.Any]
+
+
+def help_callback(ctx: typer.Context, value: typing.Optional[bool] = None) -> None:
+    """Print the help message for the command."""
+    if ctx.resilient_parsing:  # pragma: no cover
+        return
+
+    if value:
+        rich.print(ctx.get_help())
+        raise typer.Exit()
+
+
+HelpAnnotation: TypeAlias = Annotated[
+    typing.Optional[bool],
+    typer.Option(
+        '-h',
+        '--help',
+        callback=help_callback,
+        rich_help_panel='Global',
+        show_default=False,
+        is_eager=True,
+        help='Show this message and exit.',
+    ),
+]
+
 KeyAnnotation: TypeAlias = Annotated[
     str,
     typer.Argument(help='The key of the configuration object to retrieve', show_default=False),
 ]
 OptionalKeyAnnotation: TypeAlias = Annotated[
-    typing.Optional[str],
+    typing.Optional[typing.List[str]],
     typer.Argument(
-        help='If specified, only apply the configuration object with this key.',
+        help='Apply the configuration object(s) with matching key(s)'
+        ' (multiple values may be provided). If unspecified, all objects will be applied',
         show_default=False,
+        metavar='[KEY...]',
     ),
 ]
 PollAnnotation: TypeAlias = Annotated[
@@ -116,12 +126,43 @@ PrintAnnotation: TypeAlias = Annotated[
         show_default=False,
     ),
 ]
-SettingsAnnotation: TypeAlias = Annotated[
+
+
+def load_config(ctx: typer.Context, value: typing.Optional[Path]) -> None:
+    """Load the settings file from the given path."""
+    if ctx.resilient_parsing:  # pragma: no cover
+        return
+
+    ctx.ensure_object(dict)
+    if not value and 'settings' in ctx.obj:
+        logger.debug('already loaded settings')
+        return
+
+    try:
+        settings_file = value or config_ninja.resolve_settings_path()
+    except FileNotFoundError as exc:
+        logger.warning(
+            '%s%s',
+            LOG_MISSING_SETTINGS_MESSAGE,
+            (' at any of the following locations:\n  - ' + '\n  - '.join(f'{p}' for p in exc.args[1]))
+            if len(exc.args) > 1
+            else '',
+            extra={'markup': True},
+        )
+        ctx.obj['settings'] = None
+
+    else:
+        ctx.obj['settings'] = config_ninja.load_settings(settings_file)
+
+
+ConfigAnnotation: TypeAlias = Annotated[
     typing.Optional[Path],
     typer.Option(
         '-c',
         '--config',
+        callback=load_config,
         help="Path to [bold blue]config-ninja[/]'s own configuration file.",
+        rich_help_panel='Global',
         show_default=False,
     ),
 ]
@@ -203,7 +244,7 @@ def parse_var(value: str) -> Variable:
     try:
         parsed = Variable(*value.split('='))
     except TypeError as exc:
-        print(f'[red]ERROR[/]: Invalid argument (expected [yellow]VARIABLE=VALUE[/] pair): [purple]{value}[/]')
+        rich.print(f'[red]ERROR[/]: Invalid argument (expected [yellow]VARIABLE=VALUE[/] pair): [purple]{value}[/]')
         raise typer.Exit(1) from exc
 
     return parsed
@@ -221,22 +262,71 @@ VariableAnnotation: TypeAlias = Annotated[
 ]
 
 
+def configure_logging(ctx: typer.Context, verbose: typing.Optional[bool] = None) -> None:
+    """Callback for the `--verbose` option to configure logging verbosity.
+
+    By default, log messages at the `logging.INFO` level:
+
+    >>> configure_logging(ctx)
+    >>> caplog.messages
+    ['logging verbosity set to [green]INFO[/green]']
+
+    <!-- Clear the `caplog` fixture for the `doctest`, but exclude this from the docs
+    >>> caplog.clear()
+
+    -->
+    When `verbose` is `True`, log messages at the `logging.DEBUG` level:
+
+    >>> configure_logging(ctx, True)
+    >>> caplog.messages
+    ['logging verbosity set to [green]DEBUG[/green]']
+    """
+    if ctx.resilient_parsing:  # pragma: no cover  # this is for tab completions
+        return
+
+    verbosity = logging.DEBUG if verbose else logging.INFO
+
+    logging.basicConfig(
+        level=verbosity,
+        format='%(message)s',
+        force=True,
+        datefmt='[%X]',
+        handlers=[RichHandler(rich_tracebacks=True)],
+    )
+    logger.debug(LOG_VERBOSITY_MESSAGE, logging.getLevelName(verbosity), extra={'markup': True})
+
+
+VerbosityAnnotation = Annotated[
+    typing.Optional[bool],
+    typer.Option(
+        '-v',
+        '--verbose',
+        callback=configure_logging,
+        rich_help_panel='Global',
+        help='Log messages at the [black]DEBUG[/] level.',
+        is_eager=True,
+        show_default=False,
+    ),
+]
+
+
 def version_callback(ctx: typer.Context, value: typing.Optional[bool] = None) -> None:
     """Print the version of the package."""
     if ctx.resilient_parsing:  # pragma: no cover  # this is for tab completions
         return
 
     if value:
-        print(config_ninja.__version__)
+        rich.print(config_ninja.__version__)
         raise typer.Exit()
 
 
 VersionAnnotation = Annotated[
     typing.Optional[bool],
     typer.Option(
-        '-v',
+        '-V',
         '--version',
         callback=version_callback,
+        rich_help_panel='Global',
         show_default=False,
         is_eager=True,
         help='Print the version and exit.',
@@ -250,223 +340,131 @@ def handle_key_errors(objects: typing.Dict[str, typing.Any]) -> typing.Iterator[
     try:
         yield
     except KeyError as exc:  # pragma: no cover
-        print(f'[red]ERROR[/]: Missing key: [green]{exc.args[0]}[/]\n')
-        print(yaml.dump(objects))
+        rich.print(f'[red]ERROR[/]: Missing key: [green]{exc.args[0]}[/]\n')
+        rich.print(yaml.dump(objects))
         raise typer.Exit(1) from exc
 
 
-@dataclasses.dataclass
-class DestSpec:
-    """Container for the destination spec parsed from `config-ninja`_'s own configuration file.
-
-    .. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
-    """
-
-    path: Path
-    """Write the configuration file to this path."""
-
-    format: typing.Union[FormatT, jinja2.Template]
-    """Specify the format of the configuration file to write.
-
-    This property is either a `config_ninja.backend.FormatT` or a `jinja2.environment.Template`:
-    - if `config_ninja.backend.FormatT`, the identified `config_ninja.backend.DUMPERS` will be used
-        to serialize the configuration object
-    - if `jinja2.environment.Template`, this template will be used to render the configuration file
-    """
-
-    @property
-    def is_template(self) -> bool:
-        """Whether the destination uses a Jinja2 template."""
-        return isinstance(self.format, jinja2.Template)
-
-
-class BackendController:
-    """Define logic for initializing a backend from settings and interacting with it."""
-
-    backend: Backend
-    """The backend instance to use for retrieving configuration data."""
-
-    dest: DestSpec
-    """Parameters for writing the configuration file."""
-
-    key: str
-    """The key of the backend in the settings file"""
-
-    settings: pyspry.Settings
-    """`config-ninja`_'s own configuration settings
-
-    .. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
-    """
-
-    src_format: FormatT
-    """The format of the configuration object in the backend.
-
-    The named `config_ninja.backend.LOADERS` function will be used to deserialize the configuration
-    object from the backend.
-    """
-
-    def __init__(self, settings: typing.Optional[pyspry.Settings], key: str) -> None:
-        """Parse the settings to initialize the backend.
-
-        .. note::
-            The `settings` parameter is required and cannot be `None` (`typer.Exit(1)` is raised if
-            it is). This odd handling is due to the statement in `config_ninja.cli.main` that sets
-            `ctx.obj['settings'] = None`, which is needed to allow the `self` commands to function
-                without a settings file.
-        """
-        if not settings:  # pragma: no cover
-            print('[red]ERROR[/]: Could not load settings.')
-            raise typer.Exit(1)
-
-        assert settings is not None  # noqa: S101  # 👈 for static analysis
-
-        self.settings, self.key = settings, key
-
-        self.src_format, self.backend = self._init_backend()
-        self.dest = self._get_dest()
-
-    def _get_dest(self) -> DestSpec:
-        """Read the destination spec from the settings file."""
-        objects = self.settings.OBJECTS
-        with handle_key_errors(objects):
-            dest = objects[self.key]['dest']
-            path = Path(dest['path'])
-            if dest['format'] in DUMPERS:
-                fmt: FormatT = dest['format']  # type: ignore[assignment,unused-ignore]
-                return DestSpec(format=fmt, path=path)
-
-            template_path = Path(dest['format'])
-
-        loader = jinja2.FileSystemLoader(template_path.parent)
-        env = jinja2.Environment(autoescape=jinja2.select_autoescape(default=True), loader=loader)
-
-        return DestSpec(path=path, format=env.get_template(template_path.name))
-
-    def _init_backend(self) -> typing.Tuple[FormatT, Backend]:
-        """Get the backend for the specified configuration object."""
-        objects = self.settings.OBJECTS
-
-        with handle_key_errors(objects):
-            source = objects[self.key]['source']
-            backend_class: typing.Type[Backend] = get_backend(source['backend'])
-            fmt = source.get('format', 'raw')
-            if source.get('new'):
-                backend = backend_class.new(**source['new']['kwargs'])
-            else:
-                backend = backend_class(**source['init']['kwargs'])
-
-        return fmt, backend
-
-    def _do(self, action: ActionType, data: typing.Dict[str, typing.Any]) -> None:
-        if self.dest.is_template:
-            assert isinstance(self.dest.format, jinja2.Template)  # noqa: S101  # 👈 for static analysis
-            action(self.dest.format.render(data))
-        else:
-            fmt: FormatT = self.dest.format  # type: ignore[assignment]
-            action(dumps(fmt, data))
-
-    def get(self) -> None:
-        """Retrieve and print the value of the configuration object."""
-        data = loads(self.src_format, self.backend.get())
-        self._do(print, data)
-
-    async def aget(self) -> None:
-        """Poll to retrieve the latest configuration object, and print on each update."""
-        if SYSTEMD_AVAILABLE:  # pragma: no cover
-            systemd.notify()
-
-        async for content in self.backend.poll():
-            data = loads(self.src_format, content)
-            self._do(print, data)
-
-    def write(self) -> None:
-        """Retrieve the latest value of the configuration object, and write to file."""
-        data = loads(self.src_format, self.backend.get())
-        self._do(self.dest.path.write_text, data)
-
-    async def awrite(self) -> None:
-        """Poll to retrieve the latest configuration object, and write to file on each update."""
-        if SYSTEMD_AVAILABLE:  # pragma: no cover
-            systemd.notify()
-
-        async for content in self.backend.poll():
-            data = loads(self.src_format, content)
-            self._do(self.dest.path.write_text, data)
-
-
-@app.command()
-def get(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) -> None:
-    """Print the value of the specified configuration object."""
-    ctrl = BackendController(ctx.obj['settings'], key)
-
-    if poll:
-        asyncio.run(ctrl.aget())
-    else:
-        ctrl.get()
-
-
-@app.command()
-def apply(ctx: typer.Context, key: OptionalKeyAnnotation = None, poll: PollAnnotation = False) -> None:
-    """Apply the specified configuration to the system."""
-    settings: pyspry.Settings = ctx.obj['settings']
-    if poll and key is None:
-        print(ctx.get_help())
-        print('[red]ERROR[/]: Can only use the [cyan][bold]--poll[/][/] when a key is specified')
-        raise typer.Exit(1)
-
-    if key is None:
-        controllers = [BackendController(settings, key) for key in settings.OBJECTS]
-    else:
-        controllers = [BackendController(settings, key)]
-
-    for ctrl in controllers:
-        ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
-        if poll:
-            # must have specified a key to get here
-            asyncio.run(ctrl.awrite())
-        else:
-            ctrl.write()
-
-
-@app.command()
-def monitor(ctx: typer.Context) -> None:
-    """Apply all configuration objects to the filesystem, and poll for changes."""
-    settings: pyspry.Settings = ctx.obj['settings']
-    controllers = [BackendController(settings, key) for key in settings.OBJECTS]
-    for ctrl in controllers:
-        ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
-
-    async def poll_all() -> None:
-        await asyncio.gather(*[ctrl.awrite() for ctrl in controllers])
-
-    print(f'Begin monitoring: {list(settings.OBJECTS.keys())}')
-    asyncio.run(poll_all())
-
-
-@self_app.command(name='print')
-def self_print(ctx: typer.Context) -> None:
-    """Print [bold blue]config-ninja[/]'s settings."""
-    if settings := ctx.obj['settings']:
-        print(yaml.dump(settings.OBJECTS))
-    else:
-        print('[yellow]WARNING[/]: No settings file found.')
+async def poll_all(
+    controllers: typing.List[controller.BackendController], get_or_write: typing.Literal['get', 'write']
+) -> None:
+    """Run the given controllers within an `asyncio` event loop to monitor and apply changes."""
+    await asyncio.gather(*[ctrl.aget(rich.print) if get_or_write == 'get' else ctrl.awrite() for ctrl in controllers])
 
 
 def _check_systemd() -> None:
     if not SYSTEMD_AVAILABLE:
-        print('[red]ERROR[/]: Missing [bold gray93]systemd[/]!')
-        print('Currently, this command only works on linux.')
+        rich.print('[red]ERROR[/]: Missing [bold gray93]systemd[/]!')
+        rich.print('Currently, this command only works on linux.')
         raise typer.Exit(1)
 
 
+def _new_controller(settings: pyspry.Settings, key: str) -> controller.BackendController:
+    ctrl = controller.BackendController(settings, key, handle_key_errors)
+    ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
+    return ctrl
+
+
+# ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+#                                             command definitions
+
+
+@app.command()
+def get(
+    ctx: typer.Context,
+    keys: OptionalKeyAnnotation = None,
+    poll: PollAnnotation = False,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
+    """Print the value of the specified configuration object."""
+    settings: pyspry.Settings = ctx.obj['settings']
+
+    controllers = [_new_controller(settings, key) for key in keys or settings.OBJECTS]
+
+    if poll:
+        logger.debug(
+            'Begin monitoring (read-only): %s',
+            ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers),
+            extra={'markup': True},
+        )
+        asyncio.run(poll_all(controllers, 'get'))
+        return
+
+    for ctrl in controllers:
+        logger.debug('Get [yellow]%s[/yellow]: %s', ctrl.key, ctrl, extra={'markup': True})
+        ctrl.get(rich.print)
+
+
+@app.command()
+def apply(
+    ctx: typer.Context,
+    keys: OptionalKeyAnnotation = None,
+    poll: PollAnnotation = False,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
+    """Apply the specified configuration to the system."""
+    settings: pyspry.Settings = ctx.obj['settings']
+
+    controllers = [_new_controller(settings, key) for key in keys or settings.OBJECTS]
+
+    if poll:
+        rich.print('Begin monitoring: ' + ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers))
+        asyncio.run(poll_all(controllers, 'write'))
+        return
+
+    for ctrl in controllers:
+        rich.print(f'Apply [yellow]{ctrl.key}[/yellow]: {ctrl}')
+        ctrl.write()
+
+
+@app.command(
+    deprecated=True,
+    short_help='[dim]Apply all configuration objects to the filesystem, and poll for changes.[/] [red](deprecated)[/]',
+    help='Use [bold blue]config-ninja apply --poll[/] instead.',
+)
+def monitor(ctx: typer.Context) -> None:
+    """Apply all configuration objects to the filesystem, and poll for changes."""
+    settings: pyspry.Settings = ctx.obj['settings']
+    controllers = [controller.BackendController(settings, key, handle_key_errors) for key in settings.OBJECTS]
+    for ctrl in controllers:
+        ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
+
+    rich.print('Begin monitoring: ' + ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers))
+    asyncio.run(poll_all(controllers, 'write'))
+
+
+@self_app.command(name='print')
+def self_print(
+    ctx: typer.Context,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
+    """Print [bold blue]config-ninja[/]'s settings."""
+    if not (settings := ctx.obj.get('settings')):
+        raise typer.Exit(1)
+    rich.print(yaml.dump(settings.OBJECTS))
+
+
 @self_app.command()
-def install(  # noqa: PLR0913
+def install(
     env_names: EnvNamesAnnotation = None,
     print_only: PrintAnnotation = None,
     run_as: RunAsAnnotation = None,
     user_mode: UserAnnotation = False,
     variables: VariableAnnotation = None,
     workdir: WorkdirAnnotation = None,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
 ) -> None:
     """Install [bold blue]config-ninja[/] as a [bold gray93]systemd[/] service.
 
@@ -496,34 +494,63 @@ def install(  # noqa: PLR0913
     svc = systemd.Service('config_ninja', 'systemd.service.j2', user_mode)
     if print_only:
         rendered = svc.render(**kwargs)
-        print(Markdown(f'# {svc.path}\n```systemd\n{rendered}\n```'))
+        rich.print(Markdown(f'# {svc.path}\n```systemd\n{rendered}\n```'))
         raise typer.Exit(0)
 
     _check_systemd()
 
-    print(f'Installing {svc.path}')
-    print(svc.install(**kwargs))
+    rich.print(f'Installing {svc.path}')
+    rich.print(svc.install(**kwargs))
 
-    print('[green]SUCCESS[/] :white_check_mark:')
+    rich.print('[green]SUCCESS[/] :white_check_mark:')
 
 
 @self_app.command()
-def uninstall(print_only: PrintAnnotation = None, user: UserAnnotation = False) -> None:
+def uninstall(
+    print_only: PrintAnnotation = None,
+    user: UserAnnotation = False,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
     """Uninstall the [bold blue]config-ninja[/] [bold gray93]systemd[/] service."""
     svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False)
     if print_only:
-        print(Markdown(f'# {svc.path}\n```systemd\n{svc.read()}\n```'))
+        rich.print(Markdown(f'# {svc.path}\n```systemd\n{svc.read()}\n```'))
         raise typer.Exit(0)
 
     _check_systemd()
 
-    print(f'Uninstalling {svc.path}')
+    rich.print(f'Uninstalling {svc.path}')
     svc.uninstall()
-    print('[green]SUCCESS[/] :white_check_mark:')
+    rich.print('[green]SUCCESS[/] :white_check_mark:')
+
+
+@self_app.callback(
+    invoke_without_command=True,
+    name='self',
+)
+def self_main(
+    ctx: typer.Context,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
+    """Print the help message for the `self` command."""
+    if not ctx.invoked_subcommand:
+        rich.print(ctx.get_help())
 
 
 @app.command()
-def version(ctx: typer.Context) -> None:
+def version(
+    ctx: typer.Context,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
     """Print the version and exit."""
     version_callback(ctx, True)
 
@@ -531,26 +558,16 @@ def version(ctx: typer.Context) -> None:
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,
-    settings_file: SettingsAnnotation = None,
-    version: VersionAnnotation = None,  # type: ignore[valid-type,unused-ignore]  # pylint: disable=unused-argument,redefined-outer-name
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
 ) -> None:
     """Manage operating system configuration files based on data in the cloud."""
     ctx.ensure_object(dict)
 
-    try:
-        settings_file = settings_file or config_ninja.resolve_settings_path()
-    except FileNotFoundError as exc:
-        message = "[yellow]WARNING[/]: Could not find [bold blue]config-ninja[/]'s settings file"
-        if len(exc.args) > 1:
-            message += ' at any of the following locations:\n' + '\n'.join(f'    {p}' for p in exc.args[1])
-        print(message)
-        ctx.obj['settings'] = None
-
-    else:
-        ctx.obj['settings'] = config_ninja.load_settings(settings_file)
-
     if not ctx.invoked_subcommand:  # pragma: no cover
-        print(ctx.get_help())
+        rich.print(ctx.get_help())
 
 
 logger.debug('successfully imported %s', __name__)

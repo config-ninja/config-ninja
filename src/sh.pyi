@@ -73,6 +73,9 @@ class SystemCtl:
 contrib = Contrib()
 systemctl = SystemCtl()
 
+def config_ninja(*args: str, _tty_size: tuple[int, int] = ...) -> str:
+    """Run the `config-ninja` command."""
+
 def mkdir(*args: str) -> str:
     """Make directories."""
 

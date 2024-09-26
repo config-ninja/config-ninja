@@ -26,6 +26,9 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
+    - run: poetry env use ${{ inputs.python-version }}
+      shell: sh
+
     - id: poetry
       run: tr -d '\n' <<<"${{ inputs.poetry-groups }}" |
         tr -c '[:alnum:]' '-' |
