@@ -67,13 +67,13 @@ def config_ninja(*args: str) -> click.testing.Result:
 @pytest.fixture
 def settings() -> pyspry.Settings:
     """Return a dictionary with settings for the test."""
-    return cn.load_settings(Path('config-ninja-settings.yaml'))  # type: ignore[no-any-return,unused-ignore]
+    return cn.load_settings(Path('config-ninja-settings.yaml'))
 
 
 @pytest.fixture
 def mock_rich_print(mocker: pytest_mock.MockFixture) -> MagicMock:
     """Patch the `rich.print` function."""
-    return mocker.patch('rich.print')  # type: ignore[no-any-return]
+    return mocker.patch('rich.print')
 
 
 @pytest.mark.parametrize(('config_key', 'command'), tuple(itertools.product(CONFIG_OBJECTS, ['get', 'apply'])))

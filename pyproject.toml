@@ -365,6 +365,8 @@ cmd = """
     --cov-report=html:./docs/reports/pytest-html
     --cov-report=xml:./docs/reports/coverage.xml
     --doctest-glob=README.md
+    --durations=10
+    --ignore=docs
     --junitxml=docs/reports/pytest.xml
     .
 """

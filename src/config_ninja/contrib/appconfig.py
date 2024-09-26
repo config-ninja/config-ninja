@@ -166,7 +166,10 @@ class AppConfigBackend(Backend):
 
         ## Usage: `AppConfigBackend.new()`
 
-        >>> session = getfixture('mock_session_with_1_id')  # fixture for doctest
+        <!-- fixture is used for doctest but excluded from documentation
+        >>> session = getfixture('mock_session_with_1_id')
+
+        -->
 
         Use `boto3` to fetch IDs for based on name:
 
@@ -255,7 +258,7 @@ class AppConfigBackend(Backend):
             try:
                 resp = self.client.get_latest_configuration(ConfigurationToken=token)
             except self.client.exceptions.BadRequestException as exc:
-                if exc.response['Error']['Message'] != 'Request too early':
+                if exc.response['Error']['Message'] != 'Request too early':  # pragma: no cover
                     raise
                 logger.debug('Request too early; retrying in %d seconds', interval / 2)
                 await asyncio.sleep(interval / 2)
@@ -272,8 +275,9 @@ class AppConfigBackend(Backend):
     def _async_doctests(self) -> None:
         """Define `async` `doctest` tests in this method to improve documentation.
 
-        >>> backend = AppConfigBackend(appconfigdata_client, 'app-id', 'conf-id', 'env-id')
-        >>> content = asyncio.run(anext(backend.poll()))
+        Verify that an empty response to the `boto3` client is handled and the polling continues:
+        >>> backend = AppConfigBackend(appconfigdata_client_first_empty, 'app-id', 'conf-id', 'env-id')
+        >>> content = asyncio.run(anext(backend.poll(interval=0.01)))
         >>> print(content)
         key_0: value_0
         key_1: 1

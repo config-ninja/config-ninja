@@ -73,6 +73,8 @@ repos:
           - boto3-stubs[appconfig,appconfigdata]
           - jinja2
           - pyspry
+          - pytest
+          - pytest-mock
           - pyyaml
           - sdnotify
           - sh

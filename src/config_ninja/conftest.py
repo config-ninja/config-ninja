@@ -77,6 +77,7 @@ def mock_context(mocker: pytest_mock.MockerFixture) -> MagicMock:
 def src_doctest_namespace(  # noqa: PLR0913
     doctest_namespace: dict[str, Any],
     mock_appconfigdata_client: AppConfigDataClient,
+    mock_appconfigdata_client_first_empty: AppConfigDataClient,
     example_file: Path,
     monkeypatch_systemd: tuple[Path, Path],
     mock_context: MagicMock,
@@ -96,6 +97,7 @@ def src_doctest_namespace(  # noqa: PLR0913
     doctest_namespace['example_file'] = example_file
     doctest_namespace['pytest'] = pytest
     doctest_namespace['appconfigdata_client'] = mock_appconfigdata_client
+    doctest_namespace['appconfigdata_client_first_empty'] = mock_appconfigdata_client_first_empty
     doctest_namespace['ExampleBackend'] = ExampleBackend
     doctest_namespace['ctx'] = mock_context
     doctest_namespace['caplog'] = caplog
