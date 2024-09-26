@@ -45,6 +45,7 @@ else:
         SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
 
 
+# ruff: noqa: PLR0913
 # pylint: disable=redefined-outer-name,unused-argument,too-many-arguments
 
 __all__ = [
@@ -81,6 +82,31 @@ self_app = typer.Typer(**app_kwargs)
 app.add_typer(self_app, name='self', help='Operate on this installation of [bold blue]config-ninja[/].')
 
 ActionType = typing.Callable[[str], typing.Any]
+
+
+def help_callback(ctx: typer.Context, value: typing.Optional[bool] = None) -> None:
+    """Print the help message for the command."""
+    if ctx.resilient_parsing:  # pragma: no cover
+        return
+
+    if value:
+        rich.print(ctx.get_help())
+        raise typer.Exit()
+
+
+HelpAnnotation: TypeAlias = Annotated[
+    typing.Optional[bool],
+    typer.Option(
+        '-h',
+        '--help',
+        callback=help_callback,
+        rich_help_panel='Global',
+        show_default=False,
+        is_eager=True,
+        help='Show this message and exit.',
+    ),
+]
+
 KeyAnnotation: TypeAlias = Annotated[
     str,
     typer.Argument(help='The key of the configuration object to retrieve', show_default=False),
@@ -112,12 +138,43 @@ PrintAnnotation: TypeAlias = Annotated[
         show_default=False,
     ),
 ]
-SettingsAnnotation: TypeAlias = Annotated[
+
+
+def load_config(ctx: typer.Context, value: typing.Optional[Path]) -> None:
+    """Load the settings file from the given path."""
+    if ctx.resilient_parsing:  # pragma: no cover
+        return
+
+    ctx.ensure_object(dict)
+    if not value and 'settings' in ctx.obj:
+        logger.debug('already loaded settings')
+        return
+
+    try:
+        settings_file = value or config_ninja.resolve_settings_path()
+    except FileNotFoundError as exc:
+        logger.warning(
+            '%s%s',
+            LOG_MISSING_SETTINGS_MESSAGE,
+            (' at any of the following locations:\n  - ' + '\n  - '.join(f'{p}' for p in exc.args[1]))
+            if len(exc.args) > 1
+            else '',
+            extra={'markup': True},
+        )
+        ctx.obj['settings'] = None
+
+    else:
+        ctx.obj['settings'] = config_ninja.load_settings(settings_file)
+
+
+ConfigAnnotation: TypeAlias = Annotated[
     typing.Optional[Path],
     typer.Option(
         '-c',
         '--config',
+        callback=load_config,
         help="Path to [bold blue]config-ninja[/]'s own configuration file.",
+        rich_help_panel='Global',
         show_default=False,
     ),
 ]
@@ -327,6 +384,8 @@ def get(
     ctx: typer.Context,
     key: KeyAnnotation,
     poll: PollAnnotation = False,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
     verbose: VerbosityAnnotation = None,
     version: VersionAnnotation = None,
 ) -> None:
@@ -344,6 +403,8 @@ def apply(
     ctx: typer.Context,
     keys: OptionalKeyAnnotation = None,
     poll: PollAnnotation = False,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
     verbose: VerbosityAnnotation = None,
     version: VersionAnnotation = None,
 ) -> None:
@@ -381,23 +442,27 @@ def monitor(ctx: typer.Context) -> None:
 @self_app.command(name='print')
 def self_print(
     ctx: typer.Context,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
     verbose: VerbosityAnnotation = None,
     version: VersionAnnotation = None,
 ) -> None:
     """Print [bold blue]config-ninja[/]'s settings."""
-    if not (settings := ctx.obj['settings']):
+    if not (settings := ctx.obj.get('settings')):
         raise typer.Exit(1)
     rich.print(yaml.dump(settings.OBJECTS))
 
 
 @self_app.command()
-def install(  # noqa: PLR0913
+def install(
     env_names: EnvNamesAnnotation = None,
     print_only: PrintAnnotation = None,
     run_as: RunAsAnnotation = None,
     user_mode: UserAnnotation = False,
     variables: VariableAnnotation = None,
     workdir: WorkdirAnnotation = None,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
     verbose: VerbosityAnnotation = None,
     version: VersionAnnotation = None,
 ) -> None:
@@ -444,6 +509,8 @@ def install(  # noqa: PLR0913
 def uninstall(
     print_only: PrintAnnotation = None,
     user: UserAnnotation = False,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
     verbose: VerbosityAnnotation = None,
     version: VersionAnnotation = None,
 ) -> None:
@@ -464,14 +531,26 @@ def uninstall(
     invoke_without_command=True,
     name='self',
 )
-def self_main(ctx: typer.Context, verbose: VerbosityAnnotation = None, version: VersionAnnotation = None) -> None:
+def self_main(
+    ctx: typer.Context,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
     """Print the help message for the `self` command."""
     if not ctx.invoked_subcommand:
         rich.print(ctx.get_help())
 
 
 @app.command()
-def version(ctx: typer.Context, verbose: VerbosityAnnotation = None, version: VersionAnnotation = None) -> None:
+def version(
+    ctx: typer.Context,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
     """Print the version and exit."""
     version_callback(ctx, True)
 
@@ -479,24 +558,13 @@ def version(ctx: typer.Context, verbose: VerbosityAnnotation = None, version: Ve
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,
-    settings_file: SettingsAnnotation = None,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
     verbose: VerbosityAnnotation = None,
     version: VersionAnnotation = None,
 ) -> None:
     """Manage operating system configuration files based on data in the cloud."""
     ctx.ensure_object(dict)
-
-    try:
-        settings_file = settings_file or config_ninja.resolve_settings_path()
-    except FileNotFoundError as exc:
-        message = LOG_MISSING_SETTINGS_MESSAGE
-        if len(exc.args) > 1:
-            message += ' at any of the following locations:\n - ' + '\n - '.join(f'{p}' for p in exc.args[1])
-        logger.warning(message, extra={'markup': True})
-        ctx.obj['settings'] = None
-
-    else:
-        ctx.obj['settings'] = config_ninja.load_settings(settings_file)
 
     if not ctx.invoked_subcommand:  # pragma: no cover
         rich.print(ctx.get_help())

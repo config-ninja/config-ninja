@@ -27,7 +27,8 @@ except ImportError:
 
 CONFIG_OBJECTS = ['example-local', 'example-local-template']
 GLOBAL_OPTION_ANNOTATIONS = {
-    'config': cli.SettingsAnnotation,
+    'config': cli.ConfigAnnotation,
+    'get_help': cli.HelpAnnotation,
     'verbose': cli.VerbosityAnnotation,
     'version': cli.VersionAnnotation,
 }
