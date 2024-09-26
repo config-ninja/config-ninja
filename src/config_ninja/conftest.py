@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import builtins
 from pathlib import Path
-from typing import Any, AsyncIterator, Iterator
+from typing import Any, Iterator
 
 import pytest
 from mypy_boto3_appconfigdata import AppConfigDataClient
@@ -50,26 +50,16 @@ def py_anext(iterator: Iterator[Any], default: Any = _no_default) -> Any:  # pra
     return anext_impl()
 
 
-class ExampleBackend(Backend):
+class ExampleBackend:
     """A sample backend class used in `doctest` tests."""
 
     source: str
 
+    __repr__ = Backend.__repr__
+
     def __init__(self, source: str) -> None:
         """Initialize the backend with the given `source`."""
         self.source = source
-
-    def __str__(self) -> str:
-        """Format a mock source identifier to satisfy `abc.abstractmethod()`."""
-        return f'sid: {self.source}'
-
-    def get(self) -> str:
-        """Dummy method to retrieve an example configuration."""
-        return 'example configuration'
-
-    async def poll(self, interval: int = 0) -> AsyncIterator[str]:
-        """Dummy method to poll the configuration."""
-        yield 'example configuration'
 
 
 @pytest.fixture(autouse=True)
