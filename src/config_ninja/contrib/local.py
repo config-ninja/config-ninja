@@ -48,7 +48,7 @@ class LocalBackend(Backend):
     path: Path
     """Read the configuration from this file"""
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str | Path) -> None:
         """Set attributes to initialize the backend.
 
         If the given `path` doesn't exist, emit a warning and continue.
@@ -56,6 +56,7 @@ class LocalBackend(Backend):
         >>> with pytest.warns(RuntimeWarning):
         ...     backend = LocalBackend('does_not_exist')
         """
+        logger.debug("Initialize: %s('%s')", self.__class__.__name__, path)
         self.path = Path(path)
         if not self.path.is_file():
             warnings.warn(f'could not read file: {path}', category=RuntimeWarning, stacklevel=2)
@@ -66,6 +67,7 @@ class LocalBackend(Backend):
 
     def get(self) -> str:
         """Read the contents of the configuration file as a string."""
+        logger.debug("Read file: '%s'", self.path)
         return self.path.read_text(encoding='utf-8')
 
     async def poll(self, interval: int = 0) -> AsyncIterator[str]:
@@ -76,7 +78,7 @@ class LocalBackend(Backend):
         """
         yield self.get()
         async for _ in awatch(self.path):
-            logger.info("detected change to '%s'", self.path)
+            logger.info("Detected change to '%s'", self.path)
             yield self.get()
 
 

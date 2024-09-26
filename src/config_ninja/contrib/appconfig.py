@@ -81,6 +81,14 @@ class AppConfigBackend(Backend):
         env_id: str,
     ) -> None:
         """Initialize the backend."""
+        logger.debug(
+            "Initialize: %s(client=%s, app_id='%s', conf_id='%s', env_id='%s')",
+            self.__class__.__name__,
+            client,
+            app_id,
+            config_profile_id,
+            env_id,
+        )
         self.client = client
 
         self.application_id = app_id
@@ -120,6 +128,7 @@ class AppConfigBackend(Backend):
 
     def get(self) -> str:
         """Retrieve the latest configuration deployment as a string."""
+        logger.debug('Retrieve latest configuration (%s)', self)
         token = self.client.start_configuration_session(
             ApplicationIdentifier=self.application_id,
             EnvironmentIdentifier=self.environment_id,
@@ -186,7 +195,7 @@ class AppConfigBackend(Backend):
         ...     backend = AppConfigBackend.new('app-name', 'conf-name', 'env-name', session)
         """
         logger.info(
-            'creating new instance: %s(app="%s", conf="%s", env="%s")',
+            'Create new instance: %s(app="%s", conf="%s", env="%s")',
             cls.__name__,
             application_name,
             configuration_profile_name,
@@ -242,12 +251,13 @@ class AppConfigBackend(Backend):
         )['InitialConfigurationToken']
 
         while True:
-            logger.debug('polling for configuration changes')
+            logger.debug('Poll for configuration changes')
             try:
                 resp = self.client.get_latest_configuration(ConfigurationToken=token)
             except self.client.exceptions.BadRequestException as exc:
                 if exc.response['Error']['Message'] != 'Request too early':
                     raise
+                logger.debug('Request too early; retrying in %d seconds', interval / 2)
                 await asyncio.sleep(interval / 2)
                 continue
 
@@ -255,7 +265,7 @@ class AppConfigBackend(Backend):
             if content := resp['Configuration'].read():
                 yield content.decode()
             else:
-                logger.debug('no configuration changes')
+                logger.debug('No configuration changes')
 
             await asyncio.sleep(resp['NextPollIntervalInSeconds'])
 

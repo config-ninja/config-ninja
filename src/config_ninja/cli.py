@@ -357,9 +357,11 @@ def handle_key_errors(objects: typing.Dict[str, typing.Any]) -> typing.Iterator[
         raise typer.Exit(1) from exc
 
 
-async def poll_all(controllers: typing.List[controller.BackendController]) -> None:
+async def poll_all(
+    controllers: typing.List[controller.BackendController], get_or_write: typing.Literal['get', 'write']
+) -> None:
     """Run the given controllers within an `asyncio` event loop to monitor and apply changes."""
-    await asyncio.gather(*[ctrl.awrite() for ctrl in controllers])
+    await asyncio.gather(*[ctrl.aget(rich.print) if get_or_write == 'get' else ctrl.awrite() for ctrl in controllers])
 
 
 def _check_systemd() -> None:
@@ -382,7 +384,7 @@ def _new_controller(settings: pyspry.Settings, key: str) -> controller.BackendCo
 @app.command()
 def get(
     ctx: typer.Context,
-    key: KeyAnnotation,
+    keys: OptionalKeyAnnotation = None,
     poll: PollAnnotation = False,
     get_help: HelpAnnotation = None,
     config: ConfigAnnotation = None,
@@ -390,11 +392,21 @@ def get(
     version: VersionAnnotation = None,
 ) -> None:
     """Print the value of the specified configuration object."""
-    ctrl = controller.BackendController(ctx.obj['settings'], key, handle_key_errors)
+    settings: pyspry.Settings = ctx.obj['settings']
+
+    controllers = [_new_controller(settings, key) for key in keys or settings.OBJECTS]
 
     if poll:
-        asyncio.run(ctrl.aget(rich.print))
-    else:
+        logger.debug(
+            'Begin monitoring (read-only): %s',
+            ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers),
+            extra={'markup': True},
+        )
+        asyncio.run(poll_all(controllers, 'get'))
+        return
+
+    for ctrl in controllers:
+        logger.debug('Get [yellow]%s[/yellow]: %s', ctrl.key, ctrl, extra={'markup': True})
         ctrl.get(rich.print)
 
 
@@ -415,7 +427,7 @@ def apply(
 
     if poll:
         rich.print('Begin monitoring: ' + ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers))
-        asyncio.run(poll_all(controllers))
+        asyncio.run(poll_all(controllers, 'write'))
         return
 
     for ctrl in controllers:
@@ -436,7 +448,7 @@ def monitor(ctx: typer.Context) -> None:
         ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
 
     rich.print('Begin monitoring: ' + ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers))
-    asyncio.run(poll_all(controllers))
+    asyncio.run(poll_all(controllers, 'write'))
 
 
 @self_app.command(name='print')
