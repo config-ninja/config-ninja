@@ -69,6 +69,21 @@ class DestSpec:
 
         return f'{fmt} -> {self.path}'
 
+    @classmethod
+    def from_primitives(cls, data: pyspry.DestType) -> DestSpec:
+        """Create a `DestSpec` instance from a dictionary of primitive types."""
+        path = Path(data['path'])
+        if data['format'] in DUMPERS:
+            fmt: FormatT = data['format']  # type: ignore[assignment,unused-ignore]
+            return DestSpec(format=fmt, path=path)
+
+        template_path = Path(data['format'])
+
+        loader = jinja2.FileSystemLoader(template_path.parent)
+        env = jinja2.Environment(autoescape=jinja2.select_autoescape(default=True), loader=loader)
+
+        return DestSpec(path=path, format=env.get_template(template_path.name))
+
     @property
     def is_template(self) -> bool:
         """Whether the destination uses a Jinja2 template."""
@@ -119,18 +134,7 @@ class BackendController:
         """Read the destination spec from the settings file."""
         objects = self.settings.OBJECTS
         with self.handle_key_errors(objects):
-            dest = objects[self.key]['dest']
-            path = Path(dest['path'])
-            if dest['format'] in DUMPERS:
-                fmt: FormatT = dest['format']  # type: ignore[assignment,unused-ignore]
-                return DestSpec(format=fmt, path=path)
-
-            template_path = Path(dest['format'])
-
-        loader = jinja2.FileSystemLoader(template_path.parent)
-        env = jinja2.Environment(autoescape=jinja2.select_autoescape(default=True), loader=loader)
-
-        return DestSpec(path=path, format=env.get_template(template_path.name))
+            return DestSpec.from_primitives(objects[self.key]['dest'])
 
     def _init_backend(self) -> tuple[FormatT, Backend]:
         """Get the backend for the specified configuration object."""
