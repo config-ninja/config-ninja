@@ -55,7 +55,6 @@ else:
     except ImportError:  # pragma: no cover
         sh = None
 
-# pylint: disable=no-member
 SERVICE_NAME = 'config-ninja.service'
 SYSTEM_INSTALL_PATH = Path('/etc/systemd/system')
 """The file path for system-wide installation."""

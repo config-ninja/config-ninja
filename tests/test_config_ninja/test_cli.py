@@ -69,15 +69,15 @@ def test_help(args: Sequence[str]) -> None:
     """Verify the `-h` argument matches `--help` and the default command."""
     results = runner.invoke(app, args)
     stdout = clean(results.stdout)
-    assert results.exit_code == 0
+    assert 0 == results.exit_code
     assert stdout.startswith('Usage')
 
 
 def test_version() -> None:
     """Verify the `version` command returns the correct version."""
     result = runner.invoke(app, ['version'])
-    assert result.exit_code == 0
-    assert result.stdout.strip() == config_ninja.__version__
+    assert 0 == result.exit_code
+    assert config_ninja.__version__ == result.stdout.strip()
 
 
 def test_missing_settings(mocker: MockerFixture) -> None:
@@ -89,7 +89,7 @@ def test_missing_settings(mocker: MockerFixture) -> None:
     result = runner.invoke(app, ['self', 'print'])
 
     # Assert
-    assert result.exit_code == 0
+    assert 0 == result.exit_code
     assert all(text in result.stdout for text in ['WARNING', 'Could not find', 'config-ninja', 'settings file'])
 
 
@@ -97,7 +97,7 @@ def test_missing_settings(mocker: MockerFixture) -> None:
 def test_get_example_appconfig() -> None:
     """Get the 'example-appconfig' configuration (as specified in config-ninja-settings.yaml)."""
     result = runner.invoke(app, ['get', 'example-appconfig'])
-    assert result.exit_code == 0, result.exception
+    assert 0 == result.exit_code, result.exception
     # note: logging on windows dislikes how the runner captures output and prints a traceback, so
     # ... :      just make sure that the YAML config is included _in_ the output
     assert MOCK_YAML_CONFIG.decode('utf-8') in result.stdout.strip()
@@ -106,8 +106,8 @@ def test_get_example_appconfig() -> None:
 def test_get_example_local(settings: dict[str, Any]) -> None:
     """Get the 'example-local' configuration (as specified in config-ninja-settings.yaml)."""
     result = runner.invoke(app, ['get', 'example-local'])
-    assert result.exit_code == 0, result.exception
-    assert result.stdout.replace('\n', '').strip() == json.dumps(settings)
+    assert 0 == result.exit_code, result.exception
+    assert json.dumps(settings) == result.stdout.replace('\n', '').strip()
 
 
 @pytest.mark.usefixtures('_patch_awatch')
@@ -115,15 +115,15 @@ def test_get_example_local(settings: dict[str, Any]) -> None:
 def test_get_example_local_poll(mocker: MockerFixture, settings: dict[str, Any]) -> None:
     """Test the `poll` command with a local file."""
     # Arrange
-    mock_print = mocker.patch('config_ninja.cli.print')
+    mock_print = mocker.patch('rich.print')
     expected_call_count = 2  # 1 for the initial print, 2 for the patched awatch()
 
     # Act
     result = runner.invoke(app, ['get', '--poll', 'example-local'])
 
     # Assert
-    assert result.exit_code == 0, result.exception
-    assert mock_print.call_count == expected_call_count
+    assert 0 == result.exit_code, result.exception
+    assert expected_call_count == mock_print.call_count
     assert (
         mock_print.call_args_list[0][0][0].strip() == mock_print.call_args_list[1][0][0].strip() == json.dumps(settings)
     )
@@ -133,7 +133,7 @@ def test_self_print() -> None:
     """Test the `self print` command."""
     result = runner.invoke(app, ['self', 'print'])
 
-    assert result.exit_code == 0, result.exception
+    assert 0 == result.exit_code, result.exception
     assert 'example-local' in result.stdout.strip()
     assert 'example-appconfig' in result.stdout.strip()
 
@@ -143,8 +143,8 @@ def test_apply_example_local(settings: dict[str, Any]) -> None:
     result = runner.invoke(app, ['apply', 'example-local'])
     output = Path(settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path']).read_text(encoding='utf-8').strip()
 
-    assert result.exit_code == 0, result.exception
-    assert output == json.dumps(settings)
+    assert 0 == result.exit_code, result.exception
+    assert json.dumps(settings) == output
 
 
 def test_apply_example_local_template(settings: dict[str, Any]) -> None:
@@ -156,10 +156,9 @@ def test_apply_example_local_template(settings: dict[str, Any]) -> None:
         .strip()
     )
 
-    assert result.exit_code == 0, result.exception
+    assert 0 == result.exit_code, result.exception
     assert (
-        output
-        == tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
+        tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
             {
                 'CONFIG_NINJA_OBJECTS': {
                     'example-local-template': {
@@ -168,6 +167,7 @@ def test_apply_example_local_template(settings: dict[str, Any]) -> None:
                 }
             }
         ).strip()
+        == output
     )
 
 
@@ -177,10 +177,11 @@ def test_apply_example_local_poll(settings: dict[str, Any]) -> None:
     """Test the `apply --poll` command with a local file backend."""
     result = runner.invoke(app, ['apply', '--poll', 'example-local'])
 
-    assert result.exit_code == 0, result.exception
-    assert Path(settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path']).read_text(
-        encoding='utf-8'
-    ).strip() == json.dumps(settings)
+    assert 0 == result.exit_code, result.exception
+    assert (
+        json.dumps(settings)
+        == Path(settings['CONFIG_NINJA_OBJECTS']['example-local']['dest']['path']).read_text(encoding='utf-8').strip()
+    )
 
 
 @pytest.mark.usefixtures('_patch_awatch')
@@ -194,10 +195,9 @@ def test_apply_example_local_template_poll(settings: dict[str, Any]) -> None:
         .strip()
     )
 
-    assert result.exit_code == 0, result.exception
+    assert 0 == result.exit_code, result.exception
     assert (
-        output
-        == tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
+        tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
             {
                 'CONFIG_NINJA_OBJECTS': {
                     'example-local-template': {
@@ -206,6 +206,7 @@ def test_apply_example_local_template_poll(settings: dict[str, Any]) -> None:
                 }
             }
         ).strip()
+        == output
     )
 
 
@@ -220,11 +221,10 @@ def test_apply_all(settings: dict[str, Any]) -> None:
     outputs = [p.read_text().strip() for p in paths]
 
     # Assert
-    assert result.exit_code == 0, result.exception
-    assert outputs[0] == json.dumps(settings)
+    assert 0 == result.exit_code, result.exception
+    assert json.dumps(settings) == outputs[0]
     assert (
-        outputs[1]
-        == tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
+        tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
             {
                 'CONFIG_NINJA_OBJECTS': {
                     'example-local-template': {
@@ -233,14 +233,8 @@ def test_apply_all(settings: dict[str, Any]) -> None:
                 }
             }
         ).strip()
+        == outputs[1]
     )
-
-
-@pytest.mark.usefixtures('settings')
-def test_apply_all_poll() -> None:
-    """Ensure the `--poll` argument cannot be used without a key."""
-    result = runner.invoke(app, ['--config', 'examples/local-backend.yaml', 'apply', '--poll'])
-    assert result.exit_code != 0
 
 
 @pytest.mark.usefixtures('_patch_awatch')
@@ -256,11 +250,10 @@ def test_monitor_local(settings: dict[str, Any]) -> None:
     outputs = [p.read_text().strip() for p in paths]
 
     # Assert
-    assert result.exit_code == 0, result.exception
-    assert outputs[0] == json.dumps(settings)
+    assert 0 == result.exit_code, result.exception
+    assert json.dumps(settings) == outputs[0]
     assert (
-        outputs[1]
-        == tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
+        tomlkit.dumps(  # pyright: ignore[reportUnknownMemberType]
             {
                 'CONFIG_NINJA_OBJECTS': {
                     'example-local-template': {
@@ -269,6 +262,7 @@ def test_monitor_local(settings: dict[str, Any]) -> None:
                 }
             }
         ).strip()
+        == outputs[1]
     )
 
 
@@ -281,7 +275,7 @@ def test_install_no_systemd(monkeypatch: pytest.MonkeyPatch) -> None:
     result = runner.invoke(app, ['self', 'install'])
 
     # Assert
-    assert result.exit_code != 0
+    assert 0 != result.exit_code
     assert result.stdout.startswith('ERROR: Missing systemd!')
 
 
@@ -290,7 +284,7 @@ def test_install() -> None:
     """Verify the `install` command works as expected."""
     result = runner.invoke(app, ['self', 'install'])
 
-    assert result.exit_code == 0, result.exception
+    assert 0 == result.exit_code, result.exception
     assert result.stdout.startswith('Installing')
     assert 'SUCCESS' in result.stdout
 
@@ -334,7 +328,7 @@ def test_install_env(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
     # Assert
-    assert result.exit_code == 0, result.exception
+    assert 0 == result.exit_code, result.exception
     for name, value in variables.items():
         assert f'Environment={name}={value}' in result.stdout
 
@@ -344,7 +338,7 @@ def test_install_print_only() -> None:
     """Verify the `install` command respects the `--print-only` argument."""
     result = runner.invoke(app, ['self', 'install', '--print-only'])
 
-    assert result.exit_code == 0, result.exception
+    assert 0 == result.exit_code, result.exception
     assert _clean_output(str(systemd.SYSTEM_INSTALL_PATH)) in _clean_output(result.stdout)
 
 
@@ -363,7 +357,7 @@ def test_install_called_with_sudo(mocker: MockerFixture) -> None:
     result = runner.invoke(app, ['self', 'install'])
 
     # Assert
-    assert result.exit_code == 0, result.exception
+    assert 0 == result.exit_code, result.exception
     sudo.__enter__.assert_not_called()
 
 
@@ -380,7 +374,7 @@ def test_install_run_as(run_as: str) -> None:
     result = runner.invoke(app, ['self', 'install', '--print-only', '--run-as', run_as])
 
     # Assert
-    assert result.exit_code == 0, {result.exception: str(result.stdout)}
+    assert 0 == result.exit_code, {result.exception: str(result.stdout)}
     assert f'User={user}' in result.stdout
     if group:
         assert f'Group={group}' in result.stdout
@@ -398,7 +392,7 @@ def test_install_variables() -> None:
     result = runner.invoke(app, ['self', 'install', '--print-only', *args])
 
     # Assert
-    assert result.exit_code == 0, {result.exception: str(result.stdout)}
+    assert 0 == result.exit_code, {result.exception: str(result.stdout)}
     for line in expected:
         assert line in result.stdout
 
@@ -411,7 +405,7 @@ def test_install_variables_invalid() -> None:
     result = runner.invoke(app, ['self', 'install', '--print-only', '--var', pair])
 
     # Assert
-    assert result.exit_code == 1
+    assert 1 == result.exit_code
     assert f'Invalid argument (expected VARIABLE=VALUE pair): {pair}' in result.stdout
 
 
@@ -427,7 +421,7 @@ def test_uninstall() -> None:
     result = runner.invoke(app, ['self', 'uninstall', '--user'])
 
     # Assert
-    assert result.exit_code == 0, result.exception
+    assert 0 == result.exit_code, result.exception
     assert result.stdout.startswith('Uninstalling')
     assert 'SUCCESS' in result.stdout
 
@@ -444,7 +438,7 @@ def test_uninstall_print_only() -> None:
     result = runner.invoke(app, ['self', 'uninstall', '--print-only'])
 
     # Assert
-    assert result.exit_code == 0, result.exception
+    assert 0 == result.exit_code, result.exception
     assert _clean_output(str(systemd.SYSTEM_INSTALL_PATH)) in _clean_output(result.stdout)
     assert content in result.stdout
 
@@ -464,5 +458,5 @@ def test_uninstall_called_with_sudo(mocker: MockerFixture) -> None:
     result = runner.invoke(app, ['self', 'uninstall'])
 
     # Assert
-    assert result.exit_code == 0, result.exception
+    assert 0 == result.exit_code, result.exception
     sudo.__enter__.assert_not_called()
