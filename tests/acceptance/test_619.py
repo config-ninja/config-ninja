@@ -14,7 +14,7 @@ except ImportError:
 
 config_ninja = functools.partial(
     sh.config_ninja,
-    _tty_size=(20, 1000),  # prevent the tty width from influencing the number of lines in the output
+    _tty_size=(20, 10000),  # prevent the tty width from influencing the number of lines in the output
 )
 
 
