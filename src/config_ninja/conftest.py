@@ -16,12 +16,12 @@ from config_ninja.backend import Backend
 
 _no_default = object()
 
-# pylint: disable=too-complex,redefined-outer-name,too-many-arguments
+# pylint: disable=redefined-outer-name,too-many-arguments
 
 
 # note: the following is needed for testing on Python < 3.10
 # ref: https://docs.python.org/3/library/functions.html#anext
-def py_anext(iterator: Iterator[Any], default: Any = _no_default) -> Any:  # pragma: no cover
+def py_anext(iterator: Iterator[Any], default: Any = _no_default) -> Any:  # pylint: disable=too-complex   # pragma: no cover
     """Pure-Python implementation of anext() for testing purposes.
 
     Closely matches the builtin anext() C implementation.

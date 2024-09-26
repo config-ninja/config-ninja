@@ -25,24 +25,12 @@ from rich.markdown import Markdown
 
 import config_ninja
 from config_ninja import controller, systemd
+from config_ninja.controller import SYSTEMD_AVAILABLE
 
 try:
     from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
 except ImportError:  # pragma: no cover
     from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment,attr-defined,unused-ignore]
-
-if typing.TYPE_CHECKING:  # pragma: no cover
-    import sh
-
-    SYSTEMD_AVAILABLE = True
-else:
-    try:
-        import sh
-    except ImportError:  # pragma: no cover
-        sh = None
-        SYSTEMD_AVAILABLE = False
-    else:
-        SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
 
 
 # ruff: noqa: PLR0913
