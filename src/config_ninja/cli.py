@@ -86,10 +86,12 @@ KeyAnnotation: TypeAlias = Annotated[
     typer.Argument(help='The key of the configuration object to retrieve', show_default=False),
 ]
 OptionalKeyAnnotation: TypeAlias = Annotated[
-    typing.Optional[str],
+    typing.Optional[typing.List[str]],
     typer.Argument(
-        help='If specified, only apply the configuration object with this key.',
+        help='If specified, only apply the configuration object(s) with matching key(s);'
+        ' multiple values may be provided. If unspecified, all objects will be applied',
         show_default=False,
+        metavar='[KEY...]',
     ),
 ]
 PollAnnotation: TypeAlias = Annotated[
@@ -260,33 +262,39 @@ def get(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) ->
         ctrl.get(rich.print)
 
 
+async def poll_all(controllers: typing.List[controller.BackendController]) -> None:
+    """Run the given controllers within an `asyncio` event loop to monitor and apply changes."""
+    await asyncio.gather(*[ctrl.awrite() for ctrl in controllers])
+
+
+def _new_controller(settings: pyspry.Settings, key: str) -> controller.BackendController:
+    ctrl = controller.BackendController(settings, key, handle_key_errors)
+    ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
+    return ctrl
+
+
 @app.command()
-def apply(ctx: typer.Context, key: OptionalKeyAnnotation = None, poll: PollAnnotation = False) -> None:
+def apply(ctx: typer.Context, keys: OptionalKeyAnnotation = None, poll: PollAnnotation = False) -> None:
     """Apply the specified configuration to the system."""
     settings: pyspry.Settings = ctx.obj['settings']
-    if poll and key is None:
-        rich.print(ctx.get_help())
-        rich.print('[red]ERROR[/]: Can only use the [cyan][bold]--poll[/][/] when a key is specified')
-        raise typer.Exit(1)
 
-    if key is None:
-        controllers = [controller.BackendController(settings, key, handle_key_errors) for key in settings.OBJECTS]
-    else:
-        controllers = [controller.BackendController(settings, key, handle_key_errors)]
+    controllers = [_new_controller(settings, key) for key in keys or settings.OBJECTS]
+
+    if poll:
+        rich.print('Begin monitoring: ' + ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers))
+        asyncio.run(poll_all(controllers))
+        return
 
     for ctrl in controllers:
-        ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
         rich.print(f'Apply [yellow]{ctrl.key}[/yellow]: {ctrl}')
-        if poll:
-            # FIXME: this is implemented incorrectly: the first controller in this loop blocks while polling, preventing
-            #          the other controllers from ever running
-            # must have specified a key to get here
-            asyncio.run(ctrl.awrite())
-        else:
-            ctrl.write()
+        ctrl.write()
 
 
-@app.command()
+@app.command(
+    deprecated=True,
+    short_help='[dim]Apply all configuration objects to the filesystem, and poll for changes.[/] [red](deprecated)[/]',
+    help='Use [bold blue]config-ninja apply --poll[/] instead.',
+)
 def monitor(ctx: typer.Context) -> None:
     """Apply all configuration objects to the filesystem, and poll for changes."""
     settings: pyspry.Settings = ctx.obj['settings']
@@ -294,11 +302,8 @@ def monitor(ctx: typer.Context) -> None:
     for ctrl in controllers:
         ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
 
-    async def poll_all() -> None:
-        await asyncio.gather(*[ctrl.awrite() for ctrl in controllers])
-
     rich.print('Begin monitoring: ' + ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers))
-    asyncio.run(poll_all())
+    asyncio.run(poll_all(controllers))
 
 
 @self_app.command(name='print')
