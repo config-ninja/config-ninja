@@ -10,7 +10,7 @@ Environment={{ key }}={{ value }}
 {% endfor -%}
 {% endif -%}
 ExecStartPre={{ config_ninja_cmd }} self print
-ExecStart={{ config_ninja_cmd }} monitor
+ExecStart={{ config_ninja_cmd }} apply --poll
 Restart=always
 RestartSec=30s
 Type=notify
