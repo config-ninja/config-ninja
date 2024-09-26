@@ -56,6 +56,8 @@ __all__ = [
     'main',
 ]
 
+LOG_VERBOSITY_MESSAGE = 'logging verbosity set to [green]%s[/green]'
+
 logger = logging.getLogger(__name__)
 
 app_kwargs: typing.Dict[str, typing.Any] = {
@@ -210,6 +212,9 @@ VariableAnnotation: TypeAlias = Annotated[
     ),
 ]
 
+# TODO[#619]: define annotation for the `--verbose` option
+VerbosityAnnotation = Annotated[typing.Optional[bool], typer.Option('-v', '--verbose')]
+
 
 def version_callback(ctx: typer.Context, value: typing.Optional[bool] = None) -> None:
     """Print the version of the package."""
@@ -224,7 +229,7 @@ def version_callback(ctx: typer.Context, value: typing.Optional[bool] = None) ->
 VersionAnnotation = Annotated[
     typing.Optional[bool],
     typer.Option(
-        '-v',
+        '-V',
         '--version',
         callback=version_callback,
         show_default=False,

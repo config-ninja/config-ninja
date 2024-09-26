@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import itertools
+import logging
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -9,6 +11,7 @@ import click.testing
 import pyspry
 import pytest
 import pytest_mock
+import typer
 from typer import testing
 
 import config_ninja as cn
@@ -23,6 +26,22 @@ except ImportError:
 
 
 CONFIG_OBJECTS = ['example-local', 'example-local-template']
+GLOBAL_OPTION_ANNOTATIONS = {'verbose': cli.VerbosityAnnotation, 'version': cli.VersionAnnotation}
+
+
+def _recurse_sub_apps(app: typer.Typer | None) -> list[typer.Typer]:
+    if not app:
+        return []
+    return [app] + [sub_app for group in app.registered_groups for sub_app in _recurse_sub_apps(group.typer_instance)]
+
+
+all_apps = _recurse_sub_apps(cli.app)
+typer_cmd_infos = [
+    callable
+    for app in all_apps
+    for callable in app.registered_commands + ([app.registered_callback] if app.registered_callback else [])
+    if not callable.deprecated
+]
 
 runner = testing.CliRunner()
 
@@ -72,3 +91,38 @@ def test_output_message_per_config(settings: pyspry.Settings, mock_rich_print: M
         f'Apply [yellow]{config_key}[/yellow]: '
         f'{truth["source_path"]} ({truth["source"]["format"]}) -> {truth["dest"]}'
     )
+
+
+@pytest.mark.parametrize(
+    'command',
+    [
+        [],
+        ['version'],
+        ['get', 'example-local'],
+        ['apply', 'example-local'],
+        ['self'],
+        ['self', 'install'],
+        ['self', 'uninstall'],
+        ['self', 'print'],
+    ],
+)
+def test_verbosity_argument(command: list[str], caplog: pytest.LogCaptureFixture) -> None:
+    """Verify that `config-ninja` commands support the verbosity argument."""
+    # Arrange
+    command.append('--verbose')
+
+    # Act
+    with caplog.at_level(logging.DEBUG):
+        out = config_ninja(*command)
+
+    # Assert
+    assert 0 == out.exit_code, out.stdout
+    assert (cli.LOG_VERBOSITY_MESSAGE % 'DEBUG') in caplog.messages, caplog.text
+
+
+@pytest.mark.parametrize('cmd_func_arg', itertools.product(typer_cmd_infos, GLOBAL_OPTION_ANNOTATIONS))
+def test_global_options(cmd_func_arg: tuple[typer.models.CommandInfo | typer.models.TyperInfo, str]) -> None:
+    """Verify that all registered commands support the global arguments."""
+    cmd_func, arg_name = cmd_func_arg
+    assert arg_name in cmd_func.callback.__annotations__, cmd_func.callback
+    assert GLOBAL_OPTION_ANNOTATIONS[arg_name] is cmd_func.callback.__annotations__[arg_name], cmd_func.callback
