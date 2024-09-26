@@ -20,6 +20,7 @@ import pyspry
 import rich
 import typer
 import yaml
+from rich.logging import RichHandler
 from rich.markdown import Markdown
 
 import config_ninja
@@ -44,6 +45,8 @@ else:
         SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
 
 
+# pylint: disable=redefined-outer-name,unused-argument,too-many-arguments
+
 __all__ = [
     'app',
     'get',
@@ -56,6 +59,7 @@ __all__ = [
     'main',
 ]
 
+LOG_MISSING_SETTINGS_MESSAGE = "Could not find [bold blue]config-ninja[/]'s settings file"
 LOG_VERBOSITY_MESSAGE = 'logging verbosity set to [green]%s[/green]'
 
 logger = logging.getLogger(__name__)
@@ -212,8 +216,52 @@ VariableAnnotation: TypeAlias = Annotated[
     ),
 ]
 
-# TODO[#619]: define annotation for the `--verbose` option
-VerbosityAnnotation = Annotated[typing.Optional[bool], typer.Option('-v', '--verbose')]
+
+def configure_logging(ctx: typer.Context, verbose: typing.Optional[bool] = None) -> None:
+    """Callback for the `--verbose` option to configure logging verbosity.
+
+    By default, log messages at the `logging.INFO` level:
+
+    >>> configure_logging(ctx)
+    >>> caplog.messages
+    ['logging verbosity set to [green]INFO[/green]']
+
+    <!-- Clear the `caplog` fixture for the `doctest`, but exclude this from the docs
+    >>> caplog.clear()
+
+    -->
+    When `verbose` is `True`, log messages at the `logging.DEBUG` level:
+
+    >>> configure_logging(ctx, True)
+    >>> caplog.messages
+    ['logging verbosity set to [green]DEBUG[/green]']
+    """
+    if ctx.resilient_parsing:
+        return
+
+    verbosity = logging.DEBUG if verbose else logging.INFO
+
+    logging.basicConfig(
+        level=verbosity,
+        format='%(message)s',
+        force=True,
+        datefmt='[%X]',
+        handlers=[RichHandler(rich_tracebacks=True)],
+    )
+    logger.debug(LOG_VERBOSITY_MESSAGE, logging.getLevelName(verbosity), extra={'markup': True})
+
+
+VerbosityAnnotation = Annotated[
+    typing.Optional[bool],
+    typer.Option(
+        '-v',
+        '--verbose',
+        callback=configure_logging,
+        help='Log messages at the [black]DEBUG[/] level.',
+        is_eager=True,
+        show_default=False,
+    ),
+]
 
 
 def version_callback(ctx: typer.Context, value: typing.Optional[bool] = None) -> None:
@@ -273,7 +321,13 @@ def _new_controller(settings: pyspry.Settings, key: str) -> controller.BackendCo
 
 
 @app.command()
-def get(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) -> None:
+def get(
+    ctx: typer.Context,
+    key: KeyAnnotation,
+    poll: PollAnnotation = False,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
     """Print the value of the specified configuration object."""
     ctrl = controller.BackendController(ctx.obj['settings'], key, handle_key_errors)
 
@@ -284,7 +338,13 @@ def get(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) ->
 
 
 @app.command()
-def apply(ctx: typer.Context, keys: OptionalKeyAnnotation = None, poll: PollAnnotation = False) -> None:
+def apply(
+    ctx: typer.Context,
+    keys: OptionalKeyAnnotation = None,
+    poll: PollAnnotation = False,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
     """Apply the specified configuration to the system."""
     settings: pyspry.Settings = ctx.obj['settings']
 
@@ -317,10 +377,13 @@ def monitor(ctx: typer.Context) -> None:
 
 
 @self_app.command(name='print')
-def self_print(ctx: typer.Context) -> None:
+def self_print(
+    ctx: typer.Context,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
     """Print [bold blue]config-ninja[/]'s settings."""
     if not (settings := ctx.obj['settings']):
-        rich.print('[yellow]WARNING[/]: No settings file found.')
         raise typer.Exit(1)
     rich.print(yaml.dump(settings.OBJECTS))
 
@@ -333,6 +396,8 @@ def install(  # noqa: PLR0913
     user_mode: UserAnnotation = False,
     variables: VariableAnnotation = None,
     workdir: WorkdirAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
 ) -> None:
     """Install [bold blue]config-ninja[/] as a [bold gray93]systemd[/] service.
 
@@ -374,7 +439,12 @@ def install(  # noqa: PLR0913
 
 
 @self_app.command()
-def uninstall(print_only: PrintAnnotation = None, user: UserAnnotation = False) -> None:
+def uninstall(
+    print_only: PrintAnnotation = None,
+    user: UserAnnotation = False,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
     """Uninstall the [bold blue]config-ninja[/] [bold gray93]systemd[/] service."""
     svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False)
     if print_only:
@@ -388,8 +458,18 @@ def uninstall(print_only: PrintAnnotation = None, user: UserAnnotation = False) 
     rich.print('[green]SUCCESS[/] :white_check_mark:')
 
 
+@self_app.callback(
+    invoke_without_command=True,
+    name='self',
+)
+def self_main(ctx: typer.Context, verbose: VerbosityAnnotation = None, version: VersionAnnotation = None) -> None:
+    """Print the help message for the `self` command."""
+    if not ctx.invoked_subcommand:
+        rich.print(ctx.get_help())
+
+
 @app.command()
-def version(ctx: typer.Context) -> None:
+def version(ctx: typer.Context, verbose: VerbosityAnnotation = None, version: VersionAnnotation = None) -> None:
     """Print the version and exit."""
     version_callback(ctx, True)
 
@@ -398,7 +478,8 @@ def version(ctx: typer.Context) -> None:
 def main(
     ctx: typer.Context,
     settings_file: SettingsAnnotation = None,
-    version: VersionAnnotation = None,  # type: ignore[valid-type,unused-ignore]  # pylint: disable=unused-argument,redefined-outer-name
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
 ) -> None:
     """Manage operating system configuration files based on data in the cloud."""
     ctx.ensure_object(dict)
@@ -406,10 +487,10 @@ def main(
     try:
         settings_file = settings_file or config_ninja.resolve_settings_path()
     except FileNotFoundError as exc:
-        message = "[yellow]WARNING[/]: Could not find [bold blue]config-ninja[/]'s settings file"
+        message = LOG_MISSING_SETTINGS_MESSAGE
         if len(exc.args) > 1:
-            message += ' at any of the following locations:\n' + '\n'.join(f'    {p}' for p in exc.args[1])
-        rich.print(message)
+            message += ' at any of the following locations:\n - ' + '\n - '.join(f'{p}' for p in exc.args[1])
+        logger.warning(message, extra={'markup': True})
         ctx.obj['settings'] = None
 
     else:

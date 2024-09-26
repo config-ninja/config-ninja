@@ -45,6 +45,7 @@ class SourceType(TypedDict):
     """
 
 PathStr: TypeAlias = str
+"""A string representing a file path."""
 
 class DestType(TypedDict):
     """The parameters `output` and `template` are mutually exclusive."""

@@ -93,6 +93,7 @@ def test_output_message_per_config(settings: pyspry.Settings, mock_rich_print: M
     )
 
 
+@pytest.mark.usefixtures('monkeypatch_systemd')
 @pytest.mark.parametrize(
     'command',
     [
@@ -117,7 +118,7 @@ def test_verbosity_argument(command: list[str], caplog: pytest.LogCaptureFixture
 
     # Assert
     assert 0 == out.exit_code, out.stdout
-    assert (cli.LOG_VERBOSITY_MESSAGE % 'DEBUG') in caplog.messages, caplog.text
+    assert cli.LOG_VERBOSITY_MESSAGE % 'DEBUG' in caplog.messages, caplog.text
 
 
 @pytest.mark.parametrize('cmd_func_arg', itertools.product(typer_cmd_infos, GLOBAL_OPTION_ANNOTATIONS))

@@ -9,6 +9,7 @@ from typing import Any, Iterator, TypeVar
 from unittest import mock
 
 import pytest
+import pytest_mock
 from boto3 import Session
 from botocore.exceptions import ClientError
 from botocore.paginate import PageIterator, Paginator
@@ -255,3 +256,9 @@ example_file.__doc__ = f"""Write the test configuration to a file in the tempora
 {MOCK_YAML_CONFIG.decode('utf-8')}
 ```
 """
+
+
+@pytest.fixture(autouse=True)
+def mock_logging_basic_config(mocker: pytest_mock.MockerFixture) -> mock.MagicMock:
+    """Mock the `logging.basicConfig` function."""
+    return mocker.patch('logging.basicConfig')  # type: ignore[no-any-return]

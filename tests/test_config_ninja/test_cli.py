@@ -80,7 +80,7 @@ def test_version() -> None:
     assert config_ninja.__version__ == result.stdout.strip()
 
 
-def test_missing_settings(mocker: MockerFixture) -> None:
+def test_missing_settings(mocker: MockerFixture, caplog: pytest.LogCaptureFixture) -> None:
     """Verify errors are handled correctly when the settings file is missing."""
     # Arrange
     mocker.patch('config_ninja.DEFAULT_SETTINGS_PATHS', new=[Path('does not'), Path('exist')])
@@ -90,7 +90,7 @@ def test_missing_settings(mocker: MockerFixture) -> None:
 
     # Assert
     assert 1 == result.exit_code
-    assert all(text in result.stdout for text in ['WARNING', 'Could not find', 'config-ninja', 'settings file'])
+    assert cli.LOG_MISSING_SETTINGS_MESSAGE in caplog.text
 
 
 @pytest.mark.usefixtures('mock_full_session')

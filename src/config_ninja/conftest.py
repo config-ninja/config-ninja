@@ -3,17 +3,20 @@
 from __future__ import annotations
 
 import builtins
+import logging
 from pathlib import Path
 from typing import Any, Iterator
+from unittest.mock import MagicMock
 
 import pytest
+import pytest_mock
 from mypy_boto3_appconfigdata import AppConfigDataClient
 
 from config_ninja.backend import Backend
 
 _no_default = object()
 
-# pylint: disable=too-complex
+# pylint: disable=too-complex,redefined-outer-name,too-many-arguments
 
 
 # note: the following is needed for testing on Python < 3.10
@@ -62,16 +65,30 @@ class ExampleBackend:
         self.source = source
 
 
+@pytest.fixture
+def mock_context(mocker: pytest_mock.MockerFixture) -> MagicMock:
+    """Mock the `context` object that is passed between commands / groups."""
+    ctx = mocker.MagicMock(spec=mocker.MagicMock)
+    ctx.resilient_parsing = False
+    return ctx  # type: ignore[no-any-return]
+
+
 @pytest.fixture(autouse=True)
-def src_doctest_namespace(
+def src_doctest_namespace(  # noqa: PLR0913
     doctest_namespace: dict[str, Any],
     mock_appconfigdata_client: AppConfigDataClient,
     example_file: Path,
     monkeypatch_systemd: tuple[Path, Path],
+    mock_context: MagicMock,
+    caplog: pytest.LogCaptureFixture,
+    mocker: pytest_mock.MockerFixture,
 ) -> dict[str, Any]:
     """Add various mocks and patches to the doctest namespace."""
     if 'anext' not in builtins.__dict__:  # pragma: no cover
         doctest_namespace['anext'] = py_anext
+
+    mocker.patch('logging.basicConfig')
+    caplog.set_level(logging.NOTSET)
 
     doctest_namespace['SYSTEM_INSTALL_PATH'] = monkeypatch_systemd[0]
     doctest_namespace['USER_INSTALL_PATH'] = monkeypatch_systemd[1]
@@ -80,4 +97,6 @@ def src_doctest_namespace(
     doctest_namespace['pytest'] = pytest
     doctest_namespace['appconfigdata_client'] = mock_appconfigdata_client
     doctest_namespace['ExampleBackend'] = ExampleBackend
+    doctest_namespace['ctx'] = mock_context
+    doctest_namespace['caplog'] = caplog
     return doctest_namespace
