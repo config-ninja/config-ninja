@@ -76,26 +76,42 @@ def mock_rich_print(mocker: pytest_mock.MockFixture) -> MagicMock:
     return mocker.patch('rich.print')  # type: ignore[no-any-return]
 
 
-@pytest.mark.parametrize('config_key', CONFIG_OBJECTS)
-def test_output_message_per_config(settings: pyspry.Settings, mock_rich_print: MagicMock, config_key: str) -> None:
-    """Verify that `config-ninja apply` prints a single message for each applied controller."""
+@pytest.mark.parametrize(('config_key', 'command'), tuple(itertools.product(CONFIG_OBJECTS, ['get', 'apply'])))
+def test_output_message_per_config(
+    caplog: pytest.LogCaptureFixture,
+    settings: pyspry.Settings,
+    mock_rich_print: MagicMock,
+    config_key: str,
+    command: str,
+) -> None:
+    """Verify that `config-ninja get|apply` prints a single message for each applied controller.
+
+    - `config-ninja apply` should invoke `rich.print` for each controller
+    - `config-ninja get` should log a message with the `logging` module for each controller
+    """
     # Arrange
     truth: TruthT = {
         'dest': controller.DestSpec.from_primitives(settings.OBJECTS[config_key]['dest']),
         'source': (source := settings.OBJECTS[config_key]['source']),
         'source_path': source['init' if 'init' in source else 'new']['kwargs']['path'],
     }
+    message = (
+        f'{command.capitalize()} [yellow]{config_key}[/yellow]: '
+        f'{truth["source_path"]} ({truth["source"]["format"]}) -> {truth["dest"]}'
+    )
 
     # Act
-    out = config_ninja('apply', *CONFIG_OBJECTS)
+    with caplog.at_level(logging.DEBUG):
+        out = config_ninja(command, *CONFIG_OBJECTS)
 
     # Assert
     assert 0 == out.exit_code, out.stdout
     assert len(CONFIG_OBJECTS) == mock_rich_print.call_count, mock_rich_print.call_args_list
-    mock_rich_print.assert_any_call(
-        f'Apply [yellow]{config_key}[/yellow]: '
-        f'{truth["source_path"]} ({truth["source"]["format"]}) -> {truth["dest"]}'
-    )
+
+    if command == 'get':
+        assert 1 == caplog.messages.count(message)
+    else:
+        mock_rich_print.assert_any_call(message)
 
 
 @pytest.mark.usefixtures('monkeypatch_systemd')
