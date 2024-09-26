@@ -90,13 +90,14 @@ class AppConfigBackend(Backend):
     def __str__(self) -> str:
         """Include properties in the string representation.
 
-        >>> print(str(AppConfigBackend(appconfigdata_client, 'app-id', 'conf-id', 'env-id')))
-        AppConfigBackend(app_id='app-id', conf_profile_id='conf-id', env_id='env-id')
+        >>> print(str( AppConfigBackend(appconfigdata_client, 'app-id', 'conf-id', 'env-id') ))
+        boto3.client('appconfigdata').start_configuration_session(ApplicationIdentifier='app-id', ConfigurationProfileIdentifier='conf-id', EnvironmentIdentifier='env-id')
         """
         return (
-            f"{self.__class__.__name__}(app_id='{self.application_id}', "
-            f"conf_profile_id='{self.configuration_profile_id}', "
-            f"env_id='{self.environment_id}')"
+            "boto3.client('appconfigdata').start_configuration_session("
+            f"ApplicationIdentifier='{self.application_id}', "
+            f"ConfigurationProfileIdentifier='{self.configuration_profile_id}', "
+            f"EnvironmentIdentifier='{self.environment_id}')"
         )
 
     @staticmethod
@@ -145,7 +146,7 @@ class AppConfigBackend(Backend):
         return cls._get_id_from_name(name, 'list_environments', client, ApplicationId=application_id)
 
     @classmethod
-    def new(  # pyright: ignore[reportIncompatibleMethodOverride]
+    def new(  # pylint: disable=arguments-differ  # pyright: ignore[reportIncompatibleMethodOverride]
         cls,
         application_name: str,
         configuration_profile_name: str,
@@ -162,7 +163,7 @@ class AppConfigBackend(Backend):
 
         >>> backend = AppConfigBackend.new('app-name', 'conf-name', 'env-name', session)
         >>> print(f"{backend}")
-        AppConfigBackend(app_id='id-1', conf_profile_id='id-1', env_id='id-1')
+        boto3.client('appconfigdata').start_configuration_session(ApplicationIdentifier='id-1', ConfigurationProfileIdentifier='id-1', EnvironmentIdentifier='id-1')
 
         ### Error: No IDs Found
 
@@ -210,7 +211,7 @@ class AppConfigBackend(Backend):
         .. note::
             Methods written for `asyncio` need to jump through hoops to run as `doctest` tests.
             To improve the readability of this documentation, each Python code block corresponds to
-            a `doctest` test a private method.
+            a `doctest` test defined in a private method.
 
         ## Usage: `AppConfigBackend.poll()`
 

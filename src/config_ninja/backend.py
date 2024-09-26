@@ -71,6 +71,23 @@ def loads(fmt: FormatT, raw: str) -> dict[str, Any]:
 class Backend(abc.ABC):
     """Define the API for backend implementations."""
 
+    def __repr__(self) -> str:
+        """Represent the backend object as its invocation.
+
+        >>> example = ExampleBackend('an example')
+        >>> example
+        ExampleBackend(source='an example')
+        """
+        annotations = (klass := self.__class__).__annotations__
+        annotations.pop('return', None)
+
+        args = ', '.join(f'{key}={getattr(self, key)!r}' for key in annotations if hasattr(self, key))
+        return f'{klass.__name__}({args})'
+
+    @abc.abstractmethod
+    def __str__(self) -> str:
+        """When formatted as a string, represent the backend as the identifier of its source."""
+
     @abc.abstractmethod
     def get(self) -> str:
         """Retrieve the configuration as a raw string."""

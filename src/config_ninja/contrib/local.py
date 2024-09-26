@@ -60,6 +60,10 @@ class LocalBackend(Backend):
         if not self.path.is_file():
             warnings.warn(f'could not read file: {path}', category=RuntimeWarning, stacklevel=2)
 
+    def __str__(self) -> str:
+        """Return the source file's path as the string representation of the backend."""
+        return f'{self.path}'
+
     def get(self) -> str:
         """Read the contents of the configuration file as a string."""
         return self.path.read_text(encoding='utf-8')

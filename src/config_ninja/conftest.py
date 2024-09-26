@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import builtins
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, AsyncIterator, Iterator
 
 import pytest
 from mypy_boto3_appconfigdata import AppConfigDataClient
+
+from config_ninja.backend import Backend
 
 _no_default = object()
 
@@ -48,6 +50,28 @@ def py_anext(iterator: Iterator[Any], default: Any = _no_default) -> Any:  # pra
     return anext_impl()
 
 
+class ExampleBackend(Backend):
+    """A sample backend class used in `doctest` tests."""
+
+    source: str
+
+    def __init__(self, source: str) -> None:
+        """Initialize the backend with the given `source`."""
+        self.source = source
+
+    def __str__(self) -> str:
+        """Format a mock source identifier to satisfy `abc.abstractmethod()`."""
+        return f'sid: {self.source}'
+
+    def get(self) -> str:
+        """Dummy method to retrieve an example configuration."""
+        return 'example configuration'
+
+    async def poll(self, interval: int = 0) -> AsyncIterator[str]:
+        """Dummy method to poll the configuration."""
+        yield 'example configuration'
+
+
 @pytest.fixture(autouse=True)
 def src_doctest_namespace(
     doctest_namespace: dict[str, Any],
@@ -65,4 +89,5 @@ def src_doctest_namespace(
     doctest_namespace['example_file'] = example_file
     doctest_namespace['pytest'] = pytest
     doctest_namespace['appconfigdata_client'] = mock_appconfigdata_client
+    doctest_namespace['ExampleBackend'] = ExampleBackend
     return doctest_namespace

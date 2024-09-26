@@ -33,7 +33,7 @@ def test_output_message_per_config(settings: pyspry.Settings, key: str) -> None:
     # Arrange
     dest = settings.OBJECTS[key]['dest']
     source = settings.OBJECTS[key]['source']
-    path = source['init' if 'init' in source else 'new']['kwargs']['path']
+    src_path = source['init' if 'init' in source else 'new']['kwargs']['path']
 
     # Act
     out = sh.config_ninja('apply', *CONFIG_OBJECTS)
@@ -43,4 +43,4 @@ def test_output_message_per_config(settings: pyspry.Settings, key: str) -> None:
     assert f'Apply {key}' in no_colors, no_colors
     assert dest['path'] in no_colors, no_colors
     assert source['format'] in no_colors, no_colors
-    assert path in no_colors, no_colors
+    assert src_path in no_colors, no_colors
