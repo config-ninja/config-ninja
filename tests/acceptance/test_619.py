@@ -24,7 +24,7 @@ CONFIG_OBJECTS = ['example-local', 'example-local-template']
 @pytest.fixture
 def settings() -> pyspry.Settings:
     """Return a dictionary with settings for the test."""
-    return config_ninja.load_settings(Path('config-ninja-settings.yaml'))
+    return config_ninja.load_settings(Path('config-ninja-settings.yaml'))  # type: ignore[no-any-return,unused-ignore]
 
 
 @pytest.mark.parametrize('key', CONFIG_OBJECTS)

@@ -15,14 +15,12 @@ from config_ninja.backend import DUMPERS, Backend, FormatT, dumps, loads
 from config_ninja.contrib import get_backend
 
 if typing.TYPE_CHECKING:  # pragma: no cover
-    from typing import TypeAlias
-
     import sh
 
     try:
-        from typing import TypeAlias
+        from typing import TypeAlias  # type: ignore[attr-defined,unused-ignore]
     except ImportError:
-        from typing_extensions import TypeAlias
+        from typing_extensions import TypeAlias  # type: ignore[assignment,attr-defined,unused-ignore]
 
     SYSTEMD_AVAILABLE = True
 else:

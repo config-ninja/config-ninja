@@ -26,15 +26,9 @@ import config_ninja
 from config_ninja import controller, systemd
 
 try:
-    from typing import (
-        Annotated,  # type: ignore[attr-defined,unused-ignore]
-        TypeAlias,
-    )
+    from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
 except ImportError:  # pragma: no cover
-    from typing_extensions import (  # type: ignore[assignment,unused-ignore]
-        Annotated,
-        TypeAlias,
-    )
+    from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment,attr-defined,unused-ignore]
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     import sh
@@ -88,8 +82,8 @@ KeyAnnotation: TypeAlias = Annotated[
 OptionalKeyAnnotation: TypeAlias = Annotated[
     typing.Optional[typing.List[str]],
     typer.Argument(
-        help='If specified, only apply the configuration object(s) with matching key(s);'
-        ' multiple values may be provided. If unspecified, all objects will be applied',
+        help='Apply the configuration object(s) with matching key(s)'
+        ' (multiple values may be provided). If unspecified, all objects will be applied',
         show_default=False,
         metavar='[KEY...]',
     ),
@@ -251,6 +245,28 @@ def handle_key_errors(objects: typing.Dict[str, typing.Any]) -> typing.Iterator[
         raise typer.Exit(1) from exc
 
 
+async def poll_all(controllers: typing.List[controller.BackendController]) -> None:
+    """Run the given controllers within an `asyncio` event loop to monitor and apply changes."""
+    await asyncio.gather(*[ctrl.awrite() for ctrl in controllers])
+
+
+def _check_systemd() -> None:
+    if not SYSTEMD_AVAILABLE:
+        rich.print('[red]ERROR[/]: Missing [bold gray93]systemd[/]!')
+        rich.print('Currently, this command only works on linux.')
+        raise typer.Exit(1)
+
+
+def _new_controller(settings: pyspry.Settings, key: str) -> controller.BackendController:
+    ctrl = controller.BackendController(settings, key, handle_key_errors)
+    ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
+    return ctrl
+
+
+# ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+#                                             command definitions
+
+
 @app.command()
 def get(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) -> None:
     """Print the value of the specified configuration object."""
@@ -260,17 +276,6 @@ def get(ctx: typer.Context, key: KeyAnnotation, poll: PollAnnotation = False) ->
         asyncio.run(ctrl.aget(rich.print))
     else:
         ctrl.get(rich.print)
-
-
-async def poll_all(controllers: typing.List[controller.BackendController]) -> None:
-    """Run the given controllers within an `asyncio` event loop to monitor and apply changes."""
-    await asyncio.gather(*[ctrl.awrite() for ctrl in controllers])
-
-
-def _new_controller(settings: pyspry.Settings, key: str) -> controller.BackendController:
-    ctrl = controller.BackendController(settings, key, handle_key_errors)
-    ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
-    return ctrl
 
 
 @app.command()
@@ -309,17 +314,10 @@ def monitor(ctx: typer.Context) -> None:
 @self_app.command(name='print')
 def self_print(ctx: typer.Context) -> None:
     """Print [bold blue]config-ninja[/]'s settings."""
-    if settings := ctx.obj['settings']:
-        rich.print(yaml.dump(settings.OBJECTS))
-    else:
+    if not (settings := ctx.obj['settings']):
         rich.print('[yellow]WARNING[/]: No settings file found.')
-
-
-def _check_systemd() -> None:
-    if not SYSTEMD_AVAILABLE:
-        rich.print('[red]ERROR[/]: Missing [bold gray93]systemd[/]!')
-        rich.print('Currently, this command only works on linux.')
         raise typer.Exit(1)
+    rich.print(yaml.dump(settings.OBJECTS))
 
 
 @self_app.command()

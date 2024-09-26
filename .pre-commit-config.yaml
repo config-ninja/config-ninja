@@ -82,6 +82,10 @@ repos:
           - typing_extensions
           - watchfiles
 
+        # mypy sometimes encounters false positives when run on individual files (instead of the whole project)
+        args: ["."]
+        pass_filenames: false
+
   - repo: https://github.com/RobertCraigie/pyright-python
     rev: v1.1.381
     hooks:

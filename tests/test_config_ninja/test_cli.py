@@ -89,7 +89,7 @@ def test_missing_settings(mocker: MockerFixture) -> None:
     result = runner.invoke(app, ['self', 'print'])
 
     # Assert
-    assert 0 == result.exit_code
+    assert 1 == result.exit_code
     assert all(text in result.stdout for text in ['WARNING', 'Could not find', 'config-ninja', 'settings file'])
 
 
