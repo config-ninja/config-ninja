@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import contextlib
 import dataclasses
 import logging
 import typing
 from pathlib import Path
-from typing import TypeAlias
 
 import jinja2
 import pyspry
@@ -17,7 +15,14 @@ from config_ninja.backend import DUMPERS, Backend, FormatT, dumps, loads
 from config_ninja.contrib import get_backend
 
 if typing.TYPE_CHECKING:  # pragma: no cover
+    from typing import TypeAlias
+
     import sh
+
+    try:
+        from typing import TypeAlias
+    except ImportError:
+        from typing_extensions import TypeAlias
 
     SYSTEMD_AVAILABLE = True
 else:
@@ -34,7 +39,7 @@ __all__ = ['BackendController', 'DestSpec', 'ErrorHandler']
 logger = logging.getLogger(__name__)
 
 ActionType: TypeAlias = typing.Callable[[str], typing.Any]
-ErrorHandler: TypeAlias = typing.Callable[[dict[typing.Any, typing.Any]], contextlib.AbstractContextManager[None]]
+ErrorHandler: TypeAlias = typing.Callable[[typing.Dict[typing.Any, typing.Any]], typing.ContextManager[None]]
 
 
 @dataclasses.dataclass
@@ -101,14 +106,7 @@ class BackendController:
     """
 
     def __init__(self, settings: pyspry.Settings, key: str, handle_key_errors: ErrorHandler) -> None:
-        """Parse the settings to initialize the backend.
-
-        .. note::
-            The `settings` parameter is required and cannot be `None` (`typer.Exit(1)` is raised if
-            it is). This odd handling is due to the statement in `config_ninja.cli.main` that sets
-            `ctx.obj['settings'] = None`, which is needed to allow the `self` commands to function
-                without a settings file.
-        """
+        """Parse the settings to initialize the backend."""
         self.settings, self.key = settings, key
 
         self.handle_key_errors = handle_key_errors
