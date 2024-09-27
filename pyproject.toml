@@ -246,41 +246,7 @@ help = "Generate this package's docs"
 uses = {PACKAGE_VERSION = "_version"}
 
 [[tool.poe.tasks.docs.sequence]]
-cmd = """
-  pdoc
-    --mermaid
-    --docformat google
-    --output-directory docs
-    --logo "$LOGO_URL"
-    --favicon "$FAVICON_URL"
-    --footer "$PACKAGE_VERSION"
-    abc
-    boto3.session
-    config_ninja
-    config_ninja.backend
-    config_ninja.cli
-    config_ninja.contrib
-    config_ninja.systemd
-    dataclasses
-    jinja2
-    mypy_boto3_appconfig
-    mypy_boto3_appconfig.client
-    mypy_boto3_appconfigdata
-    mypy_boto3_appconfigdata.client
-    pathlib
-    pyspry
-    pyspry.base
-    pytest
-    pytest_mock
-    pytest_mock.plugin
-    tests
-    tools
-    tools.install
-    typer.models
-    typer.params
-    typing
-    unittest
-"""
+ref = "serve-docs --output-directory docs"
 
 [[tool.poe.tasks.docs.sequence]]
 cmd = "cp tools/install.py docs/install.py"
@@ -300,6 +266,7 @@ cmd = """
     config_ninja.backend
     config_ninja.cli
     config_ninja.contrib
+    config_ninja.settings
     config_ninja.systemd
     dataclasses
     jinja2

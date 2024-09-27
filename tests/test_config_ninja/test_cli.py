@@ -83,7 +83,7 @@ def test_version() -> None:
 def test_missing_settings(mocker: MockerFixture, caplog: pytest.LogCaptureFixture) -> None:
     """Verify errors are handled correctly when the settings file is missing."""
     # Arrange
-    mocker.patch('config_ninja.DEFAULT_SETTINGS_PATHS', new=[Path('does not'), Path('exist')])
+    mocker.patch('config_ninja.settings.DEFAULT_PATHS', new=[Path('does not'), Path('exist')])
 
     # Act
     result = runner.invoke(app, ['self', 'print'])

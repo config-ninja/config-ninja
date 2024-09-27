@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
-import dataclasses
 import logging
 import typing
-from pathlib import Path
 
 import jinja2
 import pyspry
 
 from config_ninja import systemd
-from config_ninja.backend import DUMPERS, Backend, FormatT, dumps, loads
+from config_ninja.backend import Backend, FormatT, dumps, loads
 from config_ninja.contrib import get_backend
+from config_ninja.settings import DestSpec
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     import sh
@@ -38,56 +37,6 @@ logger = logging.getLogger(__name__)
 
 ActionType: TypeAlias = typing.Callable[[str], typing.Any]
 ErrorHandler: TypeAlias = typing.Callable[[typing.Dict[typing.Any, typing.Any]], typing.ContextManager[None]]
-
-
-@dataclasses.dataclass
-class DestSpec:
-    """Container for the destination spec parsed from `config-ninja`_'s own configuration file.
-
-    .. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
-    """
-
-    path: Path
-    """Write the configuration file to this path."""
-
-    format: FormatT | jinja2.Template
-    """Specify the format of the configuration file to write.
-
-    This property is either a `config_ninja.backend.FormatT` or a `jinja2.environment.Template`:
-    - if `config_ninja.backend.FormatT`, the identified `config_ninja.backend.DUMPERS` will be used
-        to serialize the configuration object
-    - if `jinja2.environment.Template`, this template will be used to render the configuration file
-    """
-
-    def __str__(self) -> str:
-        """Represent the destination spec as a string."""
-        if self.is_template:
-            assert isinstance(self.format, jinja2.Template)  # noqa: S101  # 👈 for static analysis
-            fmt = f'(template: {self.format.name})'
-        else:
-            fmt = f'(format: {self.format})'
-
-        return f'{fmt} -> {self.path}'
-
-    @classmethod
-    def from_primitives(cls, data: pyspry.DestType) -> DestSpec:
-        """Create a `DestSpec` instance from a dictionary of primitive types."""
-        path = Path(data['path'])
-        if data['format'] in DUMPERS:
-            fmt: FormatT = data['format']  # type: ignore[assignment,unused-ignore]
-            return DestSpec(format=fmt, path=path)
-
-        template_path = Path(data['format'])
-
-        loader = jinja2.FileSystemLoader(template_path.parent)
-        env = jinja2.Environment(autoescape=jinja2.select_autoescape(default=True), loader=loader)
-
-        return DestSpec(path=path, format=env.get_template(template_path.name))
-
-    @property
-    def is_template(self) -> bool:
-        """Whether the destination uses a Jinja2 template."""
-        return isinstance(self.format, jinja2.Template)
 
 
 class BackendController:
