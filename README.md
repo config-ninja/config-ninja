@@ -85,9 +85,9 @@ To demonstrate how the mechanics work locally:
              path: ./.local/config.toml
    EOF
    ```
-2. start `config-ninja` in `monitor` mode:
+2. run `config-ninja` in monitor mode:
    ```sh
-   config-ninja monitor
+   config-ninja apply --poll
    ```
 3. in a separate shell, create the `config.toml`:
    ```sh
