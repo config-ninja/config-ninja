@@ -12,23 +12,10 @@ from config_ninja import systemd
 from config_ninja.backend import Backend, FormatT, dumps, loads
 from config_ninja.settings import DestSpec, ObjectSpec
 
-if typing.TYPE_CHECKING:  # pragma: no cover
-    import sh
-
-    try:
-        from typing import TypeAlias  # type: ignore[attr-defined,unused-ignore]
-    except ImportError:
-        from typing_extensions import TypeAlias  # type: ignore[assignment,attr-defined,unused-ignore]
-
-    SYSTEMD_AVAILABLE = True
-else:
-    try:
-        import sh
-    except ImportError:  # pragma: no cover
-        sh = None
-        SYSTEMD_AVAILABLE = False
-    else:
-        SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
+try:
+    from typing import TypeAlias  # type: ignore[attr-defined,unused-ignore]
+except ImportError:
+    from typing_extensions import TypeAlias  # type: ignore[assignment,attr-defined,unused-ignore]
 
 __all__ = ['BackendController', 'DestSpec', 'ErrorHandler']
 
@@ -92,7 +79,7 @@ class BackendController:
 
     async def aget(self, do_print: typing.Callable[[str], typing.Any]) -> None:
         """Poll to retrieve the latest configuration object, and print on each update."""
-        if SYSTEMD_AVAILABLE:  # pragma: no cover
+        if systemd.AVAILABLE:  # pragma: no cover
             systemd.notify()
 
         async for content in self.backend.poll():
@@ -106,7 +93,7 @@ class BackendController:
 
     async def awrite(self) -> None:
         """Poll to retrieve the latest configuration object, and write to file on each update."""
-        if SYSTEMD_AVAILABLE:  # pragma: no cover
+        if systemd.AVAILABLE:  # pragma: no cover
             systemd.notify()
 
         async for content in self.backend.poll():
