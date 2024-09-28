@@ -55,7 +55,7 @@ class TruthT(TypedDict):
     """Type annotation for the structure of the truth dictionary."""
 
     dest: controller.DestSpec
-    source: pyspry.SourceType
+    source: pyspry.Source
     source_path: str
 
 
