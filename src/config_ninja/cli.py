@@ -24,7 +24,7 @@ from rich.logging import RichHandler
 from rich.markdown import Markdown
 
 import config_ninja
-from config_ninja import controller, systemd
+from config_ninja import controller, settings, systemd
 from config_ninja.controller import SYSTEMD_AVAILABLE
 
 try:
@@ -152,7 +152,7 @@ def load_config(ctx: typer.Context, value: typing.Optional[Path]) -> None:
         ctx.obj['settings'] = None
 
     else:
-        ctx.obj['settings'] = config_ninja.load_settings(settings_file)
+        ctx.obj['settings'] = settings.load(settings_file)
 
 
 ConfigAnnotation: TypeAlias = Annotated[
@@ -359,12 +359,6 @@ def _check_systemd() -> None:
         raise typer.Exit(1)
 
 
-def _new_controller(settings: pyspry.Settings, key: str) -> controller.BackendController:
-    ctrl = controller.BackendController(settings, key, handle_key_errors)
-    ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
-    return ctrl
-
-
 # ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
 #                                             command definitions
 
@@ -382,7 +376,9 @@ def get(
     """Print the value of the specified configuration object."""
     settings: pyspry.Settings = ctx.obj['settings']
 
-    controllers = [_new_controller(settings, key) for key in keys or settings.OBJECTS]
+    controllers = [
+        controller.BackendController.from_settings(settings, key, handle_key_errors) for key in keys or settings.OBJECTS
+    ]
 
     if poll:
         logger.debug(
@@ -411,7 +407,9 @@ def apply(
     """Apply the specified configuration to the system."""
     settings: pyspry.Settings = ctx.obj['settings']
 
-    controllers = [_new_controller(settings, key) for key in keys or settings.OBJECTS]
+    controllers = [
+        controller.BackendController.from_settings(settings, key, handle_key_errors) for key in keys or settings.OBJECTS
+    ]
 
     if poll:
         rich.print('Begin monitoring: ' + ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers))
@@ -431,7 +429,9 @@ def apply(
 def monitor(ctx: typer.Context) -> None:
     """Apply all configuration objects to the filesystem, and poll for changes."""
     settings: pyspry.Settings = ctx.obj['settings']
-    controllers = [controller.BackendController(settings, key, handle_key_errors) for key in settings.OBJECTS]
+    controllers = [
+        controller.BackendController.from_settings(settings, key, handle_key_errors) for key in settings.OBJECTS
+    ]
     for ctrl in controllers:
         ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
 
