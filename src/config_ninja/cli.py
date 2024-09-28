@@ -4,7 +4,7 @@
 
 .. note:: `typer`_ does not support `from __future__ import annotations` as of 2023-12-31
 
-.. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
+.. _config-ninja: https://config-ninja.readthedocs.io/home.html
 .. _typer: https://typer.tiangolo.com/
 """
 
