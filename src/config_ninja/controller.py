@@ -10,8 +10,7 @@ import pyspry
 
 from config_ninja import systemd
 from config_ninja.backend import Backend, FormatT, dumps, loads
-from config_ninja.contrib import get_backend
-from config_ninja.settings import DestSpec
+from config_ninja.settings import DestSpec, ObjectSpec
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     import sh
@@ -48,17 +47,8 @@ class BackendController:
     dest: DestSpec
     """Parameters for writing the configuration file."""
 
-    handle_key_errors: ErrorHandler
-    """Context manager for handling key errors."""
-
     key: str
-    """The key of the backend in the settings file"""
-
-    settings: pyspry.Settings
-    """`config-ninja`_'s own configuration settings
-
-    .. _config-ninja: https://bryant-finney.github.io/config-ninja/config_ninja.html
-    """
+    """The key of the configuration object in the settings file."""
 
     src_format: FormatT
     """The format of the configuration object in the backend.
@@ -67,38 +57,17 @@ class BackendController:
     object from the backend.
     """
 
-    def __init__(self, settings: pyspry.Settings, key: str, handle_key_errors: ErrorHandler) -> None:
-        """Parse the settings to initialize the backend."""
-        self.settings, self.key = settings, key
-
-        self.handle_key_errors = handle_key_errors
-        self.src_format, self.backend = self._init_backend()
-        self.dest = self._get_dest()
+    def __init__(self, spec: ObjectSpec, key: str) -> None:
+        """Ensure the parent directory of the destination path exists."""
+        self.backend = spec.source.backend
+        self.dest = spec.dest
+        self.key = key
+        self.src_format = spec.source.format
+        spec.dest.path.parent.mkdir(parents=True, exist_ok=True)
 
     def __str__(self) -> str:
         """Represent the controller as its backend populating its destination."""
         return f'{self.backend} ({self.src_format}) -> {self.dest}'
-
-    def _get_dest(self) -> DestSpec:
-        """Read the destination spec from the settings file."""
-        objects = self.settings.OBJECTS
-        with self.handle_key_errors(objects):
-            return DestSpec.from_primitives(objects[self.key]['dest'])
-
-    def _init_backend(self) -> tuple[FormatT, Backend]:
-        """Get the backend for the specified configuration object."""
-        objects = self.settings.OBJECTS
-
-        with self.handle_key_errors(objects):
-            source = objects[self.key]['source']
-            backend_class: type[Backend] = get_backend(source['backend'])
-            fmt = source.get('format', 'raw')
-            if source.get('new'):
-                backend = backend_class.new(**source['new']['kwargs'])
-            else:
-                backend = backend_class(**source['init']['kwargs'])
-
-        return fmt, backend
 
     def _do(self, action: ActionType, data: dict[str, typing.Any]) -> None:
         if self.dest.is_template:
@@ -107,6 +76,14 @@ class BackendController:
         else:
             fmt: FormatT = self.dest.format  # type: ignore[assignment]
             action(dumps(fmt, data))
+
+    @classmethod
+    def from_settings(cls, settings: pyspry.Settings, key: str, handle_key_errors: ErrorHandler) -> BackendController:
+        """Create a `BackendController` instance from the given settings."""
+        cfg_obj = settings.OBJECTS[key]
+        with handle_key_errors(cfg_obj):  # type: ignore[arg-type]
+            spec = ObjectSpec.from_primitives(cfg_obj)
+        return cls(spec, key)
 
     def get(self, do_print: typing.Callable[[str], typing.Any]) -> None:
         """Retrieve and print the value of the configuration object."""
