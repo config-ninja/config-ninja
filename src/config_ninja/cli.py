@@ -93,10 +93,13 @@ HelpAnnotation: TypeAlias = Annotated[
         help='Show this message and exit.',
     ),
 ]
-
-KeyAnnotation: TypeAlias = Annotated[
-    str,
-    typer.Argument(help='The key of the configuration object to retrieve', show_default=False),
+HookAnnotation: TypeAlias = Annotated[
+    typing.List[str],
+    typer.Argument(
+        help='Execute the named hook(s) (multiple values may be provided).',
+        show_default=False,
+        metavar='[HOOK...]',
+    ),
 ]
 OptionalKeyAnnotation: TypeAlias = Annotated[
     typing.Optional[typing.List[str]],
@@ -153,6 +156,7 @@ def load_config(ctx: typer.Context, value: typing.Optional[Path]) -> None:
 
     conf: settings.Config = settings.load(settings_file)
     ctx.obj['settings'] = conf
+    ctx.obj['settings_file'] = settings_file
 
     if 'logging_config' in ctx.obj and conf.settings.LOGGING:
         configure_logging(ctx, None)
@@ -459,6 +463,29 @@ def monitor(ctx: typer.Context) -> None:
 
     rich.print('Begin monitoring: ' + ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers))
     asyncio.run(poll_all(controllers, 'write'))
+
+
+@app.command()
+def hook(
+    ctx: typer.Context,
+    hook_names: HookAnnotation,
+    get_help: HelpAnnotation = None,
+    config: ConfigAnnotation = None,
+    verbose: VerbosityAnnotation = None,
+    version: VersionAnnotation = None,
+) -> None:
+    """Execute the named hook.
+
+    This command requires the `poe` extra in order to work.
+    """
+    conf: settings.Config = ctx.obj['settings']
+
+    if not conf.engine:
+        rich.print(f'[red]ERROR[/]: failed to load hooks from file: [purple]{ctx.obj['settings_file']}[/]')
+        raise typer.Exit(1)
+
+    for name in hook_names:
+        conf.engine.get_hook(name)()
 
 
 @self_app.command(name='print')
