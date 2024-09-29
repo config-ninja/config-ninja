@@ -15,6 +15,7 @@ from config_ninja import cli, settings
 # pylint: disable=redefined-outer-name
 
 runner = testing.CliRunner()
+logging_config_file = Path('examples/logging.yaml')
 
 
 @pytest.fixture
@@ -40,12 +41,11 @@ def test_default_logging_level(mock_logging_dict_config: mock.MagicMock) -> None
 def test_logging_level(mock_logging_dict_config: mock.MagicMock) -> None:
     """Test the null result (the level of `logger` is not set)."""
     # Arrange
-    config_file = Path('examples/logging.yaml')
-    logging_cfg = settings.load(config_file).settings.LOGGING
+    logging_cfg = settings.load(logging_config_file).settings.LOGGING
     logging_level = logging_cfg['loggers']['tests.acceptance.test_620']['level']  # type: ignore[index]
 
     # Act
-    result = config_ninja('self', 'print', '--config', str(config_file))
+    result = config_ninja('self', 'print', '--config', str(logging_config_file))
 
     # Assert
     assert 0 == result.exit_code
@@ -57,9 +57,32 @@ def test_logging_level(mock_logging_dict_config: mock.MagicMock) -> None:
 
 
 def test_hook_is_executed(mock_task_execute_method: mock.MagicMock) -> None:
-    """Test that the hook is executed."""
+    """Test that the hooks are executed."""
     result = config_ninja('hook', 'print-environ', 'list-dir')
 
     assert 0 == result.exit_code, result.stdout
     assert ('printenv',) == mock_task_execute_method.call_args_list[0].args[0]
     assert ('ls',) == mock_task_execute_method.call_args_list[1].args[0]
+
+
+def test_hook_without_hooks(mock_task_execute_method: mock.MagicMock) -> None:
+    """Test that the hook is executed."""
+    result = config_ninja('hook', '--config', str(logging_config_file), 'print-environ')
+
+    assert 1 == result.exit_code, result.stdout
+    mock_task_execute_method.assert_not_called()
+    assert 'failed to load hooks from file' in result.stdout
+    assert str(logging_config_file) in result.stdout
+
+
+def test_hook_undefined(mock_task_execute_method: mock.MagicMock) -> None:
+    """Verify that running an undefined hook name raises a `ValueError`."""
+    result = config_ninja('hook', 'undefined-hook')
+    exc = result.exception
+
+    assert 1 == result.exit_code, result.stdout
+    mock_task_execute_method.assert_not_called()
+
+    assert exc is not None
+    assert ValueError is exc.__class__
+    assert 'Undefined hook' in exc.args[0]

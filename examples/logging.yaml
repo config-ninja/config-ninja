@@ -4,3 +4,4 @@ CONFIG_NINJA_LOGGING:
     # this example sets a specific logger to the DEBUG level
     tests.acceptance.test_620:
       level: DEBUG
+  disable_existing_loggers: false

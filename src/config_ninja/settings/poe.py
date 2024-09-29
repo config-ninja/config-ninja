@@ -32,11 +32,11 @@ class Hook:
 
     def __init__(self, engine: HooksEngine, name: str) -> None:
         """Raise a `ValueError` if the engine does not define a hook by the given name."""
-        if name not in engine:
-            raise ValueError(f'Undefined hook: {name!r}')
-
         self.name = name
         self.engine = engine
+
+        if name not in engine:
+            raise ValueError(f'Undefined hook {name!r} (options: {list(engine.tasks)})')
 
     def __repr__(self) -> str:
         """The string representation of the `Hook` instance.
