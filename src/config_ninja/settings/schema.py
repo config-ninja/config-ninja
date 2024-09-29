@@ -262,6 +262,9 @@ class ConfigNinjaObject(TypedDict):
     dest: Dest
     """Metadata for the object's output file."""
 
+    hooks: NotRequired[list[str]]
+    """The names of the `poethepoet` tasks to run as callback hooks; not always defined."""
+
     source: Source
     """Configuration data for the object's `config_ninja.backend.Backend` data source."""
 
