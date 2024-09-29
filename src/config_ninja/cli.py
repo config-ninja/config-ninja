@@ -481,7 +481,8 @@ def hook(
     conf: settings.Config = ctx.obj['settings']
 
     if not conf.engine:
-        rich.print(f'[red]ERROR[/]: failed to load hooks from file: [purple]{ctx.obj['settings_file']}[/]')
+        fname = ctx.obj.get('settings_file')
+        rich.print(f'[red]ERROR[/]: failed to load hooks from file: [purple]{fname}[/]')
         raise typer.Exit(1)
 
     for name in hook_names:
