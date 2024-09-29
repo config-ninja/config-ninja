@@ -29,10 +29,14 @@ Integration with `systemd`.
 
 from __future__ import annotations
 
+import warnings
+from pathlib import Path
+
+import pyspry
+
 __version__ = '0.0.0'
 
-from config_ninja.settings import DEFAULT_PATHS
-from config_ninja.settings import load as load_settings
+from config_ninja.settings import DEFAULT_PATHS, load
 from config_ninja.settings import resolve_path as resolve_settings_path
 
 __all__ = ['DEFAULT_SETTINGS_PATHS', 'load_settings', 'resolve_settings_path']
@@ -48,3 +52,17 @@ The following locations are checked (ordered by priority):
 
 .. _config-ninja: https://config-ninja.readthedocs.io/home.html
 """
+
+
+def load_settings(path: Path) -> pyspry.Settings:
+    """(deprecated) Load the settings file at the given path.
+
+    This function is deprecated and will be removed in a future release. Use `config_ninja.settings.load()` instead.
+    """
+    warnings.warn(
+        '`config_ninja.load_settings()` is deprecated and will be removed in a future release. Use '
+        '`config_ninja.settings.load()` instead.',
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return load(path).settings
