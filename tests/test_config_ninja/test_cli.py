@@ -97,9 +97,16 @@ def test_get_example_appconfig() -> None:
 
 def test_get_example_local(settings: dict[str, Any]) -> None:
     """Get the 'example-local' configuration (as specified in config-ninja-settings.yaml)."""
+    # Arrange
+    expected = json.dumps(settings).replace(' ', '')
+
+    # Act
     result = runner.invoke(app, ['get', 'example-local'])
+    output = result.stdout.replace('\n', '').replace(' ', '')
+
+    # Assert
     assert 0 == result.exit_code, result.stdout
-    assert json.dumps(settings) == result.stdout.replace('\n', '').strip()
+    assert expected == output
 
 
 @pytest.mark.usefixtures('_patch_awatch')

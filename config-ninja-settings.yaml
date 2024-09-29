@@ -7,6 +7,9 @@ CONFIG_NINJA_OBJECTS:
       format: json
       path: /tmp/config-ninja/settings.json
 
+    # run the 'list-dir' task after writing to the destination path
+    hooks: [list-dir]
+
     # specify where the object is stored / retrieved from
     source:
       backend: local
@@ -43,3 +46,12 @@ CONFIG_NINJA_OBJECTS:
           application_name: Hello World 1
           configuration_profile_name: /dev/etc/datadog-agent/datadog.yaml
           environment_name: dev
+
+# task definitions are referenced by 'hooks'
+tool.poe:
+  tasks:
+    list-dir:
+      cmd: ls
+
+    print-environ:
+      cmd: printenv
