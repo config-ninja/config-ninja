@@ -303,3 +303,9 @@ example_file.__doc__ = f"""Write the test configuration to a file in the tempora
 def mock_logging_dict_config(mocker: pytest_mock.MockerFixture) -> mock.MagicMock:
     """Mock the `logging.config.dictConfig()` function."""
     return mocker.patch('logging.config.dictConfig')
+
+
+@pytest.fixture(autouse=True)
+def mock_stop_coverage_func(mocker: pytest_mock.MockerFixture) -> mock.MagicMock:
+    """Mock the `coverage` module to stop coverage collection."""
+    return mocker.patch('poethepoet.executor.base._stop_coverage')
