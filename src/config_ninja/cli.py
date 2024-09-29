@@ -18,7 +18,6 @@ import sys
 import typing
 from pathlib import Path
 
-import pyspry
 import rich
 import typer
 import yaml
@@ -152,10 +151,10 @@ def load_config(ctx: typer.Context, value: typing.Optional[Path]) -> None:
         ctx.obj['settings'] = None
         return
 
-    conf: pyspry.Settings = settings.load(settings_file)
+    conf: settings.Config = settings.load(settings_file)
     ctx.obj['settings'] = conf
 
-    if 'logging_config' in ctx.obj and conf.LOGGING:
+    if 'logging_config' in ctx.obj and conf.settings.LOGGING:
         configure_logging(ctx, None)
 
 
@@ -298,10 +297,10 @@ def configure_logging(ctx: typer.Context, verbose: typing.Optional[bool] = None)
         'logging_config', copy.deepcopy(settings.DEFAULT_LOGGING_CONFIG)
     )
 
-    conf: typing.Optional[pyspry.Settings] = ctx.obj.get('settings')
-    logging_settings: schema.DictConfig = (conf.LOGGING or {}) if conf else {}  # type: ignore[assignment]
+    conf: typing.Optional[settings.Config] = ctx.obj.get('settings')
+    new_logging_config: schema.DictConfig = (conf.settings.LOGGING or {}) if conf else {}  # type: ignore[assignment]
 
-    for key, value in logging_settings.items():
+    for key, value in new_logging_config.items():
         base = logging_config.get(key, {})
         if isinstance(base, dict):
             base.update(value)  # type: ignore[call-overload]
@@ -397,10 +396,11 @@ def get(
     version: VersionAnnotation = None,
 ) -> None:
     """Print the value of the specified configuration object."""
-    settings: pyspry.Settings = ctx.obj['settings']
+    conf: settings.Config = ctx.obj['settings']
 
     controllers = [
-        controller.BackendController.from_settings(settings, key, handle_key_errors) for key in keys or settings.OBJECTS
+        controller.BackendController.from_settings(conf.settings, key, handle_key_errors)
+        for key in keys or conf.settings.OBJECTS
     ]
 
     if poll:
@@ -428,10 +428,10 @@ def apply(
     version: VersionAnnotation = None,
 ) -> None:
     """Apply the specified configuration to the system."""
-    settings: pyspry.Settings = ctx.obj['settings']
-
+    conf: settings.Config = ctx.obj['settings']
     controllers = [
-        controller.BackendController.from_settings(settings, key, handle_key_errors) for key in keys or settings.OBJECTS
+        controller.BackendController.from_settings(conf.settings, key, handle_key_errors)
+        for key in keys or conf.settings.OBJECTS
     ]
 
     if poll:
@@ -451,12 +451,11 @@ def apply(
 )
 def monitor(ctx: typer.Context) -> None:
     """Apply all configuration objects to the filesystem, and poll for changes."""
-    settings: pyspry.Settings = ctx.obj['settings']
+    conf: settings.Config = ctx.obj['settings']
     controllers = [
-        controller.BackendController.from_settings(settings, key, handle_key_errors) for key in settings.OBJECTS
+        controller.BackendController.from_settings(conf.settings, key, handle_key_errors)
+        for key in conf.settings.OBJECTS
     ]
-    for ctrl in controllers:
-        ctrl.dest.path.parent.mkdir(parents=True, exist_ok=True)
 
     rich.print('Begin monitoring: ' + ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers))
     asyncio.run(poll_all(controllers, 'write'))
@@ -471,9 +470,11 @@ def self_print(
     version: VersionAnnotation = None,
 ) -> None:
     """Print [bold blue]config-ninja[/]'s settings."""
-    if not (settings := ctx.obj.get('settings')):
+    conf: typing.Optional[settings.Config] = ctx.obj['settings']
+    if not conf:
         raise typer.Exit(1)
-    rich.print(yaml.dump(settings.OBJECTS))
+
+    rich.print(yaml.dump(conf.settings.OBJECTS))
 
 
 @self_app.command()

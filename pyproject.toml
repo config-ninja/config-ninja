@@ -260,15 +260,28 @@ cmd = """
     config_ninja.backend
     config_ninja.cli
     config_ninja.contrib
+    config_ninja.controller
     config_ninja.settings
+    config_ninja.settings.poe
+    config_ninja.settings.schema
     config_ninja.systemd
     dataclasses
     jinja2
+    logging
+    logging.config
     mypy_boto3_appconfig
     mypy_boto3_appconfig.client
     mypy_boto3_appconfigdata
     mypy_boto3_appconfigdata.client
     pathlib
+    poethepoet
+    poethepoet.app
+    poethepoet.config
+    poethepoet.context
+    poethepoet.exceptions
+    poethepoet.task
+    poethepoet.task.base
+    poethepoet.ui
     pyspry
     pyspry.base
     pytest

@@ -14,8 +14,8 @@ import pytest_mock
 import typer
 from typer import testing
 
-import config_ninja as cn
-from config_ninja import cli, controller
+from config_ninja import cli
+from config_ninja import settings as settings_module
 
 try:
     from typing import TypedDict
@@ -54,7 +54,7 @@ runner = testing.CliRunner()
 class TruthT(TypedDict):
     """Type annotation for the structure of the truth dictionary."""
 
-    dest: controller.DestSpec
+    dest: settings_module.DestSpec
     source: pyspry.Source
     source_path: str
 
@@ -67,7 +67,7 @@ def config_ninja(*args: str) -> click.testing.Result:
 @pytest.fixture
 def settings() -> pyspry.Settings:
     """Return a dictionary with settings for the test."""
-    return cn.load_settings(Path('config-ninja-settings.yaml'))
+    return settings_module.load(Path('config-ninja-settings.yaml')).settings
 
 
 @pytest.fixture
@@ -91,7 +91,7 @@ def test_output_message_per_config(
     """
     # Arrange
     truth: TruthT = {
-        'dest': controller.DestSpec.from_primitives(settings.OBJECTS[config_key]['dest']),
+        'dest': settings_module.DestSpec.from_primitives(settings.OBJECTS[config_key]['dest']),
         'source': (source := settings.OBJECTS[config_key]['source']),
         'source_path': source['init' if 'init' in source else 'new']['kwargs']['path'],
     }

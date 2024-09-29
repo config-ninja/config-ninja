@@ -72,6 +72,7 @@ repos:
           - boto3
           - boto3-stubs[appconfig,appconfigdata]
           - jinja2
+          - poethepoet
           - pyspry
           - pytest
           - pytest-mock
@@ -96,6 +97,7 @@ repos:
           - boto3
           - boto3-stubs[appconfig,appconfigdata]
           - jinja2
+          - poethepoet
           - pyspry
           - pytest
           - pytest-mock

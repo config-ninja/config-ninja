@@ -31,7 +31,7 @@ def test_logging_level(mock_logging_dict_config: mock.MagicMock) -> None:
     """Test the null result (the level of `logger` is not set)."""
     # Arrange
     config_file = Path('examples/logging.yaml')
-    logging_cfg = settings.load(config_file).LOGGING
+    logging_cfg = settings.load(config_file).settings.LOGGING
     logging_level = logging_cfg['loggers']['tests.acceptance.test_620']['level']  # type: ignore[index]
 
     # Act
