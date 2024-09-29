@@ -10,7 +10,9 @@
 
 import asyncio
 import contextlib
+import copy
 import logging
+import logging.config
 import os
 import sys
 import typing
@@ -20,10 +22,10 @@ import pyspry
 import rich
 import typer
 import yaml
-from rich.logging import RichHandler
 from rich.markdown import Markdown
 
 from config_ninja import __version__, controller, settings, systemd
+from config_ninja.settings import schema
 
 try:
     from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
@@ -148,9 +150,13 @@ def load_config(ctx: typer.Context, value: typing.Optional[Path]) -> None:
             extra={'markup': True},
         )
         ctx.obj['settings'] = None
+        return
 
-    else:
-        ctx.obj['settings'] = settings.load(settings_file)
+    conf: pyspry.Settings = settings.load(settings_file)
+    ctx.obj['settings'] = conf
+
+    if 'logging_config' in ctx.obj and conf.LOGGING:
+        configure_logging(ctx, None)
 
 
 ConfigAnnotation: TypeAlias = Annotated[
@@ -282,15 +288,34 @@ def configure_logging(ctx: typer.Context, verbose: typing.Optional[bool] = None)
     if ctx.resilient_parsing:  # pragma: no cover  # this is for tab completions
         return
 
+    ctx.ensure_object(dict)
+
+    # the `--verbose` argument always overrides previous verbosity settings
+    verbose = verbose or ctx.obj.get('verbose')
     verbosity = logging.DEBUG if verbose else logging.INFO
 
-    logging.basicConfig(
-        level=verbosity,
-        format='%(message)s',
-        force=True,
-        datefmt='[%X]',
-        handlers=[RichHandler(rich_tracebacks=True)],
+    logging_config: schema.DictConfigDefault = ctx.obj.get(
+        'logging_config', copy.deepcopy(settings.DEFAULT_LOGGING_CONFIG)
     )
+
+    conf: typing.Optional[pyspry.Settings] = ctx.obj.get('settings')
+    logging_settings: schema.DictConfig = (conf.LOGGING or {}) if conf else {}  # type: ignore[assignment]
+
+    for key, value in logging_settings.items():
+        base = logging_config.get(key, {})
+        if isinstance(base, dict):
+            base.update(value)  # type: ignore[call-overload]
+        else:
+            logging_config[key] = value  # type: ignore[literal-required]
+
+    if verbose:
+        logging_config['root']['level'] = verbosity
+        ctx.obj['verbose'] = verbose
+
+    logging.config.dictConfig(logging_config)  # type: ignore[arg-type]
+
+    ctx.obj['logging_config'] = logging_config
+
     logger.debug(LOG_VERBOSITY_MESSAGE, logging.getLevelName(verbosity), extra={'markup': True})
 
 
