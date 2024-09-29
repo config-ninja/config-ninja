@@ -1,0 +1,6 @@
+# top-level key for logging settings
+CONFIG_NINJA_LOGGING:
+  loggers:
+    # this example sets a specific logger to the DEBUG level
+    tests.acceptance.test_620:
+      level: DEBUG

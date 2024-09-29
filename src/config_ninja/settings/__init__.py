@@ -1,5 +1,9 @@
 """Read and deserialize configuration for the `config-ninja`_ agent.
 
+## Schema
+
+See `config_ninja.settings.schema` for the schema of the `config-ninja`_ settings file.
+
 .. _config-ninja: https://config-ninja.readthedocs.io/home.html
 """
 
@@ -14,9 +18,18 @@ import pyspry
 
 from config_ninja.backend import DUMPERS, Backend, FormatT
 from config_ninja.contrib import get_backend
-from config_ninja.settings.schema import ConfigNinjaObject, Dest, Source
+from config_ninja.settings.schema import ConfigNinjaObject, Dest, DictConfigDefault, Source
 
-__all__ = ['DEFAULT_PATHS', 'DestSpec', 'ObjectSpec', 'PREFIX', 'SourceSpec', 'load', 'resolve_path']
+__all__ = [
+    'DEFAULT_LOGGING_CONFIG',
+    'DEFAULT_PATHS',
+    'DestSpec',
+    'ObjectSpec',
+    'PREFIX',
+    'SourceSpec',
+    'load',
+    'resolve_path',
+]
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +48,36 @@ The following locations are checked (ordered by priority):
 
 .. _config-ninja: https://config-ninja.readthedocs.io/home.html
 """
+
+
+DEFAULT_LOGGING_CONFIG: DictConfigDefault = {
+    'version': 1,
+    'formatters': {
+        'simple': {
+            'datefmt': logging.Formatter.default_time_format,
+            'format': '%(message)s',
+            'style': '%',
+            'validate': False,
+        },
+    },
+    'filters': {},
+    'handlers': {
+        'rich': {
+            'class': 'rich.logging.RichHandler',
+            'formatter': 'simple',
+            'rich_tracebacks': True,
+        },
+    },
+    'loggers': {},
+    'root': {
+        'handlers': ['rich'],
+        'level': logging.INFO,
+        'propagate': False,
+    },
+    'disable_existing_loggers': True,
+    'incremental': False,
+}
+"""Default logging configuration passed to `logging.config.dictConfig()`."""
 
 PREFIX = 'CONFIG_NINJA'
 """Each of `config-ninja`_'s settings must be prefixed with this string.
