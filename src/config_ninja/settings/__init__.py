@@ -21,7 +21,7 @@ from config_ninja.backend import DUMPERS, Backend, FormatT
 from config_ninja.contrib import get_backend
 from config_ninja.settings.schema import ConfigNinjaObject, Dest, DictConfigDefault, Source
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
     from config_ninja.settings.poe import HooksEngine
 
 __all__ = [

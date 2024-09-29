@@ -54,7 +54,7 @@ The following locations are checked (ordered by priority):
 """
 
 
-def load_settings(path: Path) -> pyspry.Settings:
+def load_settings(path: Path) -> pyspry.Settings:  # pragma: no cover
     """(deprecated) Load the settings file at the given path.
 
     This function is deprecated and will be removed in a future release. Use `config_ninja.settings.load()` instead.
