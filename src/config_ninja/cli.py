@@ -403,7 +403,7 @@ def get(
     conf: settings.Config = ctx.obj['settings']
 
     controllers = [
-        controller.BackendController.from_settings(conf.settings, key, handle_key_errors)
+        controller.BackendController.from_settings(conf, key, handle_key_errors)
         for key in keys or conf.settings.OBJECTS
     ]
 
@@ -434,7 +434,7 @@ def apply(
     """Apply the specified configuration to the system."""
     conf: settings.Config = ctx.obj['settings']
     controllers = [
-        controller.BackendController.from_settings(conf.settings, key, handle_key_errors)
+        controller.BackendController.from_settings(conf, key, handle_key_errors)
         for key in keys or conf.settings.OBJECTS
     ]
 
@@ -457,8 +457,7 @@ def monitor(ctx: typer.Context) -> None:
     """Apply all configuration objects to the filesystem, and poll for changes."""
     conf: settings.Config = ctx.obj['settings']
     controllers = [
-        controller.BackendController.from_settings(conf.settings, key, handle_key_errors)
-        for key in conf.settings.OBJECTS
+        controller.BackendController.from_settings(conf, key, handle_key_errors) for key in conf.settings.OBJECTS
     ]
 
     rich.print('Begin monitoring: ' + ', '.join(f'[yellow]{ctrl.key}[/yellow]' for ctrl in controllers))

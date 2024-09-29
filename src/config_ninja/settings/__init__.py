@@ -22,7 +22,7 @@ from config_ninja.contrib import get_backend
 from config_ninja.settings.schema import ConfigNinjaObject, Dest, DictConfigDefault, Source
 
 if typing.TYPE_CHECKING:  # pragma: no cover
-    from config_ninja.settings.poe import HooksEngine
+    from config_ninja.settings.poe import Hook, HooksEngine
 
 __all__ = [
     'DEFAULT_LOGGING_CONFIG',
@@ -214,14 +214,27 @@ class ObjectSpec:
     dest: DestSpec
     """Destination metadata for the object's output file."""
 
+    hooks: tuple[Hook, ...]
+    """Zero or more `poethepoet` tasks to execute as callback hooks."""
+
     source: SourceSpec
     """Configuration for the object's `config_ninja.backend.Backend` data source."""
 
+    @staticmethod
+    def _load_hooks(data: ConfigNinjaObject, engine: HooksEngine | None) -> tuple[Hook, ...]:
+        hook_names: list[str] = data.get('hooks', [])
+        if hook_names and engine is None:
+            raise ValueError(f"'poethepoet' configuration must be defined for hooks in config to work: {data!r}")
+
+        return tuple(engine.get_hook(hook_name) for hook_name in hook_names)  # type: ignore[union-attr]
+
     @classmethod
-    def from_primitives(cls, data: ConfigNinjaObject) -> ObjectSpec:
+    def from_primitives(cls, data: ConfigNinjaObject, engine: HooksEngine | None) -> ObjectSpec:
         """Create an `ObjectSpec` instance from a dictionary of primitive types."""
         return ObjectSpec(
-            dest=DestSpec.from_primitives(data['dest']), source=SourceSpec.from_primitives(data['source'])
+            dest=DestSpec.from_primitives(data['dest']),
+            hooks=cls._load_hooks(data, engine),
+            source=SourceSpec.from_primitives(data['source']),
         )
 
 
