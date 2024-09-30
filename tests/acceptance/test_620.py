@@ -12,6 +12,11 @@ from typer import testing
 
 from config_ninja import cli, settings
 
+try:
+    from poethepoet import exceptions  # pyright: ignore[reportMissingTypeStubs]
+except ImportError:  # pragma: no cover
+    pytest.skip('poethepoet is not installed', allow_module_level=True)
+
 # pylint: disable=redefined-outer-name
 
 runner = testing.CliRunner()
@@ -21,7 +26,9 @@ logging_config_file = Path('examples/logging.yaml')
 @pytest.fixture
 def mock_task_execute_method(mocker: pytest_mock.MockFixture) -> mock.MagicMock:
     """Mock the `poethepoet.task.base.PoeTask.execute` method."""
-    return mocker.patch('poethepoet.executor.base.PoeExecutor.execute')
+    mocked = mocker.patch('poethepoet.executor.base.PoeExecutor.execute')
+    mocked.return_value = 0
+    return mocked
 
 
 def config_ninja(*args: str) -> click.testing.Result:
@@ -95,3 +102,42 @@ def test_example_callback(mock_task_execute_method: mock.MagicMock) -> None:
     assert 0 == result.exit_code, result.stdout
     mock_task_execute_method.assert_called_once()
     assert ('ls',) == mock_task_execute_method.call_args_list[0].args[0]
+
+
+def test_multi_callback(mock_task_execute_method: mock.MagicMock) -> None:
+    """Test that the complex sequence hook is executed for the example-local-template config object."""
+    num_tasks = 3
+    result = config_ninja('apply', 'example-local-template')
+
+    assert 0 == result.exit_code, result.stdout
+    assert num_tasks == mock_task_execute_method.call_count
+    assert ('ls',) == mock_task_execute_method.call_args_list[0].args[0]
+    assert ('printenv',) == mock_task_execute_method.call_args_list[1].args[0]
+    assert ('echo', 'success') == mock_task_execute_method.call_args_list[2].args[0]
+
+
+def test_execution_error(mocker: pytest_mock.MockerFixture) -> None:
+    """Verify behavior when a hook fails to execute."""
+    mocked = mocker.patch(
+        'poethepoet.executor.base.PoeExecutor.execute', side_effect=exceptions.ExecutionError('error executing hook')
+    )
+
+    result = config_ninja('apply', 'example-local')
+
+    assert 1 == result.exit_code, result.stdout
+    mocked.assert_called_once()
+
+    assert exceptions.ExecutionError is result.exception.__class__
+
+
+def test_multi_execution_error(mocker: pytest_mock.MockerFixture) -> None:
+    """Verify behavior when a command from a graph task returns a nonzero value."""
+    mocked = mocker.patch('poethepoet.executor.base.PoeExecutor.execute')
+    mocked.return_value = 1
+
+    result = config_ninja('apply', 'example-local-template')
+
+    assert 1 == result.exit_code, result.stdout
+    mocked.assert_called_once()
+
+    assert exceptions.ExecutionError is result.exception.__class__
