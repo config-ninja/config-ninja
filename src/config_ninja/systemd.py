@@ -49,11 +49,17 @@ import sdnotify
 
 if TYPE_CHECKING:  # pragma: no cover
     import sh
+
+    AVAILABLE = True
 else:
     try:
         import sh
     except ImportError:  # pragma: no cover
         sh = None
+        AVAILABLE = False
+    else:
+        AVAILABLE = hasattr(sh, 'systemctl')
+
 
 SERVICE_NAME = 'config-ninja.service'
 SYSTEM_INSTALL_PATH = Path('/etc/systemd/system')
