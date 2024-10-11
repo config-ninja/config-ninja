@@ -295,6 +295,52 @@ files = [
 chardet = ">=3.0.2"
 
 [[package]]
+name = "black"
+version = "24.8.0"
+description = "The uncompromising code formatter."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "black-24.8.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:09cdeb74d494ec023ded657f7092ba518e8cf78fa8386155e4a03fdcc44679e6"},
+    {file = "black-24.8.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:81c6742da39f33b08e791da38410f32e27d632260e599df7245cccee2064afeb"},
+    {file = "black-24.8.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:707a1ca89221bc8a1a64fb5e15ef39cd755633daa672a9db7498d1c19de66a42"},
+    {file = "black-24.8.0-cp310-cp310-win_amd64.whl", hash = "sha256:d6417535d99c37cee4091a2f24eb2b6d5ec42b144d50f1f2e436d9fe1916fe1a"},
+    {file = "black-24.8.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:fb6e2c0b86bbd43dee042e48059c9ad7830abd5c94b0bc518c0eeec57c3eddc1"},
+    {file = "black-24.8.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:837fd281f1908d0076844bc2b801ad2d369c78c45cf800cad7b61686051041af"},
+    {file = "black-24.8.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:62e8730977f0b77998029da7971fa896ceefa2c4c4933fcd593fa599ecbf97a4"},
+    {file = "black-24.8.0-cp311-cp311-win_amd64.whl", hash = "sha256:72901b4913cbac8972ad911dc4098d5753704d1f3c56e44ae8dce99eecb0e3af"},
+    {file = "black-24.8.0-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:7c046c1d1eeb7aea9335da62472481d3bbf3fd986e093cffd35f4385c94ae368"},
+    {file = "black-24.8.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:649f6d84ccbae73ab767e206772cc2d7a393a001070a4c814a546afd0d423aed"},
+    {file = "black-24.8.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:2b59b250fdba5f9a9cd9d0ece6e6d993d91ce877d121d161e4698af3eb9c1018"},
+    {file = "black-24.8.0-cp312-cp312-win_amd64.whl", hash = "sha256:6e55d30d44bed36593c3163b9bc63bf58b3b30e4611e4d88a0c3c239930ed5b2"},
+    {file = "black-24.8.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:505289f17ceda596658ae81b61ebbe2d9b25aa78067035184ed0a9d855d18afd"},
+    {file = "black-24.8.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:b19c9ad992c7883ad84c9b22aaa73562a16b819c1d8db7a1a1a49fb7ec13c7d2"},
+    {file = "black-24.8.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:1f13f7f386f86f8121d76599114bb8c17b69d962137fc70efe56137727c7047e"},
+    {file = "black-24.8.0-cp38-cp38-win_amd64.whl", hash = "sha256:f490dbd59680d809ca31efdae20e634f3fae27fba3ce0ba3208333b713bc3920"},
+    {file = "black-24.8.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:eab4dd44ce80dea27dc69db40dab62d4ca96112f87996bca68cd75639aeb2e4c"},
+    {file = "black-24.8.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:3c4285573d4897a7610054af5a890bde7c65cb466040c5f0c8b732812d7f0e5e"},
+    {file = "black-24.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:9e84e33b37be070ba135176c123ae52a51f82306def9f7d063ee302ecab2cf47"},
+    {file = "black-24.8.0-cp39-cp39-win_amd64.whl", hash = "sha256:73bbf84ed136e45d451a260c6b73ed674652f90a2b3211d6a35e78054563a9bb"},
+    {file = "black-24.8.0-py3-none-any.whl", hash = "sha256:972085c618ee94f402da1af548a4f218c754ea7e5dc70acb168bfaca4c2542ed"},
+    {file = "black-24.8.0.tar.gz", hash = "sha256:2500945420b6784c38b9ee885af039f5e7471ef284ab03fa35ecdde4688cd83f"},
+]
+
+[package.dependencies]
+click = ">=8.0.0"
+mypy-extensions = ">=0.4.3"
+packaging = ">=22.0"
+pathspec = ">=0.9.0"
+platformdirs = ">=2"
+tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+typing-extensions = {version = ">=4.0.1", markers = "python_version < \"3.11\""}
+
+[package.extras]
+colorama = ["colorama (>=0.4.3)"]
+d = ["aiohttp (>=3.7.4)", "aiohttp (>=3.7.4,!=3.9.0)"]
+jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
+uvloop = ["uvloop (>=0.15.2)"]
+
+[[package]]
 name = "bleach"
 version = "6.1.0"
 description = "An easy safelist-based HTML-sanitizing tool."
@@ -2098,6 +2144,26 @@ openapi = ["openapi-core (>=0.18.0,<0.19.0)", "ruamel-yaml"]
 test = ["hatch", "ipykernel", "openapi-core (>=0.18.0,<0.19.0)", "openapi-spec-validator (>=0.6.0,<0.8.0)", "pytest (>=7.0,<8)", "pytest-console-scripts", "pytest-cov", "pytest-jupyter[server] (>=0.6.2)", "pytest-timeout", "requests-mock", "ruamel-yaml", "sphinxcontrib-spelling", "strict-rfc3339", "werkzeug"]
 
 [[package]]
+name = "linkify-it-py"
+version = "2.0.3"
+description = "Links recognition library with FULL unicode support."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "linkify-it-py-2.0.3.tar.gz", hash = "sha256:68cda27e162e9215c17d786649d1da0021a451bdc436ef9e0fa0ba5234b9b048"},
+    {file = "linkify_it_py-2.0.3-py3-none-any.whl", hash = "sha256:6bcbc417b0ac14323382aef5c5192c0075bf8a9d6b41820a2b66371eac6b6d79"},
+]
+
+[package.dependencies]
+uc-micro-py = "*"
+
+[package.extras]
+benchmark = ["pytest", "pytest-benchmark"]
+dev = ["black", "flake8", "isort", "pre-commit", "pyproject-flake8"]
+doc = ["myst-parser", "sphinx", "sphinx-book-theme"]
+test = ["coverage", "pytest", "pytest-cov"]
+
+[[package]]
 name = "lxml"
 version = "5.3.0"
 description = "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API."
@@ -2279,6 +2345,7 @@ files = [
 ]
 
 [package.dependencies]
+linkify-it-py = {version = ">=1,<3", optional = true, markers = "extra == \"linkify\""}
 mdurl = ">=0.1,<1.0"
 
 [package.extras]
@@ -2403,6 +2470,165 @@ files = [
     {file = "mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e"},
     {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
 ]
+
+[[package]]
+name = "mdformat"
+version = "0.7.17"
+description = "CommonMark compliant Markdown formatter"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mdformat-0.7.17-py3-none-any.whl", hash = "sha256:91ffc5e203f5814a6ad17515c77767fd2737fc12ffd8b58b7bb1d8b9aa6effaa"},
+    {file = "mdformat-0.7.17.tar.gz", hash = "sha256:a9dbb1838d43bb1e6f03bd5dca9412c552544a9bc42d6abb5dc32adfe8ae7c0d"},
+]
+
+[package.dependencies]
+importlib-metadata = {version = ">=3.6.0", markers = "python_version < \"3.10\""}
+markdown-it-py = ">=1.0.0,<4.0.0"
+tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+
+[[package]]
+name = "mdformat-black"
+version = "0.1.1"
+description = "Mdformat plugin to Blacken Python code blocks"
+optional = false
+python-versions = ">=3.6,<4.0"
+files = [
+    {file = "mdformat-black-0.1.1.tar.gz", hash = "sha256:57cad92aee314b87dee52a795cdb52469ab166589d2771e3ad3dd19db907ab62"},
+    {file = "mdformat_black-0.1.1-py3-none-any.whl", hash = "sha256:92a7f83779428ca04e939fcbd196ef6340bf9c83f33b2c50d4d3bb734a63d7b2"},
+]
+
+[package.dependencies]
+black = "*"
+mdformat = ">=0.3.0"
+
+[[package]]
+name = "mdformat-config"
+version = "0.1.3"
+description = "Mdformat plugin to beautify configuration and data-serialization formats"
+optional = false
+python-versions = ">=3.6,<4.0"
+files = [
+    {file = "mdformat-config-0.1.3.tar.gz", hash = "sha256:0af65deef832886e9a47df126d1a083f278e47ca631fc5f5750adfd7b84239c4"},
+    {file = "mdformat_config-0.1.3-py3-none-any.whl", hash = "sha256:a3f99eaf9970ee473be8cb459e323545781183327cae9bf070d2d3fb421dfd13"},
+]
+
+[package.dependencies]
+mdformat = ">=0.3.0"
+"ruamel.yaml" = ">=0.16.0"
+toml = ">=0.10.0"
+
+[[package]]
+name = "mdformat-footnote"
+version = "0.1.1"
+description = "An mdformat plugin for parsing/validating footnotes"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "mdformat_footnote-0.1.1-py3-none-any.whl", hash = "sha256:30063aaa0f74c36257c2e80fa0cf00d7c71a5277f27e98109e8765ae8678a95b"},
+    {file = "mdformat_footnote-0.1.1.tar.gz", hash = "sha256:3b85c4c84119f15f0b651df89c99a4f6f119fc46dca6b33f7edf4f09655d1126"},
+]
+
+[package.dependencies]
+mdformat = ">=0.7.8,<0.8.0"
+mdit-py-plugins = "*"
+
+[package.extras]
+dev = ["pre-commit"]
+test = ["coverage", "pytest (>=6.0,<7.0)", "pytest-cov"]
+
+[[package]]
+name = "mdformat-frontmatter"
+version = "2.0.8"
+description = "An mdformat plugin for parsing / ignoring frontmatter."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "mdformat_frontmatter-2.0.8-py3-none-any.whl", hash = "sha256:577396695af96ad66dff1ff781284ff3764a10be3ab8659f2ef842ab42264ebb"},
+    {file = "mdformat_frontmatter-2.0.8.tar.gz", hash = "sha256:c11190ae3f9c91ada78fbd820f5b221631b520484e0b644715aa0f6ed7f097ed"},
+]
+
+[package.dependencies]
+mdformat = ">=0.7.16,<0.8.0"
+mdit-py-plugins = ">=0.4.0"
+"ruamel.yaml" = "*"
+
+[package.extras]
+dev = ["flit (>=3.9)", "pre-commit", "python-semantic-release (>=8.3.0)"]
+test = ["coverage", "pytest (>=7.3)", "pytest-cov"]
+
+[[package]]
+name = "mdformat-gfm"
+version = "0.3.6"
+description = "Mdformat plugin for GitHub Flavored Markdown compatibility"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mdformat_gfm-0.3.6-py3-none-any.whl", hash = "sha256:579e3619bedd3b7123df888b6929ab8ac5dfc8205d0b67153b1633262bdafc42"},
+    {file = "mdformat_gfm-0.3.6.tar.gz", hash = "sha256:b405ebf651a15c186ca06712100e33bbe72afeafb02aa4a4a28ea26cc3219678"},
+]
+
+[package.dependencies]
+markdown-it-py = {version = "*", extras = ["linkify"]}
+mdformat = ">=0.7.5,<0.8.0"
+mdformat-tables = ">=0.4.0"
+mdit-py-plugins = ">=0.2.0"
+
+[[package]]
+name = "mdformat-gfm-alerts"
+version = "1.0.1"
+description = "An mdformat plugin for `gfm_alerts`."
+optional = false
+python-versions = ">=3.8.0"
+files = [
+    {file = "mdformat_gfm_alerts-1.0.1-py3-none-any.whl", hash = "sha256:3bc382daf004088bc7b848db22fdf43df4383454a161db5cbbbd0472877b1a53"},
+    {file = "mdformat_gfm_alerts-1.0.1.tar.gz", hash = "sha256:c11f837ac16ac7414331887a2df4b66175b68155077d56887e713661782141de"},
+]
+
+[package.dependencies]
+mdformat = ">=0.7.16"
+mdit-py-plugins = ">=0.4.0"
+
+[package.extras]
+dev = ["pre-commit"]
+test = ["pytest (>=7.4.4)", "pytest-beartype (>=0.0.2)", "pytest-cov (>=4.1.0)"]
+
+[[package]]
+name = "mdformat-tables"
+version = "1.0.0"
+description = "An mdformat plugin for rendering tables."
+optional = false
+python-versions = ">=3.7.0"
+files = [
+    {file = "mdformat_tables-1.0.0-py3-none-any.whl", hash = "sha256:94cd86126141b2adc3b04c08d1441eb1272b36c39146bab078249a41c7240a9a"},
+    {file = "mdformat_tables-1.0.0.tar.gz", hash = "sha256:a57db1ac17c4a125da794ef45539904bb8a9592e80557d525e1f169c96daa2c8"},
+]
+
+[package.dependencies]
+mdformat = ">=0.7.5,<0.8.0"
+wcwidth = ">=0.2.13"
+
+[package.extras]
+test = ["coverage", "pytest (>=6.0,<7.0)", "pytest-cov"]
+
+[[package]]
+name = "mdit-py-plugins"
+version = "0.4.2"
+description = "Collection of plugins for markdown-it-py"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mdit_py_plugins-0.4.2-py3-none-any.whl", hash = "sha256:0c673c3f889399a33b95e88d2f0d111b4447bdfea7f237dab2d488f459835636"},
+    {file = "mdit_py_plugins-0.4.2.tar.gz", hash = "sha256:5f2cd1fdb606ddf152d37ec30e46101a60512bc0e5fa1a7002c36647b09e26b5"},
+]
+
+[package.dependencies]
+markdown-it-py = ">=1.0.0,<4.0.0"
+
+[package.extras]
+code-style = ["pre-commit"]
+rtd = ["myst-parser", "sphinx-book-theme"]
+testing = ["coverage", "pytest", "pytest-cov", "pytest-regressions"]
 
 [[package]]
 name = "mdurl"
@@ -2766,6 +2992,17 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
     {file = "pastel-0.2.1-py2.py3-none-any.whl", hash = "sha256:4349225fcdf6c2bb34d483e523475de5bb04a5c10ef711263452cb37d7dd4364"},
     {file = "pastel-0.2.1.tar.gz", hash = "sha256:e6581ac04e973cac858828c6202c1e1e81fee1dc7de7683f3e1ffe0bfd8a573d"},
+]
+
+[[package]]
+name = "pathspec"
+version = "0.12.1"
+description = "Utility library for gitignore style pattern matching of file paths."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pathspec-0.12.1-py3-none-any.whl", hash = "sha256:a0d503e138a4c123b27490a4f7beda6a01c6f288df0e4a8b79c7eb0dc7b4cc08"},
+    {file = "pathspec-0.12.1.tar.gz", hash = "sha256:a482d51503a1ab33b1c67a6c3813a26953dbdc71c31dacaef9a838c4e29f5712"},
 ]
 
 [[package]]
@@ -4373,6 +4610,20 @@ files = [
 ]
 
 [[package]]
+name = "uc-micro-py"
+version = "1.0.3"
+description = "Micro subset of unicode data files for linkify-it-py projects."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "uc-micro-py-1.0.3.tar.gz", hash = "sha256:d321b92cff673ec58027c04015fcaa8bb1e005478643ff4a500882eaab88c48a"},
+    {file = "uc_micro_py-1.0.3-py3-none-any.whl", hash = "sha256:db1dffff340817673d7b466ec86114a9dc0e9d4d9b5ba229d9d60e5c12600cd5"},
+]
+
+[package.extras]
+test = ["coverage", "pytest", "pytest-cov"]
+
+[[package]]
 name = "uri-template"
 version = "1.3.0"
 description = "RFC 6570 URI Template Processor"
@@ -4662,4 +4913,4 @@ local = ["watchfiles"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "673149b22edd5aa3bc94f8b3dddcbbb9a49c453456ddfaf1a230dc434a902d91"
+content-hash = "c98d7ce49a1027c307ac2ba5a91e97761f56d9edab004bb4245350f7913f621b"

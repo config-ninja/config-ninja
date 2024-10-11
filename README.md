@@ -63,8 +63,6 @@ After installing `config-ninja`, enable it as a `systemd` service for the curren
 config-ninja self install --user
 ```
 
-[all available backends]: https://config-ninja.github.io/config-ninja/config_ninja/contrib.html#available-backends
-
 ## How It Works
 
 To demonstrate how the mechanics work locally:
@@ -145,3 +143,5 @@ sequenceDiagram
     backend->>+config-ninja: [backend changed] fetch config
     config-ninja->>-filesystem: write updated configuration file
 ```
+
+[all available backends]: https://config-ninja.github.io/config-ninja/config_ninja/contrib.html#available-backends
