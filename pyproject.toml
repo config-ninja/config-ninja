@@ -24,6 +24,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Typing :: Typed",
 ]
 
@@ -392,7 +393,7 @@ shell = """
 [tool.poe.tasks.test-python-versions]
 help = "Run the test suite in separate virtual environments for each supported Python version"
 shell = """
-  for py in 3.8 3.9 3.10 3.11 3.12; do
+  for py in 3.8 3.9 3.10 3.11 3.12 3.13; do
     poetry run poe test-py $py
   done
 """
