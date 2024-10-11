@@ -148,6 +148,7 @@ pre-commit = [
   {version = "<3.6", python = "<3.9"},
   {version = ">=3.6", python = ">=3.9"}
 ]
+yamlfix = "^1.16"
 
 [tool.poetry.group.misc.dependencies]
 certifi = ">=2023.07.22"
@@ -924,3 +925,8 @@ max-complexity = 5
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.yamlfix]
+line_length = 120
+section_whitelines = 1
+whitelines = 1

@@ -1,3 +1,4 @@
+---
 # the following top-level key is required
 CONFIG_NINJA_OBJECTS:
   # each second-level key identifies a config-ninja object

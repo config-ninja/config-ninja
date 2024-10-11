@@ -1,5 +1,7 @@
+---
 name: setup
 description: Execute steps to set up the project
+
 inputs:
   artifacts:
     description: The path to the artifacts to upload
@@ -11,11 +13,11 @@ inputs:
 
   poetry-groups:
     description: The dependency groups to install with poetry
-    default: ""
+    default: ''
 
   python-version:
     description: The version of Python to use
-    default: "3.13"
+    default: '3.13'
 
 runs:
   steps:
@@ -30,9 +32,7 @@ runs:
       shell: sh
 
     - id: poetry
-      run: tr -d '\n' <<<"${{ inputs.poetry-groups }}" |
-        tr -c '[:alnum:]' '-' |
-        xargs printf 'groups=%s\n' >>"$GITHUB_OUTPUT"
+      run: tr -d '\n' <<<"${{ inputs.poetry-groups }}" | tr -c '[:alnum:]' '-' | xargs printf 'groups=%s\n' >>"$GITHUB_OUTPUT"
       shell: bash
 
     - uses: actions/cache@v4
@@ -40,9 +40,7 @@ runs:
         path: ~/.cache
         key: ${{ inputs.python-version }}-${{ steps.poetry.outputs.groups }}
 
-    - run: poetry
-        ${{ inputs.poetry-groups && format('install --only {0}', inputs.poetry-groups) || 'install'}}
-        --all-extras
+    - run: poetry ${{ inputs.poetry-groups && format('install --only {0}', inputs.poetry-groups) || 'install'}} --all-extras
         --sync
       shell: sh
 

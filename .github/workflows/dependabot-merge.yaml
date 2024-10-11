@@ -1,3 +1,4 @@
+---
 name: Dependabot Auto
 on: pull_request
 
@@ -22,8 +23,7 @@ jobs:
 
   auto-approve:
     env:
-      APPROVE: gh pr review --approve ${{github.event.pull_request.html_url}} &&
-        echo PR_APPROVED=true >>$GITHUB_OUTPUT
+      APPROVE: gh pr review --approve ${{github.event.pull_request.html_url}} && echo PR_APPROVED=true >>$GITHUB_OUTPUT
 
     if: github.actor == 'dependabot[bot]'
 
@@ -35,22 +35,18 @@ jobs:
     steps:
       # automatically approve dev dependencies and indirect dependencies that are not major updates
       - id: dev-or-indirect
-        if: ( needs.metadata.outputs.dependency-type == 'direct:development' ||
-          needs.metadata.outputs.dependency-type == 'indirect' ) &&
-          needs.metadata.outputs.update-type != 'version-update:semver-major'
+        if: ( needs.metadata.outputs.dependency-type == 'direct:development' || needs.metadata.outputs.dependency-type ==
+          'indirect' ) && needs.metadata.outputs.update-type != 'version-update:semver-major'
         run: eval $APPROVE
 
       # automatically approve boto3 updates that are not major updates
       - id: boto3
-        if: steps.dev-or-indirect.outputs.PR_APPROVED != 'true' &&
-          needs.metadata.outputs.dependency-type == 'direct:production' &&
-          contains(needs.metadata.outputs.dependency-names, 'boto3') &&
-          needs.metadata.outputs.update-type != 'version-update:semver-major'
+        if: steps.dev-or-indirect.outputs.PR_APPROVED != 'true' && needs.metadata.outputs.dependency-type == 'direct:production'
+          && contains(needs.metadata.outputs.dependency-names, 'boto3') && needs.metadata.outputs.update-type != 'version-update:semver-major'
         run: eval $APPROVE
 
       # post a comment that the PR needs to be reviewed
-      - if: steps.dev-or-indirect.outputs.PR_APPROVED != 'true' &&
-          steps.boto3.outputs.PR_APPROVED != 'true'
+      - if: steps.dev-or-indirect.outputs.PR_APPROVED != 'true' && steps.boto3.outputs.PR_APPROVED != 'true'
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
