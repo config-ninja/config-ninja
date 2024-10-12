@@ -1,3 +1,4 @@
+---
 # top-level key for logging settings
 CONFIG_NINJA_LOGGING:
   loggers:
