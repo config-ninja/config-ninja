@@ -47,7 +47,7 @@ jobs:
 
       # post a comment that the PR needs to be reviewed
       - if: steps.dev-or-indirect.outputs.PR_APPROVED != 'true' && steps.boto3.outputs.PR_APPROVED != 'true'
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
             > [!IMPORTANT]
