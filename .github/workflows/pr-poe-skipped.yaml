@@ -1,18 +1,20 @@
+---
 # Run this workflow to test Python code changes.
 name: 🎨 poe (PR)
 
 on:
   pull_request:
     paths:
-      - "*"
-      - "**"
-      - "!**/*.py"
-      - "!*.py"
-      - "!.pre-commit-config.yaml"
-      - "!poetry.lock"
-      - "!pyproject.toml"
-      - "!.github/workflows/pr-poe.yaml"
-      - "!.github/actions/poe/*"
+      - '*'
+      - '**'
+      - '!**/*.py'
+      - '!*.py'
+      - '!.pre-commit-config.yaml'
+      - '!poetry.lock'
+      - '!pyproject.toml'
+      - '!.github/workflows/pr-poe.yaml'
+      - '!.github/actions/poe/*'
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -23,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        py: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
       - run: printf "skipping 'poe test' job (no relevant changes) ✅"

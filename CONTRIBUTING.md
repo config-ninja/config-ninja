@@ -26,16 +26,9 @@ There are several ways you can contribute to `config-ninja`.
 
 If you encounter any bugs while using `config-ninja`, please [open a new bug issue] using the [bug_report.md] template.
 
-[open a new bug issue]: https://github.com/bryant-finney/config-ninja/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=bug%3A+...
-[bug_report.md]: .github/ISSUE_TEMPLATE/bug_report.md
-
 ### Suggesting Features / Enhancements ✨
 
 If you have any ideas or suggestions to improve `config-ninja`, please [open a new issue] using the [feature_request.md] or [propose_enhancement.md] template.
-
-[open a new issue]: https://github.com/bryant-finney/config-ninja/issues/new/choose
-[feature_request.md]: .github/ISSUE_TEMPLATE/feature_request.md
-[propose_enhancement.md]: .github/ISSUE_TEMPLATE/propose_enhancement.md
 
 ### Pull Requests
 
@@ -47,7 +40,6 @@ Pull requests for bug fixes, enhancements, and new features are very welcome. To
    description of your changes
 
 > [!NOTE]
->
 > Each contribution must pass all CI/CD and linting tests in order to be considered.
 
 Once your pull request is submitted, it will be reviewed by the project maintainers. Please be patient, as it may take some time to receive feedback.
@@ -59,7 +51,6 @@ The following system dependencies are required:
 - [`poetry`](https://python-poetry.org/docs/#installation): manage dependencies and virtual environments
 - [`pre-commit`](https://pre-commit.com/#install): run linters and formatters for the package
   - > [!TIP]
-    >
     > `pre-commit` is included as a `dev` dependency; however, it tends to work better when it's installed at the user / system level
 - (optional) [`direnv`](https://direnv.net/docs/installation.html): automatically execute the [`.envrc`](./.envrc) script to install project dependencies
   - if you don't want to set up `direnv`, you can manually run `. ./.envrc` instead
@@ -98,3 +89,9 @@ CONFIGURED TASKS
 ## License
 
 By contributing to `config-ninja`, you agree that your contributions will be licensed under the project's [OSI approved license](LICENSE).
+
+[bug_report.md]: .github/ISSUE_TEMPLATE/bug_report.md
+[feature_request.md]: .github/ISSUE_TEMPLATE/feature_request.md
+[open a new bug issue]: https://github.com/bryant-finney/config-ninja/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=bug%3A+...
+[open a new issue]: https://github.com/bryant-finney/config-ninja/issues/new/choose
+[propose_enhancement.md]: .github/ISSUE_TEMPLATE/propose_enhancement.md

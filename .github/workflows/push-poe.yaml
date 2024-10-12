@@ -1,3 +1,4 @@
+---
 # Run this workflow to test Python code changes.
 name: 🎨 poe (push)
 
@@ -19,7 +20,7 @@ jobs:
   test:
     strategy:
       matrix:
-        py: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
 
     runs-on: ubuntu-latest
     steps:
@@ -44,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/poe
         with:
-          artifacts: ""
+          artifacts: ''
           poe-task: check-for-prerelease
 
       - id: check
@@ -52,10 +53,7 @@ jobs:
 
   release:
     if: needs.check.outputs.release == 'true'
-    needs:
-      - lint
-      - test
-      - check
+    needs: [lint, test, check]
 
     outputs:
       new: ${{ steps.semantic-release.outputs.released }}
@@ -83,10 +81,7 @@ jobs:
 
   docs:
     if: needs.check.outputs.release != 'true'
-    needs:
-      - lint
-      - test
-      - check
+    needs: [lint, test, check]
 
     runs-on: ubuntu-latest
     steps:
@@ -97,22 +92,22 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: lint-docs-py3.12
+          name: lint-docs-py3.13
           path: docs
 
       - uses: actions/download-artifact@v4
         with:
-          name: test-docs-py3.12
+          name: test-docs-py3.13
           path: docs
 
       - uses: ./.github/actions/poe
         with:
-          artifacts: ""
+          artifacts: ''
           poe-task: setup-versioning
 
       - uses: ./.github/actions/poe
         with:
-          artifacts: ""
+          artifacts: ''
           poe-task: docs
 
       - name: Fix permissions
@@ -133,9 +128,7 @@ jobs:
       name: GitHub Pages
       url: ${{ steps.deploy.outputs.page_url }}
 
-    needs:
-      - check
-      - docs
+    needs: [check, docs]
 
     permissions:
       pages: write
@@ -154,10 +147,7 @@ jobs:
       url: https://test.pypi.org/p/config-ninja
 
     if: needs.check.outputs.release != 'true'  && github.ref_type == 'tag'
-    needs:
-      - check
-      - lint
-      - test
+    needs: [check, lint, test]
 
     permissions:
       id-token: write
@@ -170,12 +160,12 @@ jobs:
 
       - uses: ./.github/actions/poe
         with:
-          artifacts: ""
+          artifacts: ''
           poe-task: setup-versioning
 
       - uses: ./.github/actions/poe
         with:
-          artifacts: ""
+          artifacts: ''
           poe-task: build-pkg
 
       - uses: pypa/gh-action-pypi-publish@release/v1
@@ -188,8 +178,7 @@ jobs:
       url: https://pypi.org/p/config-ninja
 
     if: github.ref_type == 'tag'
-    needs:
-      - test-pypi
+    needs: [test-pypi]
 
     permissions:
       id-token: write
@@ -202,12 +191,12 @@ jobs:
 
       - uses: ./.github/actions/poe
         with:
-          artifacts: ""
+          artifacts: ''
           poe-task: setup-versioning
 
       - uses: ./.github/actions/poe
         with:
-          artifacts: ""
+          artifacts: ''
           poe-task: build-pkg
 
       - uses: pypa/gh-action-pypi-publish@release/v1

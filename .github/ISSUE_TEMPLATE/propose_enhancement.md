@@ -1,9 +1,9 @@
 ---
 name: Propose an enhancement
 about: Suggest an improvement to this project's existing implementation, operations, or maintenance
-title: "refactor: ..."
+title: 'refactor: ...'
 labels: enhancement
-assignees: ""
+assignees: ''
 ---
 
 # Enhancement Proposal

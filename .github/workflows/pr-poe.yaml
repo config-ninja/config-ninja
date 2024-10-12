@@ -1,11 +1,12 @@
+---
 # Run this workflow to test Python code changes.
 name: 🎨 poe (PR)
 
 on:
   pull_request:
     paths:
-      - "**/*.py"
-      - "*.py"
+      - '**/*.py'
+      - '*.py'
       - .pre-commit-config.yaml
       - poetry.lock
       - pyproject.toml
@@ -27,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        py: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
       - uses: actions/checkout@v4
