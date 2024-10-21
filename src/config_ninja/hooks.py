@@ -14,8 +14,6 @@ from poethepoet.task.base import PoeTask, TaskContext, TaskSpecFactory
 from poethepoet.task.graph import TaskExecutionGraph
 from poethepoet.ui import PoeUi
 
-from config_ninja.settings import DEFAULT_PATHS
-
 __all__ = ['Hook', 'HooksEngine', 'exceptions']
 
 logger = logging.getLogger(__name__)
@@ -106,9 +104,9 @@ class HooksEngine:
             self.run_task(task)
 
     @classmethod
-    def load_file(cls, path: Path) -> HooksEngine:
+    def load_file(cls, path: Path, default_paths: list[Path]) -> HooksEngine:
         """Instantiate a `poethepoet.config.PoeConfig` object, then populate it with the given file."""
-        cfg = PoeConfig(config_name=tuple({str(p.name) for p in DEFAULT_PATHS}))
+        cfg = PoeConfig(config_name=tuple({str(p.name) for p in default_paths}))
 
         cfg.load(path)
         logger.debug('parsed hooks from %s: %s', path, list(cfg.task_names))

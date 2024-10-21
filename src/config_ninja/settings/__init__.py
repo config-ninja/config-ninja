@@ -22,7 +22,7 @@ from config_ninja.contrib import get_backend
 from config_ninja.settings.schema import ConfigNinjaObject, Dest, DictConfigDefault, Source
 
 if typing.TYPE_CHECKING:  # pragma: no cover
-    from config_ninja.settings.poe import Hook, HooksEngine
+    from config_ninja.hooks import Hook, HooksEngine
 
 __all__ = [
     'DEFAULT_LOGGING_CONFIG',
@@ -107,12 +107,12 @@ def load(path: Path) -> Config:
     `config_ninja.settings.poe.HooksEngine` is imported and loaded if the `poethepoet` extra is installed.
     """
     try:
-        from config_ninja.settings.poe import HooksEngine, exceptions
+        from config_ninja.hooks import HooksEngine, exceptions
     except ImportError:
         return Config(engine=None, settings=pyspry.Settings.load(path, PREFIX))
 
     try:
-        engine = HooksEngine.load_file(path)
+        engine = HooksEngine.load_file(path, DEFAULT_PATHS)
     except exceptions.PoeException:
         # this is expected if the file does not define any hooks
         logger.debug('could not load `poethepoet` hooks from %s', path, exc_info=True)

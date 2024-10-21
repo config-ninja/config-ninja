@@ -270,8 +270,8 @@ cmd = """
     config_ninja.cli
     config_ninja.contrib
     config_ninja.controller
+    config_ninja.hooks
     config_ninja.settings
-    config_ninja.settings.poe
     config_ninja.settings.schema
     config_ninja.systemd
     dataclasses
