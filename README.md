@@ -15,10 +15,10 @@ Similar to [`confd`](https://github.com/kelseyhightower/confd), manage your syst
 
 ## Features
 
-- ✅ Integration with [AWS AppConfig] for managing server configuration files
+- ✅ Integration with [AWS AppConfig](https://jinja.palletsprojects.com/en/3.1.x/) for managing server configuration files
 - ✅ Extensible design supports backends for new providers and formats
-- ✅ [`jinja2`] templating for arbitrary configuration file formats
-- ✅ Execute [`poethepoet`] tasks after deploying updates
+- ✅ [`jinja2`](https://jinja.palletsprojects.com/en/3.1.x/) templating for arbitrary configuration file formats
+- ✅ Execute [`poethepoet`](https://poethepoet.natn.io/index.html) tasks after deploying updates
 
 ## Installation
 
@@ -55,13 +55,13 @@ options:
 
 #### With `pip` / `pipx`
 
-Alternatively, use `pip` / `pipx` to install [all available backends] (or choose a specific one):
+Alternatively, use `pip` / `pipx` to install [all available backends](https://config-ninja.github.io/config-ninja/config_ninja/contrib.html#available-backends) (or choose a specific one):
 
 ```sh
 pipx install 'config-ninja[all]'
 ```
 
-#### With [`uv`]
+#### With [`uv`](https://github.com/astral-sh/uv)
 
 ```sh
 uv tool install 'config-ninja[all]'
@@ -90,7 +90,7 @@ sequenceDiagram
 		config-ninja->>-filesystem: write updated configuration file
 ```
 
-To demonstrate how the mechanics work (using the [local backend]):
+To demonstrate how the mechanics work (using the [local backend](https://config-ninja.readthedocs.io/en/latest/config_ninja/contrib/local.html)):
 
 1. create a settings file for `config-ninja`:
    ```sh
@@ -154,10 +154,3 @@ To demonstrate how the mechanics work (using the [local backend]):
    }
    ```
    Chances are, you'll want to update the `config-ninja-settings.yaml` file to use a remote backend (instead of `local`). See [config_ninja.contrib](https://config-ninja.github.io/config-ninja/config_ninja/contrib.html) for a list of supported config providers.
-
-[all available backends]: https://config-ninja.github.io/config-ninja/config_ninja/contrib.html#available-backends
-[aws appconfig]: https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html
-[local backend]: https://config-ninja.readthedocs.io/en/latest/config_ninja/contrib/local.html
-[`jinja2`]: https://jinja.palletsprojects.com/en/3.1.x/
-[`poethepoet`]: (https://poethepoet.natn.io/index.html)
-[`uv`]: https://github.com/astral-sh/uv
