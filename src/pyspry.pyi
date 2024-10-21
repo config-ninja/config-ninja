@@ -10,6 +10,8 @@ from config_ninja.settings import ConfigNinjaObject
 from config_ninja.settings import Dest as Dest
 from config_ninja.settings import Source as Source
 
+# pylint: disable=unused-argument,missing-class-docstring,missing-function-docstring
+
 class Settings:
     OBJECTS: dict[str, ConfigNinjaObject]
 
