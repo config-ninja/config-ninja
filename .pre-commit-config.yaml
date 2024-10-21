@@ -98,7 +98,7 @@ repos:
           - watchfiles
 
         # mypy sometimes encounters false positives when run on individual files (instead of the whole project)
-        args: [.]
+        args: [--junit-xml, docs/reports/mypy.xml, --html-report, docs/reports/mypy-html, .]
         pass_filenames: false
 
   - repo: https://github.com/RobertCraigie/pyright-python

@@ -207,11 +207,12 @@ output = "docs/reports/coverage.xml"
 
 [tool.mypy]
 # https://mypy.readthedocs.io/en/latest/config_file.html
-junit_xml = "docs/reports/mypy.xml"
-html_report = "docs/reports/mypy-html"
 strict = true
-disallow_subclassing_any = false
-disallow_untyped_decorators = false
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
 ignore_missing_imports = true
 pretty = true
 show_column_numbers = true
