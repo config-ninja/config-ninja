@@ -1,4 +1,34 @@
-"""Integrate with `poethepoet` for callback hooks."""
+"""Integrate with `poethepoet` for callback hooks.
+
+## Example
+
+The following `config-ninja`_ settings file configures two local backends connected to three `poethepoet` hooks:
+```yaml
+.. include:: ../../examples/hooks.yaml
+    :end-before: example-0
+```
+```yaml
+  example-0:
+.. include:: ../../examples/hooks.yaml
+    :start-after: example-0:
+    :end-before: example-1
+```
+```yaml
+  example-1:
+.. include:: ../../examples/hooks.yaml
+    :start-after: example-1:
+    :end-before: # define
+```
+```yaml
+# define 'poethepoet' tasks in YAML (instead of TOML)
+tool.poe:
+  # ref https://poethepoet.natn.io/tasks/index.html
+  tasks:
+.. include:: ../../examples/hooks.yaml
+    :start-after: tasks:
+```
+.. _config-ninja: https://config-ninja.readthedocs.io/home.html
+"""
 
 from __future__ import annotations
 
@@ -30,11 +60,11 @@ class Hook:
 
     def __init__(self, engine: HooksEngine, name: str) -> None:
         """Raise a `ValueError` if the engine does not define a hook by the given name."""
-        self.name = name
-        self.engine = engine
-
         if name not in engine:
             raise ValueError(f'Undefined hook {name!r} (options: {list(engine.tasks)})')
+
+        self.name = name
+        self.engine = engine
 
     def __repr__(self) -> str:
         """The string representation of the `Hook` instance.
@@ -56,10 +86,14 @@ class Hook:
 class HooksEngine:
     """Encapsulate configuration for executing `poethepoet` tasks as callback hooks."""
 
-    config_file: Path
     config: PoeConfig
+    """Contains `poethepoet` configuration settings."""
+
     tasks: dict[str, PoeTask]
+    """Name `poethepoet.task.base.PoeTask` objects for execution by name."""
+
     ui: PoeUi
+    """Used to parse configuration for running tasks."""
 
     def __init__(self, config: PoeConfig, ui: PoeUi, tasks: dict[str, PoeTask]) -> None:
         """Initialize the engine with the given configuration, UI, and tasks."""
@@ -72,7 +106,7 @@ class HooksEngine:
         return item in self.tasks
 
     def get_hook(self, name: str) -> Hook:
-        """Initialize a `Hook` instance for running the `PoeTask` of the given name."""
+        """Initialize a `Hook` instance for running the `poethepoet.task.base.PoeTask` of the given name."""
         return Hook(self, name)
 
     def get_run_context(self, multistage: bool = False) -> context.RunContext:

@@ -2,6 +2,10 @@
 
 # Navigation
 
+## `config_ninja.cli`
+
+Commands and CLI documentation.
+
 ## `config_ninja.contrib`
 
 For supported backends.
@@ -14,9 +18,9 @@ Integrate with the AWS AppConfig service.
 
 Use a local file as the backend.
 
-## `config_ninja.cli`
+## `config_ninja.hooks`
 
-Commands and CLI documentation.
+Execute [`poethepoet`](https://poethepoet.natn.io/) tasks as callback hooks for backend updates.
 
 ## `config_ninja.settings`
 
@@ -29,8 +33,10 @@ Integration with `systemd`.
 
 from __future__ import annotations
 
+import sys
 import warnings
 from pathlib import Path
+from typing import Any
 
 import pyspry
 
@@ -66,3 +72,16 @@ def load_settings(path: Path) -> pyspry.Settings:  # pragma: no cover
         stacklevel=2,
     )
     return load(path).settings
+
+
+def main(*args: Any) -> None:  # pylint: disable=missing-function-docstring
+    """Entrypoint for the `config-ninja` CLI.
+
+    When arguments are provided, they are used to replace `sys.argv[1:]`.
+    """
+    if args:
+        sys.argv[1:] = list(args)
+
+    from config_ninja.cli import app
+
+    app(prog_name='config-ninja')

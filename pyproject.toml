@@ -851,6 +851,7 @@ redefining-builtins-modules = [
 ]
 
 [tool.pyright]
+exclude = ["docs"]
 strict = ["src"]
 typeCheckingMode = "strict"
 
