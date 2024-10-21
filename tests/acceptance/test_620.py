@@ -86,3 +86,12 @@ def test_hook_undefined(mock_task_execute_method: mock.MagicMock) -> None:
     assert exc is not None
     assert ValueError is exc.__class__
     assert 'Undefined hook' in exc.args[0]
+
+
+def test_example_callback(mock_task_execute_method: mock.MagicMock) -> None:
+    """Test that the example hook is executed for the example-local config object."""
+    result = config_ninja('apply', 'example-local')
+
+    assert 0 == result.exit_code, result.stdout
+    mock_task_execute_method.assert_called_once()
+    assert ('ls',) == mock_task_execute_method.call_args_list[0].args[0]
