@@ -6,11 +6,21 @@ from pathlib import Path
 from unittest import mock
 
 import click.testing
+import pytest
+import pytest_mock
 from typer import testing
 
 from config_ninja import cli, settings
 
+# pylint: disable=redefined-outer-name
+
 runner = testing.CliRunner()
+
+
+@pytest.fixture
+def mock_task_execute_method(mocker: pytest_mock.MockFixture) -> mock.MagicMock:
+    """Mock the `poethepoet.task.base.PoeTask.execute` method."""
+    return mocker.patch('poethepoet.executor.base.PoeExecutor.execute')
 
 
 def config_ninja(*args: str) -> click.testing.Result:
@@ -44,3 +54,12 @@ def test_logging_level(mock_logging_dict_config: mock.MagicMock) -> None:
         logging_level
         == mock_logging_dict_config.call_args_list[-1][0][0]['loggers']['tests.acceptance.test_620']['level']
     )
+
+
+def test_hook_is_executed(mock_task_execute_method: mock.MagicMock) -> None:
+    """Test that the hook is executed."""
+    result = config_ninja('hook', 'print-environ', 'list-dir')
+
+    assert 0 == result.exit_code, result.stdout
+    assert ('printenv',) == mock_task_execute_method.call_args_list[0].args[0]
+    assert ('ls',) == mock_task_execute_method.call_args_list[1].args[0]
