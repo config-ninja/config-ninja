@@ -14,7 +14,7 @@ from config_ninja.settings import DestSpec, ObjectSpec
 
 try:
     from typing import TypeAlias  # type: ignore[attr-defined,unused-ignore]
-except ImportError:
+except ImportError:  # pragma: no cover
     from typing_extensions import TypeAlias  # type: ignore[assignment,attr-defined,unused-ignore]
 
 __all__ = ['BackendController', 'DestSpec', 'ErrorHandler']
