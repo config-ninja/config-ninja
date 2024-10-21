@@ -104,11 +104,24 @@ class Config:
 def load(path: Path) -> Config:
     """Load the settings from the given path.
 
-    `config_ninja.settings.poe.HooksEngine` is imported and loaded if the `poethepoet` extra is installed.
+    >>> conf = load('config-ninja-settings.yaml')
+    >>> conf.settings.__class__, conf.engine.__class__
+    (<class 'pyspry.base.Settings'>, <class 'config_ninja.hooks.HooksEngine'>)
+
+
+    `config_ninja.hooks.HooksEngine` is imported and loaded if the `poethepoet` extra is installed. When not
+        installed, the `ImportError` is handled, and `engine=None` is returned in place of
+        `config_ninja.hooks.HooksEngine`.
+
+    >>> seed_import_error()
+    >>> load('examples/hooks.yaml').engine is None
+    True
+
     """
     try:
         from config_ninja.hooks import HooksEngine, exceptions
-    except ImportError:
+    except ImportError as exc:
+        logger.debug('%s: %s', exc.name, exc.msg)
         return Config(engine=None, settings=pyspry.Settings.load(path, PREFIX))
 
     try:
@@ -230,7 +243,32 @@ class ObjectSpec:
 
     @classmethod
     def from_primitives(cls, data: ConfigNinjaObject, engine: HooksEngine | None) -> ObjectSpec:
-        """Create an `ObjectSpec` instance from a dictionary of primitive types."""
+        """Create an `ObjectSpec` instance from a dictionary of primitive types.
+
+        A `ValueError` is raised when hooks are referenced by the `ConfigNinjaObject` but the `HooksEngine` is not
+            provided:
+
+        >>> data = {
+        ...   'dest': {
+        ...     'path': '/dev/null',
+        ...     'format': 'yaml'
+        ...   },
+        ...   'source': {
+        ...     'backend': 'local',
+        ...     'init': {
+        ...       'kwargs': {
+        ...         'path': 'example.yaml'
+        ...       }
+        ...     }
+        ...   },
+        ...   'hooks': ['foo']
+        ... }
+
+        >>> ObjectSpec.from_primitives(data, None)
+        Traceback (most recent call last):
+        ...
+        ValueError: 'poethepoet' configuration must be defined for hooks in config to work: ...
+        """
         return ObjectSpec(
             dest=DestSpec.from_primitives(data['dest']),
             hooks=cls._load_hooks(data, engine),

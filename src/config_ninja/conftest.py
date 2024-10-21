@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import builtins
 import logging
+import sys
+from functools import partial
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator
 from unittest import mock
 
 import pytest
@@ -66,6 +68,12 @@ class ExampleBackend:
         self.source = source
 
 
+@pytest.fixture
+def seed_import_error(monkeypatch: pytest.MonkeyPatch) -> Callable[[], None]:
+    """Use the `pytest.MonkeyPatch` fixture to seed an import error when called."""
+    return partial(monkeypatch.setitem, sys.modules, 'config_ninja.hooks', None)
+
+
 @pytest.fixture(autouse=True)
 def src_doctest_namespace(  # noqa: PLR0913
     doctest_namespace: dict[str, Any],
@@ -75,6 +83,7 @@ def src_doctest_namespace(  # noqa: PLR0913
     monkeypatch_systemd: tuple[Path, Path],
     caplog: pytest.LogCaptureFixture,
     mocker: pytest_mock.MockerFixture,
+    seed_import_error: Callable[[], None],
 ) -> dict[str, Any]:
     """Add various mocks and patches to the doctest namespace."""
     if 'anext' not in builtins.__dict__:  # pragma: no cover
@@ -97,4 +106,5 @@ def src_doctest_namespace(  # noqa: PLR0913
     doctest_namespace['ExampleBackend'] = ExampleBackend
     doctest_namespace['ctx'] = ctx
     doctest_namespace['caplog'] = caplog
+    doctest_namespace['seed_import_error'] = seed_import_error
     return doctest_namespace
