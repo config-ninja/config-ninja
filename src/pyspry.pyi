@@ -6,13 +6,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from config_ninja.settings.schema import ConfigNinjaObject
+import pyspry.base
+
+from config_ninja.settings.schema import ConfigNinjaObject, DictConfig
 from config_ninja.settings.schema import Dest as Dest
 from config_ninja.settings.schema import Source as Source
 
 # pylint: disable=unused-argument,missing-class-docstring,missing-function-docstring
 
 class Settings:
+    LOGGING: DictConfig | pyspry.base.Null
     OBJECTS: dict[str, ConfigNinjaObject]
 
     @classmethod

@@ -35,19 +35,95 @@ This YAML file would be parsed into a dictionary of the following structure:
 from __future__ import annotations
 
 import logging
+import typing
 from typing import Literal, TypedDict
 
 from config_ninja.backend import FormatT
 
 try:
-    from typing import TypeAlias
+    from typing import NotRequired, TypeAlias
 except ImportError:
-    from typing_extensions import TypeAlias
+    from typing_extensions import NotRequired, TypeAlias
 
 
-__all__ = ['ConfigNinjaObject', 'Dest', 'Init', 'New', 'PathStr', 'Source']
+__all__ = ['ConfigNinjaObject', 'DictConfig', 'DictConfigDefault', 'Dest', 'Init', 'New', 'PathStr', 'Source']
 
 logger = logging.getLogger(__name__)
+
+
+FilterId: TypeAlias = str
+FormatterId: TypeAlias = str
+HandlerId: TypeAlias = str
+LoggerName: TypeAlias = str
+
+
+class Formatter(TypedDict):
+    """Structure of the `logging.Formatter` parameters in `DictConfig`."""
+
+    datefmt: str
+    format: str
+    style: Literal['%', '{', '$']
+    validate: bool
+
+
+class Filter(TypedDict):
+    """Structure of the `logging.Filter` parameters in `DictConfig`."""
+
+    name: LoggerName
+
+
+Handler = TypedDict(
+    'Handler',
+    {
+        'class': str,
+        'filters': NotRequired[typing.List[FilterId]],
+        'formatter': FormatterId,
+        'level': NotRequired[typing.Union[str, int]],
+        'rich_tracebacks': NotRequired[bool],
+    },
+)
+"""Structure of the `logging.Formatter` parameters in `DictConfig`."""
+
+
+class Logger(TypedDict):
+    """Structure of the `logging.Logger` parameters in `DictConfig`."""
+
+    filters: NotRequired[list[FilterId]]
+    handlers: list[HandlerId]
+    level: NotRequired[str | int]
+    propagate: NotRequired[bool]
+
+
+class DictConfig(TypedDict):
+    """Type annotations for the `logging configuration dictionary schema`_.
+
+    .. _logging configuration dictionary schema: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+    """
+
+    disable_existing_loggers: NotRequired[bool]
+    filters: NotRequired[dict[FilterId, Filter]]
+    formatters: NotRequired[dict[FormatterId, Formatter]]
+    handlers: NotRequired[dict[HandlerId, Handler]]
+    incremental: NotRequired[bool]
+    loggers: NotRequired[dict[LoggerName, Logger]]
+    root: NotRequired[Logger]
+    version: NotRequired[Literal[1]]
+
+
+class DictConfigDefault(TypedDict):
+    """Type annotations for the `logging configuration dictionary schema`_.
+
+    .. _logging configuration dictionary schema: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+    """
+
+    disable_existing_loggers: bool
+    filters: dict[FilterId, Filter]
+    formatters: dict[FormatterId, Formatter]
+    handlers: dict[HandlerId, Handler]
+    incremental: bool
+    loggers: dict[LoggerName, Logger]
+    root: Logger
+    version: Literal[1]
 
 
 class Init(TypedDict):
@@ -150,15 +226,15 @@ class Dest(TypedDict):
     ```
     """
 
-    path: str
-    """Write the configuration file to this path"""
-
     format: FormatT | PathStr
     """Set the output serialization format of the destination file.
 
     If given the path to a file, interpret the file as a Jinja2 template and render it with the
     source data.
     """
+
+    path: str
+    """Write the configuration file to this path"""
 
 
 class ConfigNinjaObject(TypedDict):
