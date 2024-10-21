@@ -23,9 +23,7 @@ import yaml
 from rich.logging import RichHandler
 from rich.markdown import Markdown
 
-import config_ninja
-from config_ninja import controller, settings, systemd
-from config_ninja.controller import SYSTEMD_AVAILABLE
+from config_ninja import __version__, controller, settings, systemd
 
 try:
     from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
@@ -139,7 +137,7 @@ def load_config(ctx: typer.Context, value: typing.Optional[Path]) -> None:
         return
 
     try:
-        settings_file = value or config_ninja.resolve_settings_path()
+        settings_file = value or settings.resolve_path()
     except FileNotFoundError as exc:
         logger.warning(
             '%s%s',
@@ -316,7 +314,7 @@ def version_callback(ctx: typer.Context, value: typing.Optional[bool] = None) ->
         return
 
     if value:
-        rich.print(config_ninja.__version__)
+        rich.print(__version__)
         raise typer.Exit()
 
 
@@ -353,7 +351,7 @@ async def poll_all(
 
 
 def _check_systemd() -> None:
-    if not SYSTEMD_AVAILABLE:
+    if not systemd.AVAILABLE:
         rich.print('[red]ERROR[/]: Missing [bold gray93]systemd[/]!')
         rich.print('Currently, this command only works on linux.')
         raise typer.Exit(1)

@@ -22,14 +22,6 @@ from config_ninja import cli, systemd
 from config_ninja.cli import app
 from tests.fixtures import MOCK_YAML_CONFIG
 
-try:
-    import sh  # pyright: ignore[reportMissingModuleSource]
-except ImportError:
-    sh = None  # type: ignore[unused-ignore,assignment]
-    SYSTEMD_AVAILABLE = False  # pyright: ignore[reportConstantRedefinition]
-else:
-    SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
-
 # pylint: disable=redefined-outer-name
 
 
@@ -293,7 +285,7 @@ def test_monitor_local(settings: dict[str, Any]) -> None:
 def test_install_no_systemd(monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify the `install` command fails gracefully when `systemd` is not available."""
     # Arrange
-    monkeypatch.setattr(cli, 'SYSTEMD_AVAILABLE', False)
+    monkeypatch.setattr(systemd, 'AVAILABLE', False)
 
     # Act
     result = runner.invoke(app, ['self', 'install'])
