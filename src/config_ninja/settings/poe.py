@@ -98,16 +98,7 @@ class HooksEngine:
         """Execute the `poethepoet.task.base.PoeTask` of the given name."""
         self.ui.parse_args([hook_name])
 
-        try:
-            task = self.tasks[hook_name]
-        except KeyError as exc:
-            raise ValueError(
-                f"Undefined hook '{hook_name!r}'; is "
-                '{"tool": {"poe": {"tasks":  {"'
-                f'{hook_name!r}'
-                '": "..."}}}} defined in '
-                f'{self.config_file}?'
-            ) from exc
+        task = self.tasks[hook_name]
 
         if task.has_deps():
             self.run_task_graph(task)

@@ -25,6 +25,8 @@ CONFIG_NINJA_OBJECTS:
       path: /tmp/config-ninja/settings-subset.toml
       format: templates/settings-subset.toml.j2
 
+    hooks: [multi]
+
     source:
       backend: local
       format: yaml
@@ -56,3 +58,9 @@ tool.poe:
 
     print-environ:
       cmd: printenv
+
+    multi:
+      cmd: echo success
+      deps:
+        - list-dir
+        - print-environ
