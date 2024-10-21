@@ -61,6 +61,4 @@ tool.poe:
 
     multi:
       cmd: echo success
-      deps:
-        - list-dir
-        - print-environ
+      deps: [list-dir, print-environ]
