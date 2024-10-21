@@ -1,0 +1,35 @@
+---
+CONFIG_NINJA_OBJECTS:
+  example-0:
+    # execute these poethepoet tasks (defined below) whenever the backend updates
+    hooks: [self-print, version]
+
+    dest: {format: json, path: /dev/null}
+    source: {backend: local, format: yaml, new: {kwargs: {path: config-ninja-settings.yaml}}}
+
+  example-1:
+    # a common use case is to restart a service after updating its configuration
+    hooks: [restart]
+
+    dest: {format: json, path: /dev/null}
+    source: {backend: local, format: yaml, new: {kwargs: {path: config-ninja-settings.yaml}}}
+
+# define 'poethepoet' tasks in YAML (instead of TOML)
+tool.poe:
+  # ref https://poethepoet.natn.io/tasks/index.html
+  tasks:
+    # define a 'cmd' task to restart the 'config-ninja' service
+    restart:
+      # ref https://poethepoet.natn.io/tasks/task_types/cmd.html
+      cmd: systemctl restart config-ninja.service
+
+    # invoke 'config-ninja self print' as a 'script' task
+    self-print:
+      # ref https://poethepoet.natn.io/tasks/task_types/script.html
+      script: config_ninja:main('self', 'print', '-c', '../config-ninja-settings.yaml')
+
+    # equivalent to running 'config-ninja version'
+    version:
+      # ref https://poethepoet.natn.io/tasks/task_types/expr.html
+      expr: config_ninja.__version__
+      imports: [config_ninja]

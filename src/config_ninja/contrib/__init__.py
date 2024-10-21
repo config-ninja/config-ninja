@@ -5,8 +5,13 @@ package. The `get_backend()` function is used to retrieve the backend class give
 
 ## Available Backends
 
-- `config_ninja.contrib.appconfig`
-- `config_ninja.contrib.local`
+### `config_ninja.contrib.appconfig`
+
+Integrate with the AWS AppConfig service.
+
+### `config_ninja.contrib.local`
+
+Use a local file as the backend.
 """
 
 from __future__ import annotations
