@@ -13,12 +13,24 @@
 
 Similar to [`confd`](https://github.com/kelseyhightower/confd), manage your system configuration files by populating [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) templates with data from a remote provider.
 
+The `config-ninja` agent monitors the backend source for changes. When the source data is changed, the agent updates the local configuration file with the new data:
+
+```mermaid
+sequenceDiagram
+		loop polling
+			 config-ninja->>backend: query for changes
+		end
+
+		backend->>+config-ninja: [backend changed] fetch config
+		config-ninja->>-filesystem: write updated configuration file
+```
+
 ## Features
 
 - ✅ Integration with [AWS AppConfig](https://jinja.palletsprojects.com/en/3.1.x/) for managing server configuration files
 - ✅ Extensible design supports backends for new providers and formats
 - ✅ [`jinja2`](https://jinja.palletsprojects.com/en/3.1.x/) templating for arbitrary configuration file formats
-- ✅ Execute [`poethepoet`](https://poethepoet.natn.io/index.html) tasks after deploying updates
+- ✅ Execute [`poethepoet`](https://poethepoet.natn.io/index.html) tasks after updating files
 
 ## Installation
 
@@ -77,18 +89,6 @@ config-ninja self install --user
 ```
 
 ## How It Works
-
-The `config-ninja` agent monitors the backend source for changes. When the source data is changed, the agent updates the local configuration file with the new data:
-
-```mermaid
-sequenceDiagram
-		loop polling
-			 config-ninja->>backend: query for changes
-		end
-
-		backend->>+config-ninja: [backend changed] fetch config
-		config-ninja->>-filesystem: write updated configuration file
-```
 
 To demonstrate how the mechanics work (using the [local backend](https://config-ninja.readthedocs.io/en/latest/config_ninja/contrib/local.html)):
 
