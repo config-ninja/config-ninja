@@ -303,6 +303,7 @@ cmd = """
     typer.params
     typing
     unittest
+    unittest.mock
 """
 uses = {PACKAGE_VERSION = "_version"}
 

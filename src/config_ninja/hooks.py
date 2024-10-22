@@ -38,7 +38,9 @@ import sys
 from pathlib import Path
 
 # pyright: reportMissingTypeStubs=false
-from poethepoet import context, exceptions
+import poethepoet.context
+import poethepoet.exceptions
+from poethepoet import exceptions
 from poethepoet.config import PoeConfig
 from poethepoet.task.base import PoeTask, TaskContext, TaskSpecFactory
 from poethepoet.task.graph import TaskExecutionGraph
@@ -109,14 +111,14 @@ class HooksEngine:
         """Initialize a `Hook` instance for running the `poethepoet.task.base.PoeTask` of the given name."""
         return Hook(self, name)
 
-    def get_run_context(self, multistage: bool = False) -> context.RunContext:
+    def get_run_context(self, multistage: bool = False) -> poethepoet.context.RunContext:
         """Create a `poethepoet.context.RunContext` instance for executing tasks.
 
         This method is based on `poethepoet.app.PoeThePoet.get_run_context()` (`reference`_).
 
         .. _reference: https://github.com/nat-n/poethepoet/blob/3c9fd8bcffde8a95c5cd9513923d0f43c1507385/poethepoet/app.py#L210-L225
         """
-        return context.RunContext(
+        return poethepoet.context.RunContext(
             config=self.config,
             ui=self.ui,
             env=os.environ,
@@ -164,14 +166,14 @@ class HooksEngine:
 
         return cls(cfg, ui, tasks)
 
-    def run_task(self, task: PoeTask, ctx: context.RunContext | None = None) -> None:
+    def run_task(self, task: PoeTask, ctx: poethepoet.context.RunContext | None = None) -> None:
         """Reimplement the `poethepoet.app.PoeThePoet.run_task()` method (`reference`_).
 
         .. _reference: https://github.com/nat-n/poethepoet/blob/3c9fd8bcffde8a95c5cd9513923d0f43c1507385/poethepoet/app.py#L169-L181
         """
         try:
             task.run(context=ctx or self.get_run_context())
-        except exceptions.ExecutionError as error:
+        except poethepoet.exceptions.ExecutionError as error:
             logger.exception('error running task %s: %s', task.name, error)
             raise
 
@@ -193,7 +195,9 @@ class HooksEngine:
 
                 task_result = stage_task.run(context=ctx)
                 if task_result:
-                    raise exceptions.ExecutionError(f'Task graph aborted after failed task {stage_task.name!r}')
+                    raise poethepoet.exceptions.ExecutionError(
+                        f'Task graph aborted after failed task {stage_task.name!r}'
+                    )
 
 
 logger.debug('successfully imported %s', __name__)
