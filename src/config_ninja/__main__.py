@@ -4,14 +4,11 @@ from __future__ import annotations
 
 import logging
 
-from config_ninja.cli import app
+from config_ninja import main
+
+__all__ = ['main']
 
 logger = logging.getLogger(__name__)
-
-
-def main() -> None:  # pylint: disable=missing-function-docstring  # noqa: D103
-    app(prog_name='config-ninja')
-
 
 if __name__ == '__main__':  # pragma: no cover
     main()

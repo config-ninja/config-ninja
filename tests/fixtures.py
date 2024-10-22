@@ -19,7 +19,7 @@ from mypy_boto3_appconfigdata import AppConfigDataClient
 from mypy_boto3_appconfigdata.type_defs import GetLatestConfigurationResponseTypeDef
 from pytest_mock import MockerFixture
 
-from config_ninja import cli, systemd
+from config_ninja import systemd
 
 # pylint: disable=redefined-outer-name
 
@@ -276,7 +276,7 @@ def monkeypatch_systemd(mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch, 
     system_install_path = tmp_path / 'system'
     user_install_path = tmp_path / 'user'
 
-    monkeypatch.setattr(cli, 'SYSTEMD_AVAILABLE', True)
+    monkeypatch.setattr(systemd, 'AVAILABLE', True)
     monkeypatch.setattr(systemd, 'SYSTEM_INSTALL_PATH', system_install_path)
     monkeypatch.setattr(systemd, 'USER_INSTALL_PATH', user_install_path)
 
@@ -300,6 +300,12 @@ example_file.__doc__ = f"""Write the test configuration to a file in the tempora
 
 
 @pytest.fixture(autouse=True)
-def mock_logging_basic_config(mocker: pytest_mock.MockerFixture) -> mock.MagicMock:
-    """Mock the `logging.basicConfig` function."""
-    return mocker.patch('logging.basicConfig')
+def mock_logging_dict_config(mocker: pytest_mock.MockerFixture) -> mock.MagicMock:
+    """Mock the `logging.config.dictConfig()` function."""
+    return mocker.patch('logging.config.dictConfig')
+
+
+@pytest.fixture(autouse=True)
+def mock_stop_coverage_func(mocker: pytest_mock.MockerFixture) -> mock.MagicMock:
+    """Mock the `coverage` module to stop coverage collection."""
+    return mocker.patch('poethepoet.executor.base._stop_coverage')

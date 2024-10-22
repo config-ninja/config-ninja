@@ -22,14 +22,6 @@ from config_ninja import cli, systemd
 from config_ninja.cli import app
 from tests.fixtures import MOCK_YAML_CONFIG
 
-try:
-    import sh  # pyright: ignore[reportMissingModuleSource]
-except ImportError:
-    sh = None  # type: ignore[unused-ignore,assignment]
-    SYSTEMD_AVAILABLE = False  # pyright: ignore[reportConstantRedefinition]
-else:
-    SYSTEMD_AVAILABLE = hasattr(sh, 'systemctl')
-
 # pylint: disable=redefined-outer-name
 
 
@@ -83,7 +75,7 @@ def test_version() -> None:
 def test_missing_settings(mocker: MockerFixture, caplog: pytest.LogCaptureFixture) -> None:
     """Verify errors are handled correctly when the settings file is missing."""
     # Arrange
-    mocker.patch('config_ninja.DEFAULT_SETTINGS_PATHS', new=[Path('does not'), Path('exist')])
+    mocker.patch('config_ninja.settings.DEFAULT_PATHS', new=[Path('does not'), Path('exist')])
 
     # Act
     result = runner.invoke(app, ['self', 'print'])
@@ -105,9 +97,16 @@ def test_get_example_appconfig() -> None:
 
 def test_get_example_local(settings: dict[str, Any]) -> None:
     """Get the 'example-local' configuration (as specified in config-ninja-settings.yaml)."""
+    # Arrange
+    expected = json.dumps(settings).replace(' ', '')
+
+    # Act
     result = runner.invoke(app, ['get', 'example-local'])
+    output = result.stdout.replace('\n', '').replace(' ', '')
+
+    # Assert
     assert 0 == result.exit_code, result.stdout
-    assert json.dumps(settings) == result.stdout.replace('\n', '').strip()
+    assert expected == output
 
 
 @pytest.mark.usefixtures('_patch_awatch')
@@ -293,7 +292,7 @@ def test_monitor_local(settings: dict[str, Any]) -> None:
 def test_install_no_systemd(monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify the `install` command fails gracefully when `systemd` is not available."""
     # Arrange
-    monkeypatch.setattr(cli, 'SYSTEMD_AVAILABLE', False)
+    monkeypatch.setattr(systemd, 'AVAILABLE', False)
 
     # Act
     result = runner.invoke(app, ['self', 'install'])

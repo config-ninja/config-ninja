@@ -1,72 +1,21 @@
 """Type stubs for the `pyspry` library."""
 
+# pylint: disable=useless-import-alias
+
 from __future__ import annotations
 
 from pathlib import Path
 
-from typing_extensions import Literal, TypeAlias, TypedDict
+import pyspry.base
 
-from config_ninja.backend import FormatT
+from config_ninja.settings.schema import ConfigNinjaObject, DictConfig
+from config_ninja.settings.schema import Dest as Dest
+from config_ninja.settings.schema import Source as Source
 
-class InitType(TypedDict):
-    """Initialization parameters for the backend class."""
-
-    kwargs: dict[str, str]
-
-class NewType(TypedDict):
-    """Initialization parameters for the backend class."""
-
-    kwargs: dict[str, str]
-
-class SourceType(TypedDict):
-    """Describe the source of configuration data written to a `DestType`.
-
-    The parameters `init` and `backend` are mutually exclusive.
-    """
-
-    backend: Literal['local', 'appconfig']
-    format: FormatT
-    """Deserialize the source data from this format.
-
-    Defaults to `'raw'`.
-    """
-
-    init: InitType
-    """Pass these parameters to the backend's `__init__` method.
-
-    These are typically unique identifiers; more friendly names can instead be passed to the `new`
-    method.
-    """
-
-    new: NewType
-    """Pass these parameters to the backend's `new` method.
-
-    If this property is defined, the `init` property is ignored.
-    """
-
-PathStr: TypeAlias = str
-"""A string representing a file path."""
-
-class DestType(TypedDict):
-    """The parameters `output` and `template` are mutually exclusive."""
-
-    path: str
-    """Write the configuration file to this path"""
-
-    format: FormatT | PathStr
-    """Set the output serialization format of the destination file.
-
-    If given the path to a file, interpret the file as a Jinja2 template and render it with the
-    source data.
-    """
-
-class ConfigNinjaObject(TypedDict):
-    """Specify information needed to manage a configuration file."""
-
-    dest: DestType
-    source: SourceType
+# pylint: disable=unused-argument,missing-class-docstring,missing-function-docstring
 
 class Settings:
+    LOGGING: DictConfig | pyspry.base.Null
     OBJECTS: dict[str, ConfigNinjaObject]
 
     @classmethod
