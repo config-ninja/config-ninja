@@ -303,8 +303,9 @@ cmd = """
     typer.params
     typing
     unittest
-    unittest.mock
 """
+# TODO: https://github.com/mitmproxy/pdoc/issues/753
+    # unittest.mock
 uses = {PACKAGE_VERSION = "_version"}
 
 [tool.poe.tasks.lab]
