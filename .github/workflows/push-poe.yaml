@@ -72,7 +72,7 @@ jobs:
           fetch-tags: true
 
       - id: semantic-release
-        uses: python-semantic-release/python-semantic-release@v9.8.7
+        uses: python-semantic-release/python-semantic-release@v9.15.0
         with:
           commit: false
           github_token: ${{ github.token }}
