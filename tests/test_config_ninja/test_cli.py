@@ -6,8 +6,9 @@ import json
 import re
 import string
 import uuid
+from collections.abc import AsyncIterable, Sequence
 from pathlib import Path
-from typing import Any, AsyncIterable, Sequence
+from typing import Any
 from unittest import mock
 
 import pyspry

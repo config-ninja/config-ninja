@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import contextlib
 import json
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator, TypeVar
+from typing import Any, TypeVar
 from unittest import mock
 
 import pytest

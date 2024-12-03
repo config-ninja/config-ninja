@@ -46,7 +46,7 @@ except ImportError:  # pragma: no cover
     from typing_extensions import NotRequired, TypeAlias
 
 
-__all__ = ['ConfigNinjaObject', 'DictConfig', 'DictConfigDefault', 'Dest', 'Init', 'New', 'PathStr', 'Source']
+__all__ = ['ConfigNinjaObject', 'Dest', 'DictConfig', 'DictConfigDefault', 'Init', 'New', 'PathStr', 'Source']
 
 logger = logging.getLogger(__name__)
 
