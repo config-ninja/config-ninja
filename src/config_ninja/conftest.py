@@ -5,9 +5,10 @@ from __future__ import annotations
 import builtins
 import logging
 import sys
+from collections.abc import Iterator
 from functools import partial
 from pathlib import Path
-from typing import Any, Callable, Iterator
+from typing import Any, Callable
 from unittest import mock
 
 import pytest
