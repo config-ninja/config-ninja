@@ -14,13 +14,16 @@ The following `config-ninja`_ settings file configures the `SecretsManagerBacken
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import typing
 
 from config_ninja.backend import Backend
+from config_ninja.contrib.appconfig import MINIMUM_POLL_INTERVAL_SECONDS
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
     from mypy_boto3_secretsmanager import SecretsManagerClient
+
 
 __all__ = ['SecretsManagerBackend']
 
@@ -34,7 +37,7 @@ class SecretsManagerBackend(Backend):
 
     >>> backend = SecretsManagerBackend(secretsmanager_client, 'secret-id')
     >>> print(backend.get())
-    {"username": "admin", "pass}
+    {"username": "admin", "password": 1234}
     """
 
     client: SecretsManagerClient
@@ -52,7 +55,11 @@ class SecretsManagerBackend(Backend):
         self.secret_id = secret_id
 
     def __str__(self) -> str:
-        """Return the secret ID."""
+        """Return the secret ID.
+
+        >>> print(str(SecretsManagerBackend(secretsmanager_client, 'secret-id')))
+        secret-id
+        """
         return self.secret_id if not self.version_id else f'{self.secret_id} (version: {self.version_id})'
 
     def get(self) -> str:
@@ -60,3 +67,48 @@ class SecretsManagerBackend(Backend):
         response = self.client.get_secret_value(SecretId=self.secret_id)
         self.version_id = response.get('VersionId')
         return response['SecretString']
+
+    def _retrieve_current_version(self) -> str:
+        """Retrieve the version ID of the current value of the secret.
+
+        A value error is raised if no current version was found:
+
+        >>> backend = SecretsManagerBackend(secretsmanager_client_no_current, 'secret-id')
+        >>> with pytest.raises(ValueError):
+        ...     backend._retrieve_current_version()
+        """
+        response = self.client.list_secret_version_ids(SecretId=self.secret_id)
+        for version in response['Versions']:
+            if 'AWSCURRENT' in version.get('VersionStages', []) and (version_id := version.get('VersionId')):
+                return version_id
+
+        raise ValueError(f"No current version found for secret '{self}'")
+
+    async def poll(self, interval: int = MINIMUM_POLL_INTERVAL_SECONDS) -> typing.AsyncIterator[str]:
+        """Poll for changes to the secret."""
+        while True:
+            logger.debug('Poll for configuration changes')
+            try:
+                version_id = self._retrieve_current_version()
+            except ValueError as exc:
+                logger.warning('%s', exc)
+            else:
+                if version_id and version_id != self.version_id:
+                    yield self.get()
+
+            await asyncio.sleep(interval)
+
+    def _async_doctests(self) -> None:
+        """Define `async` `doctest` tests in this method to improve documentation.
+
+        Verify that an empty response to the `boto3` client is handled and the polling continues:
+        >>> backend = SecretsManagerBackend(secretsmanager_client, 'secret-id')
+        >>> content = asyncio.run(anext(backend.poll(interval=0.01)))
+        >>> print(content)
+        {"username": "admin", "password": 1234}
+
+        >>> backend = SecretsManagerBackend(secretsmanager_client, 'secret-id')
+        >>> content = asyncio.run(anext(backend.poll(interval=0.01)))
+        >>> print(content)
+        {"username": "admin", "password": 1234}
+        """

@@ -17,6 +17,7 @@ from botocore.response import StreamingBody
 from mypy_boto3_appconfig import AppConfigClient
 from mypy_boto3_appconfigdata import AppConfigDataClient
 from mypy_boto3_appconfigdata.type_defs import GetLatestConfigurationResponseTypeDef
+from mypy_boto3_secretsmanager import SecretsManagerClient
 from pytest_mock import MockerFixture
 
 from config_ninja import systemd
@@ -210,6 +211,58 @@ def mock_appconfigdata_client_first_empty(mock_latest_config_first_empty: mock.M
     """Mock the low-level `boto3` client for the `AppConfigData` service."""
     mock_client = mock.MagicMock(name='mock_appconfigdata_client', spec_set=AppConfigDataClient)
     mock_client.get_latest_configuration.return_value = mock_latest_config_first_empty
+    return mock_client
+
+
+@pytest.fixture
+def mock_secretsmanager_client() -> SecretsManagerClient:
+    """Mock the `boto3` client for the `SecretsManager` service."""
+    mock_client = mock.MagicMock(name='mock_secretsmanager_client', spec_set=SecretsManagerClient)
+    mock_client.get_secret_value.return_value = {
+        'SecretString': json.dumps({'username': 'admin', 'password': 1234}),
+        'VersionId': 'v1',
+    }
+    mock_client.list_secret_version_ids.return_value = {
+        'Versions': [{'VersionId': 'v1'}, {'VersionId': 'v2', 'VersionStages': ['AWSCURRENT']}]
+    }
+
+    return mock_client
+
+
+@pytest.fixture
+def mock_secretsmanager_client_no_current() -> SecretsManagerClient:
+    """Mock the `boto3` client for the `SecretsManager` service."""
+    mock_client = mock.MagicMock(name='mock_secretsmanager_client', spec_set=SecretsManagerClient)
+    mock_client.get_secret_value.return_value = {
+        'SecretString': json.dumps({'username': 'admin', 'password': 1234}),
+        'VersionId': 'v3',
+    }
+    mock_client.list_secret_version_ids.return_value = {
+        'Versions': [{'VersionId': 'v4'}, {'VersionId': 'v5', 'VersionStages': ['AWSPREVIOUS']}]
+    }
+
+    return mock_client
+
+
+@pytest.fixture
+def mock_secretsmanager_client_no_current_initially() -> SecretsManagerClient:
+    """Mock the `boto3` client for the `SecretsManager` service."""
+    mock_client = mock.MagicMock(name='mock_secretsmanager_client', spec_set=SecretsManagerClient)
+    mock_client.get_secret_value.return_value = {
+        'SecretString': json.dumps({'username': 'admin', 'password': 1234}),
+        'VersionId': 'v3',
+    }
+
+    was_called: list[bool] = []
+
+    def mock_list_secret_version_ids(*_: Any, **__: Any) -> dict[str, Any]:
+        return (
+            {'Versions': [{'VersionId': 'v4'}, {'VersionId': 'v5', 'VersionStages': ['AWSCURRENT']}]}
+            if was_called
+            else {'Versions': [{'VersionId': 'v4'}, {'VersionId': 'v5', 'VersionStages': ['AWSPREVIOUS']}]}
+        )
+
+    mock_client.list_secret_version_ids.return_value = mock_list_secret_version_ids
     return mock_client
 
 

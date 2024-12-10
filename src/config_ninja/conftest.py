@@ -14,6 +14,7 @@ import pytest
 import pytest_mock
 import typer
 from mypy_boto3_appconfigdata import AppConfigDataClient
+from mypy_boto3_secretsmanager import SecretsManagerClient
 
 from config_ninja.backend import Backend
 
@@ -79,6 +80,9 @@ def src_doctest_namespace(  # noqa: PLR0913
     doctest_namespace: dict[str, Any],
     mock_appconfigdata_client: AppConfigDataClient,
     mock_appconfigdata_client_first_empty: AppConfigDataClient,
+    mock_secretsmanager_client: SecretsManagerClient,
+    mock_secretsmanager_client_no_current: SecretsManagerClient,
+    mock_secretsmanager_client_no_current_initially: SecretsManagerClient,
     example_file: Path,
     monkeypatch_systemd: tuple[Path, Path],
     caplog: pytest.LogCaptureFixture,
@@ -103,6 +107,9 @@ def src_doctest_namespace(  # noqa: PLR0913
     doctest_namespace['pytest'] = pytest
     doctest_namespace['appconfigdata_client'] = mock_appconfigdata_client
     doctest_namespace['appconfigdata_client_first_empty'] = mock_appconfigdata_client_first_empty
+    doctest_namespace['secretsmanager_client'] = mock_secretsmanager_client
+    doctest_namespace['secretsmanager_client_no_current'] = mock_secretsmanager_client_no_current
+    doctest_namespace['secretsmanager_client_no_current_initially'] = mock_secretsmanager_client_no_current_initially
     doctest_namespace['ExampleBackend'] = ExampleBackend
     doctest_namespace['ctx'] = ctx
     doctest_namespace['caplog'] = caplog
