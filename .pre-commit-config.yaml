@@ -92,7 +92,7 @@ repos:
           - sdnotify
           - sh
           - tomlkit
-          - typer[all]
+          - typer==0.13.1
           - types-pyyaml
           - typing_extensions
           - watchfiles
@@ -117,7 +117,7 @@ repos:
           - sdnotify
           - sh
           - tomlkit
-          - typer[all]
+          - typer==0.13.1
           - types-pyyaml
           - typing_extensions
           - watchfiles
