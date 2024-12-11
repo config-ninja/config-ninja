@@ -126,7 +126,7 @@ sdnotify = "^0.3.2"
 
 # sh encounters import errors on Windows
 sh =  { version = "^2.0.6",  markers = "sys_platform != 'win32'" }
-poethepoet = { version = "^0.29.0", optional = true }
+poethepoet = { version = ">=0.29,<0.31", optional = true }
 
 [tool.poetry.extras]
 # https://python-poetry.org/docs/pyproject/#extras
@@ -138,7 +138,7 @@ poe = ["poethepoet"]
 
 [tool.poetry.group.dev.dependencies]
 boto3-stubs = {version = "1.35.77", extras = ["appconfig", "appconfigdata"]}
-poethepoet = ">=0.20,<0.30"
+poethepoet = ">=0.20,<0.31"
 types-pyyaml = "^6"
 
 [tool.poetry.group.lint.dependencies]
