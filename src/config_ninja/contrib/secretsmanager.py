@@ -50,9 +50,9 @@ class SecretsManagerBackend(Backend):
 
     def __init__(self, client: SecretsManagerClient, secret_id: str) -> None:
         """Initialize the backend."""
-        logger.debug("Initialize: %s(client=%s, '%s')", self.__class__.__name__, client, secret_id)
         self.client = client
         self.secret_id = secret_id
+        logger.debug('Initialize: %s', repr(self))
 
     def __str__(self) -> str:
         """Return the secret ID.
