@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import contextlib
 import json
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator, TypeVar
+from typing import Any, TypeVar
 from unittest import mock
 
 import pytest
@@ -18,6 +19,7 @@ from mypy_boto3_appconfig import AppConfigClient
 from mypy_boto3_appconfigdata import AppConfigDataClient
 from mypy_boto3_appconfigdata.type_defs import GetLatestConfigurationResponseTypeDef
 from mypy_boto3_secretsmanager import SecretsManagerClient
+from mypy_boto3_secretsmanager.type_defs import ListSecretVersionIdsResponseTypeDef, SecretVersionsListEntryTypeDef
 from pytest_mock import MockerFixture
 
 from config_ninja import systemd
@@ -250,19 +252,47 @@ def mock_secretsmanager_client_no_current_initially() -> SecretsManagerClient:
     mock_client = mock.MagicMock(name='mock_secretsmanager_client', spec_set=SecretsManagerClient)
     mock_client.get_secret_value.return_value = {
         'SecretString': json.dumps({'username': 'admin', 'password': 1234}),
-        'VersionId': 'v3',
+        'VersionId': 'v6',
     }
 
-    was_called: list[bool] = []
+    def _mock_response(versions: list[SecretVersionsListEntryTypeDef]) -> ListSecretVersionIdsResponseTypeDef:
+        return {
+            'ARN': 'arn:aws:secretsmanager:us-west-2:123456789012:secret/my-secret-1-a1b2c3',
+            'Name': 'my-secret-1',
+            'ResponseMetadata': {
+                'HTTPHeaders': {},
+                'HTTPStatusCode': 200,
+                'RequestId': '12345678-1234-1234-1234-123456789012',
+                'RetryAttempts': 0,
+            },
+            'Versions': versions,
+        }
 
-    def mock_list_secret_version_ids(*_: Any, **__: Any) -> dict[str, Any]:
-        return (
-            {'Versions': [{'VersionId': 'v4'}, {'VersionId': 'v5', 'VersionStages': ['AWSCURRENT']}]}
-            if was_called
-            else {'Versions': [{'VersionId': 'v4'}, {'VersionId': 'v5', 'VersionStages': ['AWSPREVIOUS']}]}
-        )
+    versions_per_call = [
+        _mock_response([{'VersionId': 'v6', 'VersionStages': ['AWSCURRENT']}]),
+        _mock_response([{'VersionId': 'v6'}, {'VersionId': 'v7'}]),
+        _mock_response(
+            [
+                {'VersionId': 'v6', 'VersionStages': ['AWSPREVIOUS']},
+                {'VersionId': 'v7', 'VersionStages': ['AWSCURRENT']},
+            ]
+        ),
+    ]
 
-    mock_client.list_secret_version_ids.return_value = mock_list_secret_version_ids
+    class Counter:
+        count = 0
+
+        def increment(self) -> None:
+            self.count += 1
+
+    num_calls = Counter()
+
+    def mock_list_secret_version_ids(*_: Any, **__: Any) -> ListSecretVersionIdsResponseTypeDef:
+        versions = versions_per_call[num_calls.count]
+        num_calls.increment()
+        return versions
+
+    mock_client.list_secret_version_ids = mock_list_secret_version_ids
     return mock_client
 
 

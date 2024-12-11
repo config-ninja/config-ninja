@@ -107,7 +107,10 @@ class SecretsManagerBackend(Backend):
         >>> print(content)
         {"username": "admin", "password": 1234}
 
-        >>> backend = SecretsManagerBackend(secretsmanager_client, 'secret-id')
+        >>> backend = SecretsManagerBackend(secretsmanager_client_no_current_initially, 'secret-id')
+        >>> _ = backend.get(); backend.version_id   # fetch the initial value from the mock fixture
+        'v6'
+
         >>> content = asyncio.run(anext(backend.poll(interval=0.01)))
         >>> print(content)
         {"username": "admin", "password": 1234}
