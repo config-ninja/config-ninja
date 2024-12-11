@@ -18,6 +18,8 @@ import asyncio
 import logging
 import typing
 
+import boto3
+
 from config_ninja.backend import Backend
 from config_ninja.contrib.appconfig import MINIMUM_POLL_INTERVAL_SECONDS
 
@@ -61,6 +63,14 @@ class SecretsManagerBackend(Backend):
         secret-id
         """
         return self.secret_id if not self.version_id else f'{self.secret_id} (version: {self.version_id})'
+
+    @classmethod
+    def new(cls, secret_id: str, session: boto3.Session | None = None) -> SecretsManagerBackend:  # pylint: disable=arguments-differ
+        """Instantiate a new `boto3` client and `SecretsManagerBackend` object."""
+        logger.info('Create new instance: %s(secret_id="%s")', cls.__name__, secret_id)
+        session = session or boto3.Session()
+        client: SecretsManagerClient = session.client('secretsmanager')  # pyright: ignore[reportUnknownMemberType]
+        return cls(client, secret_id)
 
     def get(self) -> str:
         """Retrieve the secret data."""
