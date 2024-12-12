@@ -506,6 +506,7 @@ def self_print(
 
 @self_app.command()
 def install(
+    ctx: typer.Context,
     env_names: EnvNamesAnnotation = None,
     print_only: PrintAnnotation = None,
     run_as: RunAsAnnotation = None,
@@ -529,6 +530,8 @@ def install(
     environ = {name: os.environ[name] for name in env_names or [] if name in os.environ}
     environ.update(variables or [])
 
+    settings_file = ctx.obj.get('settings_file')
+
     kwargs = {
         # the command to use when invoking config-ninja from systemd
         'config_ninja_cmd': sys.argv[0] if sys.argv[0].endswith('config-ninja') else f'{sys.executable} {sys.argv[0]}',
@@ -536,6 +539,8 @@ def install(
         'environ': environ,
         # run `config-ninja` from this directory (if specified)
         'workdir': workdir,
+        # override the config file iff it was overridden via the 'install' command
+        'args': f'--config {settings_file}' if settings_file else None,
     }
     if run_as:
         kwargs['user'] = run_as.user

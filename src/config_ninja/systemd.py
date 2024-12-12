@@ -117,7 +117,7 @@ class Service:
     Environment=PYTHONUNBUFFERED=true
     Environment=TESTING=true
     ExecStartPre=config-ninja self print
-    ExecStart=config-ninja apply --poll
+    ExecStart=config-ninja apply  --poll
     Restart=always
     RestartSec=30s
     Type=notify
