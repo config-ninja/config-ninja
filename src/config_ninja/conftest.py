@@ -98,6 +98,7 @@ def src_doctest_namespace(  # noqa: PLR0913
     ctx.obj = {}
 
     mocker.patch('logging.config.dictConfig')
+    mocker.patch('boto3.Session')
     caplog.set_level(logging.NOTSET)
 
     doctest_namespace['SYSTEM_INSTALL_PATH'] = monkeypatch_systemd[0]
