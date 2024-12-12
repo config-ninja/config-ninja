@@ -137,7 +137,7 @@ poe = ["poethepoet"]
 
 
 [tool.poetry.group.dev.dependencies]
-boto3-stubs = {version = "1.35.77", extras = ["appconfig", "appconfigdata"]}
+boto3-stubs = {version = "1.35.79", extras = ["appconfig", "appconfigdata"]}
 poethepoet = ">=0.20,<0.31"
 types-pyyaml = "^6"
 
