@@ -66,7 +66,12 @@ class SecretsManagerBackend(Backend):
 
     @classmethod
     def new(cls, secret_id: str, session: boto3.Session | None = None) -> SecretsManagerBackend:  # pylint: disable=arguments-differ
-        """Instantiate a new `boto3` client and `SecretsManagerBackend` object."""
+        """Instantiate a new `boto3` client and `SecretsManagerBackend` object.
+
+        >>> backend = SecretsManagerBackend.new('secret-id')
+        >>> print(backend)
+        secret-id
+        """
         logger.info('Create new instance: %s(secret_id="%s")', cls.__name__, secret_id)
         session = session or boto3.Session()
         client: SecretsManagerClient = session.client('secretsmanager')  # pyright: ignore[reportUnknownMemberType]
