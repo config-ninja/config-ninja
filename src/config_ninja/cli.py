@@ -37,14 +37,14 @@ except ImportError:  # pragma: no cover
 
 __all__ = [
     'app',
-    'get',
     'apply',
+    'get',
+    'install',
+    'main',
     'monitor',
     'self_print',
-    'install',
     'uninstall',
     'version',
-    'main',
 ]
 
 LOG_MISSING_SETTINGS_MESSAGE = "Could not find [bold blue]config-ninja[/]'s settings file"
