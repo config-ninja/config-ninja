@@ -82,7 +82,7 @@ repos:
           - lxml
           - types-pyyaml
           - boto3
-          - boto3-stubs[appconfig,appconfigdata]
+          - boto3-stubs[appconfig,appconfigdata,secretsmanager]
           - jinja2
           - poethepoet
           - pyspry
@@ -107,7 +107,7 @@ repos:
       - id: pyright
         additional_dependencies:
           - boto3
-          - boto3-stubs[appconfig,appconfigdata]
+          - boto3-stubs[appconfig,appconfigdata,secretsmanager]
           - jinja2
           - poethepoet
           - pyspry
