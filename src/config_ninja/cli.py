@@ -553,7 +553,7 @@ def install(
         if run_as.group:
             kwargs['group'] = run_as.group
 
-    svc = systemd.Service('config_ninja', 'systemd.service.j2', user_mode)
+    svc = systemd.Service('config_ninja', 'systemd.service.j2', user_mode, settings_file if settings_from_arg else None)
     if print_only:
         rendered = svc.render(**kwargs)
         rich.print(Markdown(f'# {svc.path}\n```systemd\n{rendered}\n```'))
@@ -578,7 +578,8 @@ def uninstall(
     version: VersionAnnotation = None,
 ) -> None:
     """Uninstall the [bold blue]config-ninja[/] [bold gray93]systemd[/] service."""
-    svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False)
+    settings_file = ctx.obj.get('settings_file') if ctx.obj.get('settings_from_arg') else None
+    svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False, settings_file)
     if print_only:
         rich.print(Markdown(f'# {svc.path}\n```systemd\n{svc.read()}\n```'))
         raise typer.Exit(0)

@@ -40,6 +40,7 @@ from __future__ import annotations
 import contextlib
 import logging
 import os
+import string
 import typing
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -151,13 +152,32 @@ class Service:
     user_mode: bool
     """Whether to install the service for the full system or just the current user."""
 
-    def __init__(self, provider: str, template: str, user_mode: bool) -> None:
+    valid_chars: str = f'{string.ascii_letters}{string.digits}_-:'
+    """Valid characters for the `systemd` unit file name."""
+
+    max_length: int = 255
+    """Maximum length of the `systemd` unit file name."""
+
+    def __init__(self, provider: str, template: str, user_mode: bool, config_fname: Path | None = None) -> None:
         """Prepare to render the specified `template` from the `provider` package."""
         loader = jinja2.PackageLoader(provider)
         env = jinja2.Environment(autoescape=jinja2.select_autoescape(default=True), loader=loader)
         self.tmpl = env.get_template(template)
         self.user_mode = user_mode
-        self.path = (USER_INSTALL_PATH if user_mode else SYSTEM_INSTALL_PATH) / SERVICE_NAME
+
+        install_path = USER_INSTALL_PATH if user_mode else SYSTEM_INSTALL_PATH
+        if config_fname:
+            base_name = (
+                (
+                    str(config_fname.resolve().with_suffix(''))
+                    .replace('-', '--')
+                    .replace('/', '-')[1 : self.max_length - len('.service')]
+                )
+                + '.service'
+            )
+            self.path = install_path / base_name
+        else:
+            self.path = install_path / 'config-ninja.service'
 
         if os.geteuid() == 0:
             self.sudo = dummy()
