@@ -157,6 +157,7 @@ def load_config(ctx: typer.Context, value: typing.Optional[Path]) -> None:
     conf: settings.Config = settings.load(settings_file)
     ctx.obj['settings'] = conf
     ctx.obj['settings_file'] = settings_file
+    ctx.obj['settings_from_arg'] = value == settings_file
 
     if 'logging_config' in ctx.obj and conf.settings.LOGGING:
         configure_logging(ctx, None)
@@ -531,6 +532,7 @@ def install(
     environ.update(variables or [])
 
     settings_file = ctx.obj.get('settings_file')
+    settings_from_arg = ctx.obj.get('settings_from_arg')
 
     kwargs = {
         # the command to use when invoking config-ninja from systemd
@@ -539,9 +541,13 @@ def install(
         'environ': environ,
         # run `config-ninja` from this directory (if specified)
         'workdir': workdir,
-        # override the config file iff it was overridden via the 'install' command
-        'args': f'--config {settings_file}' if settings_file else None,
+        'args': f'--config {settings_file}',
     }
+
+    # override the config file iff it was overridden via the '--config' CLI argument
+    if not settings_from_arg:
+        del kwargs['args']
+
     if run_as:
         kwargs['user'] = run_as.user
         if run_as.group:
@@ -563,6 +569,7 @@ def install(
 
 @self_app.command()
 def uninstall(
+    ctx: typer.Context,
     print_only: PrintAnnotation = None,
     user: UserAnnotation = False,
     get_help: HelpAnnotation = None,
