@@ -425,11 +425,27 @@ def test_install_variables_invalid() -> None:
     """Verify the `install` command fails when an invalid variable is provided."""
     # Arrange
     pair = 'VARIABLE:INVALID'
+
+    # Act
     result = runner.invoke(app, ['self', 'install', '--print-only', '--var', pair])
 
     # Assert
     assert 1 == result.exit_code
     assert f'Invalid argument (expected VARIABLE=VALUE pair): {pair}' in result.stdout
+
+
+@pytest.mark.usefixtures('monkeypatch_systemd')
+def test_install_override_config() -> None:
+    """Verify the `install` command supports overrides of the config file."""
+    # Arrange
+    config = 'examples/local-backend.yaml'
+
+    # Act
+    result = runner.invoke(app, ['self', 'install', '--print-only', '--config', config])
+
+    # Assert
+    assert 0 == result.exit_code, result.stdout
+    assert config in result.stdout
 
 
 @pytest.mark.usefixtures('monkeypatch_systemd')
