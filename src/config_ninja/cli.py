@@ -29,7 +29,9 @@ from config_ninja.settings import schema
 try:
     from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
 except ImportError:  # pragma: no cover
-    from typing_extensions import Annotated, TypeAlias  # type: ignore[assignment,attr-defined,unused-ignore]
+    from typing import Annotated  # type: ignore[assignment,attr-defined,unused-ignore]
+
+    from typing_extensions import TypeAlias
 
 
 # ruff: noqa: PLR0913
