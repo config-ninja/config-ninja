@@ -12,6 +12,10 @@ Integrate with the AWS AppConfig service.
 ### `config_ninja.contrib.local`
 
 Use a local file as the backend.
+
+### `config_ninja.contrib.secretsmanager`
+
+Integrate with the AWS SecretsManager service.
 """
 
 from __future__ import annotations

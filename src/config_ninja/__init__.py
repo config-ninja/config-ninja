@@ -18,6 +18,10 @@ Integrate with the AWS AppConfig service.
 
 Use a local file as the backend.
 
+### `config_ninja.contrib.secretsmanager`
+
+Integrate with the AWS SecretsManager service.
+
 ## `config_ninja.hooks`
 
 Execute [`poethepoet`](https://poethepoet.natn.io/) tasks as callback hooks for backend updates.

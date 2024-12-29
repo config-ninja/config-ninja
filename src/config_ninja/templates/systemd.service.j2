@@ -9,8 +9,8 @@ Environment=PYTHONUNBUFFERED=true
 Environment={{ key }}={{ value }}
 {% endfor -%}
 {% endif -%}
-ExecStartPre={{ config_ninja_cmd }} self print
-ExecStart={{ config_ninja_cmd }} apply --poll
+ExecStartPre={{ config_ninja_cmd }} self {{ args }} print
+ExecStart={{ config_ninja_cmd }} apply {{ args }} --poll
 Restart=always
 RestartSec=30s
 Type=notify

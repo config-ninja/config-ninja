@@ -37,14 +37,14 @@ except ImportError:  # pragma: no cover
 
 __all__ = [
     'app',
-    'get',
     'apply',
+    'get',
+    'install',
+    'main',
     'monitor',
     'self_print',
-    'install',
     'uninstall',
     'version',
-    'main',
 ]
 
 LOG_MISSING_SETTINGS_MESSAGE = "Could not find [bold blue]config-ninja[/]'s settings file"
@@ -157,6 +157,7 @@ def load_config(ctx: typer.Context, value: typing.Optional[Path]) -> None:
     conf: settings.Config = settings.load(settings_file)
     ctx.obj['settings'] = conf
     ctx.obj['settings_file'] = settings_file
+    ctx.obj['settings_from_arg'] = value == settings_file
 
     if 'logging_config' in ctx.obj and conf.settings.LOGGING:
         configure_logging(ctx, None)
@@ -506,6 +507,7 @@ def self_print(
 
 @self_app.command()
 def install(
+    ctx: typer.Context,
     env_names: EnvNamesAnnotation = None,
     print_only: PrintAnnotation = None,
     run_as: RunAsAnnotation = None,
@@ -529,6 +531,9 @@ def install(
     environ = {name: os.environ[name] for name in env_names or [] if name in os.environ}
     environ.update(variables or [])
 
+    settings_file = ctx.obj.get('settings_file')
+    settings_from_arg = ctx.obj.get('settings_from_arg')
+
     kwargs = {
         # the command to use when invoking config-ninja from systemd
         'config_ninja_cmd': sys.argv[0] if sys.argv[0].endswith('config-ninja') else f'{sys.executable} {sys.argv[0]}',
@@ -536,13 +541,19 @@ def install(
         'environ': environ,
         # run `config-ninja` from this directory (if specified)
         'workdir': workdir,
+        'args': f'--config {settings_file}',
     }
+
+    # override the config file iff it was overridden via the '--config' CLI argument
+    if not settings_from_arg:
+        del kwargs['args']
+
     if run_as:
         kwargs['user'] = run_as.user
         if run_as.group:
             kwargs['group'] = run_as.group
 
-    svc = systemd.Service('config_ninja', 'systemd.service.j2', user_mode)
+    svc = systemd.Service('config_ninja', 'systemd.service.j2', user_mode, settings_file if settings_from_arg else None)
     if print_only:
         rendered = svc.render(**kwargs)
         rich.print(Markdown(f'# {svc.path}\n```systemd\n{rendered}\n```'))
@@ -558,6 +569,7 @@ def install(
 
 @self_app.command()
 def uninstall(
+    ctx: typer.Context,
     print_only: PrintAnnotation = None,
     user: UserAnnotation = False,
     get_help: HelpAnnotation = None,
@@ -566,7 +578,8 @@ def uninstall(
     version: VersionAnnotation = None,
 ) -> None:
     """Uninstall the [bold blue]config-ninja[/] [bold gray93]systemd[/] service."""
-    svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False)
+    settings_file = ctx.obj.get('settings_file') if ctx.obj.get('settings_from_arg') else None
+    svc = systemd.Service('config_ninja', 'systemd.service.j2', user or False, settings_file)
     if print_only:
         rich.print(Markdown(f'# {svc.path}\n```systemd\n{svc.read()}\n```'))
         raise typer.Exit(0)

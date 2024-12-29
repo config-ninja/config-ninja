@@ -18,7 +18,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import warnings
-from typing import TYPE_CHECKING, Any, AsyncIterator, Literal
+from typing import TYPE_CHECKING, Any, AsyncIterator, Iterator, Literal
 
 import boto3
 
@@ -31,7 +31,6 @@ except ImportError:  # pragma: no cover
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    from botocore.paginate import PageIterator
     from mypy_boto3_appconfig.client import AppConfigClient
     from mypy_boto3_appconfigdata import AppConfigDataClient
 
@@ -110,8 +109,10 @@ class AppConfigBackend(Backend):
 
     @staticmethod
     def _get_id_from_name(name: str, operation_name: OperationName, client: AppConfigClient, **kwargs: Any) -> str:
-        page_iterator: PageIterator = client.get_paginator(operation_name).paginate(**kwargs)
-        ids: list[str] = list(page_iterator.search(f'Items[?Name == `{name}`].Id'))
+        out: Iterator[str] = (
+            client.get_paginator(operation_name).paginate(**kwargs).search(f'Items[?Name == `{name}`].Id')
+        )
+        ids = list(out)
 
         if not ids:
             raise ValueError(f'no "{operation_name}" results found for Name="{name}"')
