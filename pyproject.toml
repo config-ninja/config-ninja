@@ -876,6 +876,7 @@ line-length = 120
 output-format = "full"
 show-fixes = true
 src = ["src", "tests", "tools"]
+target-version = "py38"
 
 [tool.ruff.format]
 quote-style = "single"
