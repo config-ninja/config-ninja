@@ -190,7 +190,7 @@ pyright = "^1.1.344"
 fail_under = 50
 precision = 1
 show_missing = true
-skip_covered = true
+skip_covered = false
 
 [tool.coverage.run]
 # https://coverage.readthedocs.io/en/latest/config.html#run
