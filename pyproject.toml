@@ -137,7 +137,7 @@ poe = ["poethepoet"]
 
 
 [tool.poetry.group.dev.dependencies]
-boto3-stubs = {version = "1.35.84", extras = ["appconfig", "appconfigdata", "secretsmanager"]}
+boto3-stubs = {version = "1.35.88", extras = ["appconfig", "appconfigdata", "secretsmanager"]}
 poethepoet = ">=0.20,<0.31"
 types-pyyaml = "^6"
 
@@ -190,7 +190,7 @@ pyright = "^1.1.344"
 fail_under = 50
 precision = 1
 show_missing = true
-skip_covered = true
+skip_covered = false
 
 [tool.coverage.run]
 # https://coverage.readthedocs.io/en/latest/config.html#run
@@ -876,6 +876,7 @@ line-length = 120
 output-format = "full"
 show-fixes = true
 src = ["src", "tests", "tools"]
+target-version = "py38"
 
 [tool.ruff.format]
 quote-style = "single"
