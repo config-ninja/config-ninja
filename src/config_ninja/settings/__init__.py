@@ -27,9 +27,9 @@ if typing.TYPE_CHECKING:  # pragma: no cover
 __all__ = [
     'DEFAULT_LOGGING_CONFIG',
     'DEFAULT_PATHS',
+    'PREFIX',
     'DestSpec',
     'ObjectSpec',
-    'PREFIX',
     'SourceSpec',
     'load',
     'resolve_path',

@@ -591,10 +591,7 @@ def uninstall(
     rich.print('[green]SUCCESS[/] :white_check_mark:')
 
 
-@self_app.callback(
-    invoke_without_command=True,
-    name='self',
-)
+@self_app.callback(invoke_without_command=True)
 def self_main(
     ctx: typer.Context,
     get_help: HelpAnnotation = None,
