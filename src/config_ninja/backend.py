@@ -11,7 +11,7 @@ from typing import Any, AsyncIterator, Callable, Dict
 import tomlkit as toml
 import yaml
 
-__all__ = ['FormatT', 'dumps', 'loads', 'Backend']
+__all__ = ['Backend', 'FormatT', 'dumps', 'loads']
 
 logger = logging.getLogger(__name__)
 
