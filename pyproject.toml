@@ -144,7 +144,6 @@ types-pyyaml = "^6"
 [tool.poetry.group.lint.dependencies]
 anybadge = "^1.14"
 pylint = "^3.0"
-safety = ">=2.3,<4.0"
 shellcheck-py = {version = ">=0.8,<0.11", markers = "platform_machine != 'arm64'"}
 pre-commit = [
   {version = "<3.6", python = "<3.9"},
@@ -341,9 +340,6 @@ shell = """
     xargs -I{} anybadge --overwrite --label pylint --value {} \
       --file=docs/reports/pylint.svg 7=red 8=orange 9=yellow 10=green
 """
-
-[[tool.poe.tasks.lint.sequence]]
-shell = "safety check --continue-on-error --full-report"
 
 [tool.poe.tasks.test]
 help = "Test this package and report coverage"
