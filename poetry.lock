@@ -16,13 +16,13 @@ typing-extensions = {version = ">=4.0.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "anybadge"
-version = "1.14.0"
+version = "1.15.6"
 description = "Simple, flexible badge generator for project badges."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "anybadge-1.14.0-py3-none-any.whl", hash = "sha256:8711a7f7f45317c62a460f14084f005ba665cbebdf2a94e7df53bc3ab35df4c9"},
-    {file = "anybadge-1.14.0.tar.gz", hash = "sha256:47f06e0a6320d3e5eac55c712dc0bab71b9ed85353c591d448653c5a0740783f"},
+    {file = "anybadge-1.15.6-py3-none-any.whl", hash = "sha256:4df3f672e4875e799aba1ab5008a44d695da7ef030287d277079c30c50f845b1"},
+    {file = "anybadge-1.15.6.tar.gz", hash = "sha256:4c9696f4c12c8f1461311b5c7f1eb5287cb444cb9f7231fe9a0e810e4dce2c93"},
 ]
 
 [package.dependencies]
