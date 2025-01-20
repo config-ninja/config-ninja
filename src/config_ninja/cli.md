@@ -55,7 +55,7 @@ $ config-ninja get [OPTIONS] KEY
 
 **Arguments**:
 
-- `KEY`: The key of the configuration object to retrieve \[required\]
+- `KEY`: The key of the configuration object to retrieve [required]
 
 **Options**:
 

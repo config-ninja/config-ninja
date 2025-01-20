@@ -96,9 +96,9 @@ def test_respects_config_ninja_home(
     call_count = len([args.args[0] for args in mock_ensurepip_present.call_args_list if args.args[0] == 'ensurepip'])
 
     # Assert
-    assert (
-        call_count == 1
-    ), f'Expected \'import_module("ensurepip")\' to have been called once. Called {call_count} times.'
+    assert call_count == 1, (
+        f'Expected \'import_module("ensurepip")\' to have been called once. Called {call_count} times.'
+    )
 
     assert str(install_path).lower() in stdout.lower()
 
@@ -126,9 +126,9 @@ def test_respects_xdg_home(
     call_count = len([call.args[0] for call in mock_ensurepip_present.call_args_list if call.args[0] == 'ensurepip'])
 
     # Assert
-    assert (
-        call_count == 1
-    ), f'Expected \'import_module("ensurepip")\' to have been called once. Called {call_count} times.'
+    assert call_count == 1, (
+        f'Expected \'import_module("ensurepip")\' to have been called once. Called {call_count} times.'
+    )
 
     assert str(install_path).lower() in stdout.lower()
 
