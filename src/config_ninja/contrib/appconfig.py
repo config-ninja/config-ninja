@@ -25,9 +25,9 @@ import boto3
 from config_ninja.backend import Backend
 
 try:  # pragma: no cover
-    from typing import TypeAlias  # type: ignore[attr-defined,unused-ignore]
+    from typing import TypeAlias, TypedDict  # type: ignore[attr-defined,unused-ignore]
 except ImportError:  # pragma: no cover
-    from typing_extensions import TypeAlias
+    from typing_extensions import TypeAlias, TypedDict
 
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -42,6 +42,26 @@ MINIMUM_POLL_INTERVAL_SECONDS = 60
 OperationName: TypeAlias = Literal['list_applications', 'list_configuration_profiles', 'list_environments']
 
 logger = logging.getLogger(__name__)
+
+
+class ErrorT(TypedDict):
+    """These properties are returned in the `BadRequestException` response's `Error` object.
+
+    # ref: https://botocore.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata/client/exceptions/BadRequestException.html#badrequestexception
+    """
+
+    Code: str
+    Message: str
+
+
+class BadRequestExceptionResponse(TypedDict):
+    """Type information for the `AppConfigData.Client.exceptions.BadRequestException.response`.
+
+    # ref: https://botocore.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata/client/exceptions/BadRequestException.html#badrequestexception
+    """
+
+    Error: ErrorT
+    Message: str
 
 
 class AppConfigBackend(Backend):
@@ -259,7 +279,8 @@ class AppConfigBackend(Backend):
             try:
                 resp = self.client.get_latest_configuration(ConfigurationToken=token)
             except self.client.exceptions.BadRequestException as exc:
-                if exc.response['Error']['Message'] != 'Request too early':  # pragma: no cover
+                exc_resp: BadRequestExceptionResponse = exc.response  # type: ignore[assignment]
+                if exc_resp['Error']['Message'] != 'Request too early':  # pragma: no cover
                     raise
                 logger.debug('Request too early; retrying in %d seconds', interval / 2)
                 await asyncio.sleep(interval / 2)
