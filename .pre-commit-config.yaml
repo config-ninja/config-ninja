@@ -67,7 +67,7 @@ repos:
       - id: mdformat
         additional_dependencies:
           - mdformat-black
-          - mdformat-config
+          - mdformat-config<0.2
           - mdformat-footnote
           - mdformat-frontmatter
           - mdformat-gfm
