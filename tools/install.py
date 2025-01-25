@@ -377,7 +377,7 @@ class Installer:
                 return version
 
         raise ValueError(  # pragma: no cover
-            'Unable to find a valid release; try installing a pre-release ' "by passing the '--pre' argument"
+            "Unable to find a valid release; try installing a pre-release by passing the '--pre' argument"
         )
 
     def _get_version(self) -> _Version:
@@ -590,9 +590,7 @@ def _do_install(installer: Installer) -> None:
         env = installer.install()
     except FileExistsError as exc:
         sys.stderr.write(f'{failure}: {exc}\n')
-        sys.stdout.write(
-            f"Pass the {blue('--force')} argument to clobber it or " f"{blue('--uninstall')} to remove it.\n"
-        )
+        sys.stdout.write(f'Pass the {blue("--force")} argument to clobber it or {blue("--uninstall")} to remove it.\n')
         sys.exit(RC_PATH_EXISTS)
 
     sys.stdout.write(f'{success}: Installation to virtual environment complete ✅\n')
@@ -602,7 +600,7 @@ def _do_install(installer: Installer) -> None:
 
 def _do_uninstall(installer: Installer) -> None:
     if not installer.force:
-        prompt = f"Uninstall {blue('config-ninja')} from {cyan(installer.path)}? [y/N]: "
+        prompt = f'Uninstall {blue("config-ninja")} from {cyan(installer.path)}? [y/N]: '
         if Path('/dev/tty').exists():
             sys.stdout.write(prompt)
             sys.stdout.flush()
@@ -617,7 +615,7 @@ def _do_uninstall(installer: Installer) -> None:
 
     sys.stdout.write('...\n')
     shutil.rmtree(installer.path)
-    sys.stdout.write(f"{success}: Uninstalled {blue('config-ninja')} from path {cyan(installer.path)} ✅\n")
+    sys.stdout.write(f'{success}: Uninstalled {blue("config-ninja")} from path {cyan(installer.path)} ✅\n')
     if not WINDOWS or MINGW:  # pragma: no cover  # windows
         installer.symlink(installer.path / 'bin' / 'config-ninja', installer.path.parent, remove=True)
 
