@@ -81,6 +81,7 @@ uv tool install 'config-ninja[all]'
 
 ### Enable the `systemd` Service
 
+Every service will be created with its own AliasName using the service name as a reference.
 After installing `config-ninja`, enable it as a `systemd` service for the current user:
 
 ```sh
