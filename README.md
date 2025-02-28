@@ -90,8 +90,9 @@ config-ninja self install --user
 
 Multiple instances of the service can also be installed to reference different settings files. For example, the following command will create the service named `etc-config--ninja-alternate.service`:
 
-````sh
+```sh
 sudo config-ninja self install --config /etc/config-ninja/alternate.yaml
+```
 
 ## How It Works
 
@@ -159,4 +160,3 @@ To demonstrate how the mechanics work (using the [local backend](https://config-
    }
    ```
    Chances are, you'll want to update the `config-ninja-settings.yaml` file to use a remote backend (instead of `local`). See [config_ninja.contrib](https://config-ninja.github.io/config-ninja/config_ninja/contrib.html) for a list of supported config providers.
-````
