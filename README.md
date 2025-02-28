@@ -112,7 +112,7 @@ To demonstrate how the mechanics work (using the [local backend](https://config-
    				 kwargs:
    					 path: ./.local/config.toml
    EOF
-  ```
+   ```
 
 2. run `config-ninja` in monitor mode:
    ```sh
