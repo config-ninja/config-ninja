@@ -303,7 +303,7 @@ def configure_logging(ctx: typer.Context, verbose: typing.Optional[bool] = None)
     )
 
     conf: typing.Optional[settings.Config] = ctx.obj.get('settings')
-    new_logging_config: schema.DictConfig = (conf.settings.LOGGING or {}) if conf else {}  # type: ignore[assignment,typeddict-item]
+    new_logging_config: schema.DictConfig = (conf.settings.LOGGING or {}) if conf else {}  # type: ignore[assignment,typeddict-item,unused-ignore]
 
     for key, value in new_logging_config.items():
         base = logging_config.get(key, {})
