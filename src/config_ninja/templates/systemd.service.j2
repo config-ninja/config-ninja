@@ -28,4 +28,4 @@ WorkingDirectory={{ workdir }}
 {%- if not user_mode %}
 WantedBy=multi-user.target
 {%- endif %}
-Alias=config-ninja.service
+Alias={{ service_name }}
