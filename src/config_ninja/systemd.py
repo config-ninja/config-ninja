@@ -152,6 +152,9 @@ class Service:
     user_mode: bool
     """Whether to install the service for the full system or just the current user."""
 
+    service_name: str
+    """The name of the service to install."""
+
     valid_chars: str = f'{string.ascii_letters}{string.digits}_-:'
     """Valid characters for the `systemd` unit file name."""
 
@@ -176,8 +179,10 @@ class Service:
                 + '.service'
             )
             self.path = install_path / base_name
+            self.service_name = base_name
         else:
             self.path = install_path / 'config-ninja.service'
+            self.service_name = 'config-ninja.service'
 
         if os.geteuid() == 0:
             self.sudo = dummy()
@@ -236,6 +241,8 @@ class Service:
         """Render the `systemd` service file from the given parameters."""
         if workdir := kwargs.get('workdir'):
             kwargs['workdir'] = Path(workdir).absolute()
+
+        kwargs.setdefault('service_name', self.service_name)
 
         kwargs.setdefault('user_mode', self.user_mode)
 
