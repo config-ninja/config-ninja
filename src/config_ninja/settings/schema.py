@@ -41,7 +41,7 @@ from typing import Literal, TypedDict
 from config_ninja.backend import FormatT
 
 try:
-    from typing import NotRequired, TypeAlias
+    from typing import NotRequired, TypeAlias  # type: ignore[attr-defined]  # for older Python versions
 except ImportError:  # pragma: no cover
     from typing_extensions import NotRequired, TypeAlias
 

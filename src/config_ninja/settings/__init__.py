@@ -66,14 +66,14 @@ DEFAULT_LOGGING_CONFIG: DictConfigDefault = {
     },
     'filters': {},
     'handlers': {
-        'rich': {
+        'rich': {  # type: ignore[typeddict-item,unused-ignore]  # needed for Python <3.11
             'class': 'rich.logging.RichHandler',
             'formatter': 'simple',
             'rich_tracebacks': True,
         },
     },
     'loggers': {},
-    'root': {
+    'root': {  # type: ignore[typeddict-item,unused-ignore]  # needed for Python <3.11
         'handlers': ['rich'],
         'level': logging.INFO,
         'propagate': False,
@@ -235,7 +235,7 @@ class ObjectSpec:
 
     @staticmethod
     def _load_hooks(data: ConfigNinjaObject, engine: HooksEngine | None) -> tuple[Hook, ...]:
-        hook_names: list[str] = data.get('hooks', [])
+        hook_names: list[str] = data.get('hooks', [])  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType]
         if hook_names and engine is None:
             raise ValueError(f"'poethepoet' configuration must be defined for hooks in config to work: {data!r}")
 
