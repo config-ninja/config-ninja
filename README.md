@@ -17,12 +17,12 @@ The `config-ninja` agent monitors the backend source for changes. When the sourc
 
 ```mermaid
 sequenceDiagram
-		loop polling
-			 config-ninja->>backend: query for changes
-		end
+  loop polling
+    config-ninja->>backend: query for changes
+  end
 
-		backend->>+config-ninja: [backend changed] fetch config
-		config-ninja->>-filesystem: write updated configuration file
+  backend->>+config-ninja: [backend changed] fetch config
+  config-ninja->>-filesystem: write updated configuration file
 ```
 
 ## Features
@@ -56,13 +56,13 @@ usage: install [-h] [--version VERSION] [--pre] [--uninstall] [--force] [--path 
 Installs the latest (or given) version of config-ninja
 
 options:
-	-h, --help           show this help message and exit
-	--version VERSION    install named version
-	--pre                allow pre-release versions to be installed
-	--uninstall          uninstall config-ninja
-	--force              respond 'yes' to confirmation prompts; overwrite existing installations
-	--path PATH          install config-ninja to this directory
-	--backends BACKENDS  comma-separated list of package extras to install, or 'none' to install no backends
+  -h, --help           show this help message and exit
+  --version VERSION    install named version
+  --pre                allow pre-release versions to be installed
+  --uninstall          uninstall config-ninja
+  --force              respond 'yes' to confirmation prompts; overwrite existing installations
+  --path PATH          install config-ninja to this directory
+  --backends BACKENDS  comma-separated list of package extras to install, or 'none' to install no backends
 ```
 
 #### With `pip` / `pipx`
@@ -102,16 +102,16 @@ To demonstrate how the mechanics work (using the [local backend](https://config-
    ```sh
    cat <<EOF >config-ninja-settings.yaml
    CONFIG_NINJA_OBJECTS:
-   	 example-0:
-   		 dest:
-   			 format: json
-   			 path: ./.local/settings.json
-   		 source:
-   			 backend: local
-   			 format: toml
-   			 init:
-   				 kwargs:
-   					 path: ./.local/config.toml
+     example-0:
+       dest:
+         format: json
+         path: ./.local/settings.json
+     source:
+       backend: local
+       format: toml
+       init:
+         kwargs:
+           path: ./.local/config.toml
    EOF
    ```
 2. run `config-ninja` in monitor mode:
@@ -159,4 +159,5 @@ To demonstrate how the mechanics work (using the [local backend](https://config-
      }
    }
    ```
-   Chances are, you'll want to update the `config-ninja-settings.yaml` file to use a remote backend (instead of `local`). See [config_ninja.contrib](https://config-ninja.github.io/config-ninja/config_ninja/contrib.html) for a list of supported config providers.
+
+Chances are, you'll want to update the `config-ninja-settings.yaml` file to use a remote backend (instead of `local`). See [config_ninja.contrib](https://config-ninja.github.io/config-ninja/config_ninja/contrib.html) for a list of supported config providers.
