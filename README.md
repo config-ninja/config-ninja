@@ -81,13 +81,17 @@ uv tool install 'config-ninja[all]'
 
 ### Enable the `systemd` Service
 
-Every service will be created with its own AliasName using the service name as a reference.
 After installing `config-ninja`, enable it as a `systemd` service for the current user:
 
 ```sh
 # omit '--user' to install the agent at the system level
 config-ninja self install --user
 ```
+
+Multiple instances of the service can also be installed to reference different settings files. For example, the following command will create the service named `etc-config--ninja-alternate.service`:
+
+````sh
+sudo config-ninja self install --config /etc/config-ninja/alternate.yaml
 
 ## How It Works
 
@@ -108,7 +112,8 @@ To demonstrate how the mechanics work (using the [local backend](https://config-
    				 kwargs:
    					 path: ./.local/config.toml
    EOF
-   ```
+````
+
 2. run `config-ninja` in monitor mode:
    ```sh
    config-ninja apply --poll
