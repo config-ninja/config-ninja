@@ -8,7 +8,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 name = "config-ninja"
 description = "Use special ninja powers to manage system configurations 🥷"
 readme = "README.md"
-license = { file = "LICENSE.md" }
+license-files = [ "LICENSE.md" ]
 authors = [{ name = "Bryant Finney", email = "<bryant.finney@outlook.com>" }]
 requires-python = ">=3.8.1,<4"
 classifiers = [
