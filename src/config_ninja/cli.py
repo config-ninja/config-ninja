@@ -54,7 +54,7 @@ LOG_VERBOSITY_MESSAGE = 'logging verbosity set to [green]%s[/green]'
 
 logger = logging.getLogger(__name__)
 
-app_kwargs: typing.Dict[str, typing.Any] = {
+app_kwargs: dict[str, typing.Any] = {
     'context_settings': {'help_option_names': ['-h', '--help']},
     'no_args_is_help': True,
     'rich_markup_mode': 'rich',
@@ -96,7 +96,7 @@ HelpAnnotation: TypeAlias = Annotated[
     ),
 ]
 HookAnnotation: TypeAlias = Annotated[
-    typing.List[str],
+    list[str],
     typer.Argument(
         help='Execute the named hook(s) (multiple values may be provided).',
         show_default=False,
@@ -104,7 +104,7 @@ HookAnnotation: TypeAlias = Annotated[
     ),
 ]
 OptionalKeyAnnotation: TypeAlias = Annotated[
-    typing.Optional[typing.List[str]],
+    typing.Optional[list[str]],
     typer.Argument(
         help='Apply the configuration object(s) with matching key(s)'
         ' (multiple values may be provided). If unspecified, all objects will be applied',
@@ -192,7 +192,7 @@ WorkdirAnnotation: TypeAlias = Annotated[
 ]
 
 
-def parse_env(ctx: typer.Context, value: typing.Optional[typing.List[str]]) -> typing.List[str]:
+def parse_env(ctx: typer.Context, value: typing.Optional[list[str]]) -> list[str]:
     """Parse the environment variables from the command line."""
     if ctx.resilient_parsing or not value:
         return []
@@ -201,7 +201,7 @@ def parse_env(ctx: typer.Context, value: typing.Optional[typing.List[str]]) -> t
 
 
 EnvNamesAnnotation: TypeAlias = Annotated[
-    typing.Optional[typing.List[str]],
+    typing.Optional[list[str]],
     typer.Option(
         '-e',
         '--env',
@@ -261,7 +261,7 @@ def parse_var(value: str) -> Variable:
 
 
 VariableAnnotation: TypeAlias = Annotated[
-    typing.Optional[typing.List[Variable]],
+    typing.Optional[list[Variable]],
     typer.Option(
         '--var',
         help='Embed the specified [yellow]VARIABLE=VALUE[/] into the unit file. Can be used multiple times.',
@@ -364,7 +364,7 @@ VersionAnnotation = Annotated[
 
 
 @contextlib.contextmanager
-def handle_key_errors(objects: typing.Dict[str, typing.Any]) -> typing.Iterator[None]:
+def handle_key_errors(objects: dict[str, typing.Any]) -> typing.Iterator[None]:
     """Handle KeyError exceptions within the managed context."""
     try:
         yield
@@ -375,7 +375,7 @@ def handle_key_errors(objects: typing.Dict[str, typing.Any]) -> typing.Iterator[
 
 
 async def poll_all(
-    controllers: typing.List[controller.BackendController], get_or_write: typing.Literal['get', 'write']
+    controllers: list[controller.BackendController], get_or_write: typing.Literal['get', 'write']
 ) -> None:
     """Run the given controllers within an `asyncio` event loop to monitor and apply changes."""
     await asyncio.gather(*[ctrl.aget(rich.print) if get_or_write == 'get' else ctrl.awrite() for ctrl in controllers])

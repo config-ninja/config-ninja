@@ -21,7 +21,7 @@ __all__ = ['BackendController', 'ErrorHandler']
 logger = logging.getLogger(__name__)
 
 ActionType: TypeAlias = typing.Callable[[str], typing.Any]
-ErrorHandler: TypeAlias = typing.Callable[[typing.Dict[typing.Any, typing.Any]], typing.ContextManager[None]]
+ErrorHandler: TypeAlias = typing.Callable[[dict[typing.Any, typing.Any]], typing.ContextManager[None]]
 
 
 class BackendController:

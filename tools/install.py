@@ -12,7 +12,7 @@ RC_INVALID_PYTHON = 1
 RC_PATH_EXISTS = 2
 
 # Eager version check so we fail nicely before possible syntax errors
-if sys.version_info < (3, 9):
+if sys.version_info < (3, 9):  # noqa: UP036
     sys.stdout.write('config-ninja installer requires Python 3.9 or newer to run!\n')
     sys.exit(RC_INVALID_PYTHON)
 
