@@ -6,7 +6,8 @@ import abc
 import json
 import logging
 import typing
-from typing import Any, AsyncIterator, Callable, Dict
+from collections.abc import AsyncIterator
+from typing import Any, Callable, Dict
 
 import tomlkit as toml
 import yaml

@@ -18,7 +18,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import warnings
-from typing import TYPE_CHECKING, Any, AsyncIterator, Iterator, Literal
+from collections.abc import AsyncIterator, Iterator
+from typing import TYPE_CHECKING, Any, Literal
 
 import boto3
 
