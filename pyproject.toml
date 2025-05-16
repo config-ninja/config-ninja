@@ -1,6 +1,6 @@
 [build-system]
 # https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+requires = ["poetry-core>=2.0.0", "poetry-dynamic-versioning"]
 build-backend = "poetry_dynamic_versioning.backend"
 
 [project]
@@ -8,16 +8,15 @@ build-backend = "poetry_dynamic_versioning.backend"
 name = "config-ninja"
 description = "Use special ninja powers to manage system configurations 🥷"
 readme = "README.md"
-license-files = [ "LICENSE.md" ]
+license-files = ["LICENSE.md"]
 authors = [{ name = "Bryant Finney", email = "<bryant.finney@outlook.com>" }]
-requires-python = ">=3.8.1,<4"
+requires-python = ">=3.9,<4"
 classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -29,7 +28,7 @@ dynamic = ["version"]
 scripts.config-ninja = "config_ninja.cli:app"
 dependencies = [
   "pyyaml~=6.0",
-  "typing-extensions~=4.7; python_version<'3.9'",
+  "typing-extensions~=4.7; python_version<'3.11'",
   "typer>=0.9,<0.16",
   "pyspry~=1.0.2",
   "jinja2>3.1.4,~=3.1",
@@ -37,7 +36,7 @@ dependencies = [
   # sdnotify is designed to handle errors when systemd is missing
   "sdnotify~=0.3.2",
   # sh encounters import errors on Windows
-  "sh~=2.0; sys_platform != 'win32'"
+  "sh~=2.0; sys_platform != 'win32'",
 ]
 
 [project.optional-dependencies]
@@ -162,7 +161,7 @@ mdformat-footnote = "^0.1.1"
 mdformat-black = "^0.1.1"
 mdformat-config = "^0.1.3"
 mdformat-gfm-alerts = "^1.0.1"
-# dependency of pre-commit 
+# dependency of pre-commit
 virtualenv = ">=20.26.6"
 
 [tool.poetry.group.misc.dependencies]
@@ -382,14 +381,14 @@ help = "Use 'poetry' to a virtual environment with the specified Python version"
 args = [{ name = "py", positional = true }]
 shell = """
   poetry env use $py
-  poetry install --all-extras --sync --only=dev,main,test
+  poetry sync --all-extras --only=dev,main,test
   poetry run poe test
 """
 
 [tool.poe.tasks.test-python-versions]
 help = "Run the test suite in separate virtual environments for each supported Python version"
 shell = """
-  for py in 3.8 3.9 3.10 3.11 3.12 3.13; do
+  for py in 3.9 3.10 3.11 3.12 3.13; do
     poetry run poe test-py $py
   done
 """
@@ -454,7 +453,7 @@ load-plugins = "pylint.extensions.mccabe"
 persistent = true
 # Minimum Python version to use for version dependent checks. Will default to the
 # version used to run pylint.
-py-version = "3.8"
+py-version = "3.9"
 # Discover python modules and packages in the file system subtree.
 # recursive =
 # When enabled, pylint would attempt to guess common misconfiguration and emit
@@ -880,7 +879,7 @@ line-length = 120
 output-format = "full"
 show-fixes = true
 src = ["src", "tests", "tools"]
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.format]
 quote-style = "single"
