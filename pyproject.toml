@@ -139,7 +139,7 @@ dist_glob_patterns = ["dist/*"]
 upload_to_vcs_release = true
 
 [tool.poetry.group.dev.dependencies]
-boto3-stubs = { version = "1.38.16", extras = [
+boto3-stubs = { version = "1.38.17", extras = [
   "appconfig",
   "appconfigdata",
   "secretsmanager",
