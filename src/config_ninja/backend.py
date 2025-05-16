@@ -6,7 +6,8 @@ import abc
 import json
 import logging
 import typing
-from typing import Any, AsyncIterator, Callable, Dict
+from collections.abc import AsyncIterator
+from typing import Any, Callable
 
 import tomlkit as toml
 import yaml
@@ -18,9 +19,8 @@ logger = logging.getLogger(__name__)
 FormatT = typing.Literal['json', 'raw', 'toml', 'yaml', 'yml']
 """The supported serialization formats (not including `jinja2` templates)"""
 
-# note: `3.8` was not respecting `from __future__ import annotations` for delayed evaluation
-LoadT = Callable[[str], Dict[str, Any]]
-DumpT = Callable[[Dict[str, Any]], str]
+LoadT = Callable[[str], dict[str, Any]]
+DumpT = Callable[[dict[str, Any]], str]
 
 
 def load_raw(raw: str) -> dict[str, str]:

@@ -76,7 +76,7 @@ Handler = TypedDict(
     'Handler',
     {
         'class': str,
-        'filters': NotRequired[typing.List[FilterId]],
+        'filters': NotRequired[list[FilterId]],
         'formatter': FormatterId,
         'level': NotRequired[typing.Union[str, int]],
         'rich_tracebacks': NotRequired[bool],

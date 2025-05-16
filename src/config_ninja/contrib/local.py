@@ -17,8 +17,8 @@ from __future__ import annotations
 
 import logging
 import warnings
+from collections.abc import AsyncIterator
 from pathlib import Path
-from typing import AsyncIterator
 
 from watchfiles import awatch  # pyright: ignore[reportUnknownVariableType]
 
