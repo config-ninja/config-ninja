@@ -3,6 +3,59 @@
 requires = ["poetry-core>=2.0.0", "poetry-dynamic-versioning"]
 build-backend = "poetry_dynamic_versioning.backend"
 
+[dependency-groups]
+# https://packaging.python.org/en/latest/specifications/dependency-groups/
+dev = [
+  "boto3-stubs[appconfig,appconfigdata,secretsmanager]~=1.34",
+  "poethepoet>=0.20,<0.31",
+  "types-pyyaml~=6.0",
+]
+
+lint = [
+  "anybadge~=1.14",
+  "mdformat-black~=0.1",
+  "mdformat-config~=0.2",
+  "mdformat-footnote~=0.1",
+  "mdformat-frontmatter~=2.0",
+  "mdformat-gfm~=0.4",
+  "mdformat-gfm-alerts~=1.0",
+  "pre-commit>=3.6; python_version >= '3.9'",
+  "pylint~=3.2",
+  "shellcheck-py>=0.8,<0.11; platform_machine != 'arm64'",
+  "virtualenv>=20.31.2",
+  "yamlfix>=1.16.1",
+]
+
+misc = [
+  "certifi>=2023.07.22",
+  "cruft~=2.11",
+  "gitpython>=3.1.32",                  # https://nvd.nist.gov/vuln/detail/CVE-2023-40267
+  "jupyterlab>=3.4,<5.0",
+  "pdoc~=14.0",
+  "pytest-testmon~=2.0",
+  "pytest-watch~=4.2",
+  "python-dotenv~=1.0",
+  "python-semantic-release>=8.0,<10.0",
+  "pynvim~=0.5",
+]
+
+test = [
+  "coverage[toml]>=6.4,<8.0",
+  "pytest >=7.4.4,<9.0.0",
+  "pytest-clarity~=1.0",
+  "pytest-cov >=3,<6",
+  "pytest-mock~=3.8",
+]
+
+# note: these must be synchronized with `.pre-commit-config.yaml`
+pre-commit = [
+  "ruff~=0.11",
+  "mypy[reports]~=1.4",
+  "lxml>=4.9.3; python_version >= '3.12'",
+  "pyright~=1.1",
+]
+
+
 [project]
 # https://python-poetry.org/docs/pyproject/
 name = "config-ninja"
@@ -138,7 +191,7 @@ dist_glob_patterns = ["dist/*"]
 upload_to_vcs_release = true
 
 [tool.poetry.group.dev.dependencies]
-boto3-stubs = { version = "1.38.17", extras = [
+boto3-stubs = { version = "^1.38.17", extras = [
   "appconfig",
   "appconfigdata",
   "secretsmanager",
@@ -152,11 +205,11 @@ pylint = "^3.0"
 shellcheck-py = { version = ">=0.8,<0.11", markers = "platform_machine != 'arm64'" }
 pre-commit = ">=3.6"
 yamlfix = "^1.16"
-mdformat-gfm = "^0.3.6"
+mdformat-gfm = "^0.4.1"
 mdformat-frontmatter = "^2.0.8"
 mdformat-footnote = "^0.1.1"
 mdformat-black = "^0.1.1"
-mdformat-config = "^0.1.3"
+mdformat-config = "^0.2.1"
 mdformat-gfm-alerts = "^1.0.1"
 # dependency of pre-commit
 virtualenv = ">=20.26.6"
@@ -853,7 +906,7 @@ redefining-builtins-modules = [
 ]
 
 [tool.pyright]
-exclude = ["docs"]
+exclude = ["docs", ".venv/**"]
 strict = ["src"]
 typeCheckingMode = "strict"
 

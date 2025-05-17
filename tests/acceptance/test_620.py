@@ -22,6 +22,8 @@ except ImportError:  # pragma: no cover
 runner = testing.CliRunner()
 logging_config_file = Path('examples/logging.yaml')
 
+POE_EXECUTE_METHOD_NAME = 'poethepoet.executor.base.PoeExecutor.execute'
+
 
 @pytest.fixture
 def mock_get_execution_plan(mocker: pytest_mock.MockerFixture) -> mock.MagicMock:
@@ -32,9 +34,19 @@ def mock_get_execution_plan(mocker: pytest_mock.MockerFixture) -> mock.MagicMock
 
 
 @pytest.fixture
-def mock_task_execute_method(mocker: pytest_mock.MockFixture) -> mock.MagicMock:
+def mock_virtualenv_detect(mocker: pytest_mock.MockerFixture) -> None:
+    """Mock the `poethepoet.virtualenv.Virtualenv.detect()` method to ensure the base executor is always used.
+
+    A different executor class is used according to the path of the virtual environment.
+    """
+    mocked = mocker.patch('poethepoet.virtualenv.Virtualenv.detect')
+    mocked.return_value = False
+
+
+@pytest.fixture
+def mock_task_execute_method(mocker: pytest_mock.MockFixture, mock_virtualenv_detect: None) -> mock.MagicMock:
     """Mock the `poethepoet.task.base.PoeTask.execute` method."""
-    mocked = mocker.patch('poethepoet.executor.base.PoeExecutor.execute')
+    mocked = mocker.patch(POE_EXECUTE_METHOD_NAME)
     mocked.return_value = 0
     return mocked
 
@@ -124,11 +136,9 @@ def test_multi_callback(mock_task_execute_method: mock.MagicMock) -> None:
     assert ('echo', 'success') == mock_task_execute_method.call_args_list[2].args[0]
 
 
-def test_execution_error(mocker: pytest_mock.MockerFixture) -> None:
+def test_execution_error(mocker: pytest_mock.MockerFixture, mock_virtualenv_detect: None) -> None:
     """Verify behavior when a hook fails to execute."""
-    mocked = mocker.patch(
-        'poethepoet.executor.base.PoeExecutor.execute', side_effect=exceptions.ExecutionError('error executing hook')
-    )
+    mocked = mocker.patch(POE_EXECUTE_METHOD_NAME, side_effect=exceptions.ExecutionError('error executing hook'))
 
     result = config_ninja('apply', 'example-local')
 
