@@ -4857,4 +4857,4 @@ poe = ["poethepoet"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4"
-content-hash = "8c3e969e5ede32430fd73aa1f32d005cc6454ff357af69954aad7dfb206989a2"
+content-hash = "f3b2654c5c9d7e6b591e4b3a4d8e87fb06a96123e96bb8728395fd3cb90e280f"

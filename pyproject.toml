@@ -150,10 +150,7 @@ types-pyyaml = "^6"
 anybadge = "^1.14"
 pylint = "^3.0"
 shellcheck-py = { version = ">=0.8,<0.11", markers = "platform_machine != 'arm64'" }
-pre-commit = [
-  { version = "<3.6", python = "<3.9" },
-  { version = ">=3.6", python = ">=3.9" },
-]
+pre-commit = ">=3.6"
 yamlfix = "^1.16"
 mdformat-gfm = "^0.3.6"
 mdformat-frontmatter = "^2.0.8"
