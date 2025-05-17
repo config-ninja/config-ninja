@@ -4028,33 +4028,19 @@ version = "0.12.1"
 [[package]]
 description = "API Documentation for Python Projects"
 files = [
-  { file = "pdoc-14.7.0-py3-none-any.whl", hash = "sha256:72377a907efc6b2c5b3c56b717ef34f11d93621dced3b663f3aede0b844c0ad2" },
-  { file = "pdoc-14.7.0.tar.gz", hash = "sha256:2d28af9c0acc39180744ad0543e4bbc3223ecba0d1302db315ec521c51f71f93" },
+  { file = "pdoc-15.0.3-py3-none-any.whl", hash = "sha256:686c921ef2622f166de5f73b7241935a4ddac79c8d10dbfa43def8c1fca86550" },
+  { file = "pdoc-15.0.3.tar.gz", hash = "sha256:6482d8ebbd40185fea5e6aec2f1592f4be92e93cf6bf70b9e2a00378bbaf3252" },
 ]
 groups = ["misc"]
 name = "pdoc"
 optional = false
-python-versions = ">=3.8"
-version = "14.7.0"
+python-versions = ">=3.9"
+version = "15.0.3"
 
 [package.dependencies]
 Jinja2     = ">=2.11.0"
-MarkupSafe = "*"
+MarkupSafe = ">=1.1.1"
 pygments   = ">=2.12.0"
-
-[package.extras]
-dev = [
-  "hypothesis",
-  "mypy",
-  "pdoc-pyo3-sample-library (==1.0.11)",
-  "pygments (>=2.14.0)",
-  "pytest",
-  "pytest-cov",
-  "pytest-timeout",
-  "ruff",
-  "tox",
-  "types-pygments",
-]
 
 [[package]]
 description = "Pexpect allows easy control of interactive console applications."
@@ -6333,6 +6319,6 @@ local     = ["watchfiles"]
 poe       = ["poethepoet"]
 
 [metadata]
-content-hash    = "bbfda20b81972e4c34bb9221128a732375266f24308052c5c1539ab8e64fc33c"
+content-hash    = "1f5b84d5570983c0ac80eed9a4d4fcc08bc81c0aad03136220e47a601666a0bb"
 lock-version    = "2.1"
 python-versions = ">=3.9,<4"
