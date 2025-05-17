@@ -24,9 +24,6 @@ jobs:
       contents: read
       security-events: write
 
-    strategy:
-      fail-fast: false
-
     steps:
       - uses: actions/checkout@v4
 
