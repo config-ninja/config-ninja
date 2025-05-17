@@ -8,7 +8,6 @@ updates:
     directory: /
     open-pull-requests-limit: 10
     package-ecosystem: pip
-    reviewers: [bryant-finney]
     rebase-strategy: auto
     schedule:
       interval: daily
