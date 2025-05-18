@@ -27,7 +27,7 @@ misc = [
   "cruft~=2.11",
   "gitpython>=3.1.32",                  # https://nvd.nist.gov/vuln/detail/CVE-2023-40267
   "jupyterlab>=3.4,<5.0",
-  "pdoc~=14.0",
+  "pdoc~=15.0",
   "pynvim~=0.5",
   "pytest-testmon~=2.0",
   "pytest-watch~=4.2",
@@ -39,7 +39,7 @@ test = [
   "coverage[toml]>=6.4,<8.0",
   "pytest >=7.4.4,<9.0.0",
   "pytest-clarity~=1.0",
-  "pytest-cov >=3,<6",
+  "pytest-cov>=3,<7",
   "pytest-mock~=3.8",
 ]
 
