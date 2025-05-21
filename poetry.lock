@@ -416,16 +416,16 @@ s3transfer = ">=0.12.0,<0.13.0"
 crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
-description = "Type annotations for boto3 1.38.19 generated with mypy-boto3-builder 8.11.0"
+description = "Type annotations for boto3 1.38.20 generated with mypy-boto3-builder 8.11.0"
 files = [
-  { file = "boto3_stubs-1.38.19-py3-none-any.whl", hash = "sha256:91a76773868af44bc9decefd660056428f71e1c0e2770787fa3e2aa8b7b998ea" },
-  { file = "boto3_stubs-1.38.19.tar.gz", hash = "sha256:566d50ec70105f06f86041d03fd4af6a24322f4063ecd2f6ac89b9b338038d14" },
+  { file = "boto3_stubs-1.38.20-py3-none-any.whl", hash = "sha256:5406da868980a3854cc9b57db150c6f2e39a4fe4a58f2872e61ac5a3d46f734e" },
+  { file = "boto3_stubs-1.38.20.tar.gz", hash = "sha256:7f1d7bfff7355eb4d17e7984fbf27f44709cd8484abb54bd6ba34ec73a552605" },
 ]
 groups = ["dev"]
 name = "boto3-stubs"
 optional = false
 python-versions = ">=3.8"
-version = "1.38.19"
+version = "1.38.20"
 
 [package.dependencies]
 botocore-stubs            = "*"
@@ -737,7 +737,6 @@ all = [
   "mypy-boto3-pipes (>=1.38.0,<1.39.0)",
   "mypy-boto3-polly (>=1.38.0,<1.39.0)",
   "mypy-boto3-pricing (>=1.38.0,<1.39.0)",
-  "mypy-boto3-privatenetworks (>=1.38.0,<1.39.0)",
   "mypy-boto3-proton (>=1.38.0,<1.39.0)",
   "mypy-boto3-qapps (>=1.38.0,<1.39.0)",
   "mypy-boto3-qbusiness (>=1.38.0,<1.39.0)",
@@ -888,7 +887,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.38.0,<1.39.0)"]
 billing = ["mypy-boto3-billing (>=1.38.0,<1.39.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.38.0,<1.39.0)"]
-boto3 = ["boto3 (==1.38.19)"]
+boto3 = ["boto3 (==1.38.20)"]
 braket = ["mypy-boto3-braket (>=1.38.0,<1.39.0)"]
 budgets = ["mypy-boto3-budgets (>=1.38.0,<1.39.0)"]
 ce = ["mypy-boto3-ce (>=1.38.0,<1.39.0)"]
@@ -1149,7 +1148,6 @@ pinpoint-sms-voice-v2 = ["mypy-boto3-pinpoint-sms-voice-v2 (>=1.38.0,<1.39.0)"]
 pipes = ["mypy-boto3-pipes (>=1.38.0,<1.39.0)"]
 polly = ["mypy-boto3-polly (>=1.38.0,<1.39.0)"]
 pricing = ["mypy-boto3-pricing (>=1.38.0,<1.39.0)"]
-privatenetworks = ["mypy-boto3-privatenetworks (>=1.38.0,<1.39.0)"]
 proton = ["mypy-boto3-proton (>=1.38.0,<1.39.0)"]
 qapps = ["mypy-boto3-qapps (>=1.38.0,<1.39.0)"]
 qbusiness = ["mypy-boto3-qbusiness (>=1.38.0,<1.39.0)"]
@@ -6319,6 +6317,6 @@ local     = ["watchfiles"]
 poe       = ["poethepoet"]
 
 [metadata]
-content-hash    = "519e950b6ced50562e773e906ed472eaba0fc64ce73f2b15c2ea4f627d32e320"
+content-hash    = "b54a43664111343eb58ce102093ea5c6f0040425ee8c6ec271c899014b73ac28"
 lock-version    = "2.1"
 python-versions = ">=3.9,<4"
