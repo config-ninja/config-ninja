@@ -1304,7 +1304,7 @@ files = [
   { file = "certifi-2025.4.26-py3-none-any.whl", hash = "sha256:30350364dfe371162649852c63336a15c70c6510c2ad5015b21c2345311805f3" },
   { file = "certifi-2025.4.26.tar.gz", hash = "sha256:0a816057ea3cdefcef70270d2c515e4506bbc954f417fa5ade2021213bb8f0c6" },
 ]
-groups = ["dev", "misc"]
+groups = ["misc"]
 name = "certifi"
 optional = false
 python-versions = ">=3.6"
@@ -1510,7 +1510,7 @@ files = [
   { file = "charset_normalizer-3.4.2-py3-none-any.whl", hash = "sha256:7f56930ab0abd1c45cd15be65cc741c28b1c9a34876ce8c17a2fa107810c0af0" },
   { file = "charset_normalizer-3.4.2.tar.gz", hash = "sha256:5baececa9ecba31eff645232d59845c07aa030f0c81ee70184a90d35099a0e63" },
 ]
-groups = ["dev", "misc"]
+groups = ["misc"]
 name = "charset-normalizer"
 optional = false
 python-versions = ">=3.7"
@@ -2139,7 +2139,7 @@ files = [
   { file = "idna-3.10-py3-none-any.whl", hash = "sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3" },
   { file = "idna-3.10.tar.gz", hash = "sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9" },
 ]
-groups = ["dev", "main", "misc"]
+groups = ["main", "misc"]
 markers = { main = "extra == \"all\" or extra == \"local\"" }
 name = "idna"
 optional = false
@@ -5015,7 +5015,7 @@ files = [
   { file = "requests-2.32.4-py3-none-any.whl", hash = "sha256:27babd3cda2a6d50b30443204ee89830707d396671944c998b5975b031ac2b2c" },
   { file = "requests-2.32.4.tar.gz", hash = "sha256:27d0316682c8a29834d3264820024b62a36942083d52caf2f14c0591336d3422" },
 ]
-groups = ["dev", "misc"]
+groups = ["misc"]
 name = "requests"
 optional = false
 python-versions = ">=3.8"
@@ -5866,8 +5866,8 @@ files = [
   { file = "urllib3-1.26.20-py2.py3-none-any.whl", hash = "sha256:0ed14ccfbf1c30a9072c7ca157e4319b70d65f623e91e7b32fadb2853431016e" },
   { file = "urllib3-1.26.20.tar.gz", hash = "sha256:40c2dc0c681e47eb8f90e7e27bf6ff7df2e677421fd46756da1161c39ca70d32" },
 ]
-groups = ["dev", "main", "misc"]
-markers = { main = "python_version < \"3.10\" and (extra == \"all\" or extra == \"appconfig\")", dev = "python_version < \"3.10\"", misc = "python_version < \"3.10\"" }
+groups = ["main", "misc"]
+markers = { main = "python_version < \"3.10\" and (extra == \"all\" or extra == \"appconfig\")", misc = "python_version < \"3.10\"" }
 name = "urllib3"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
@@ -5893,15 +5893,15 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [[package]]
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 files = [
-  { file = "urllib3-2.4.0-py3-none-any.whl", hash = "sha256:4e16665048960a0900c702d4a66415956a584919c03361cac9f1df5c5dd7e813" },
-  { file = "urllib3-2.4.0.tar.gz", hash = "sha256:414bc6535b787febd7567804cc015fee39daab8ad86268f1310a9250697de466" },
+  { file = "urllib3-2.5.0-py3-none-any.whl", hash = "sha256:e6b01673c0fa6a13e374b50871808eb3bf7046c4b125b216f6bf1cc604cff0dc" },
+  { file = "urllib3-2.5.0.tar.gz", hash = "sha256:3fc47733c7e419d4bc3f6b3dc2b4f890bb743906a30d56ba4a5bfa4bbff92760" },
 ]
-groups = ["dev", "main", "misc"]
+groups = ["main", "misc"]
 markers = { main = "(extra == \"all\" or extra == \"appconfig\") and python_version >= \"3.10\"" }
 name = "urllib3"
 optional = false
 python-versions = ">=3.9"
-version = "2.4.0"
+version = "2.5.0"
 
 [package.extras]
 brotli = [
