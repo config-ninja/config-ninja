@@ -224,7 +224,7 @@ pytest-mock    = "^3.14"
 # note: these must be synchronized with `.pre-commit-config.yaml`
 lxml    = { version = ">=4.9.3", python = ">=3.12" }
 mypy    = { extras = ["reports"], version = "^1.16.1" }
-pyright = "^1.1.400"
+pyright = "^1.1.402"
 ruff    = "^0.11.11"
 
 [tool.coverage.report]
