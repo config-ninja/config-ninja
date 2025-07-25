@@ -5,7 +5,7 @@ default_stages: [pre-commit, manual]
 fail_fast: false
 
 ci:
-  skip: [pyright, shellcheck, poetry-check]
+  skip: [pyright, shellcheck, poetry-check, taplo-format]
 
 repos:
   - repo: https://github.com/pre-commit/pygrep-hooks
