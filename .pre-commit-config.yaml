@@ -52,11 +52,11 @@ repos:
       - id: yamlfix
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.13
+    rev: v0.12.8
     hooks:
-      - id: ruff
+      - id: ruff-check
         types_or: [python, pyi, jupyter, toml]
-        args: [--verbose]
+        args: [--fix, --verbose]
 
       - id: ruff-format
         types_or: [python, pyi, jupyter]
@@ -75,7 +75,7 @@ repos:
           - setuptools
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.16.0
+    rev: v1.17.1
     hooks:
       - id: mypy
         additional_dependencies:
@@ -102,7 +102,7 @@ repos:
         pass_filenames: false
 
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.402
+    rev: v1.1.403
     hooks:
       - id: pyright
         additional_dependencies:
