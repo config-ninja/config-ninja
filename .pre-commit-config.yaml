@@ -52,11 +52,11 @@ repos:
       - id: yamlfix
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.7
+    rev: v0.12.8
     hooks:
-      - id: ruff
+      - id: ruff-check
         types_or: [python, pyi, jupyter, toml]
-        args: [--verbose]
+        args: [--fix, --verbose]
 
       - id: ruff-format
         types_or: [python, pyi, jupyter]

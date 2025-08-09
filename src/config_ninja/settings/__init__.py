@@ -119,7 +119,10 @@ def load(path: Path) -> Config:
 
     """
     try:
-        from config_ninja.hooks import HooksEngine, exceptions
+        from config_ninja.hooks import (  # noqa: PLC0415  # import is performed in function to avoid cycles
+            HooksEngine,
+            exceptions,
+        )
     except ImportError as exc:
         logger.debug('%s: %s', exc.name, exc.msg)
         return Config(engine=None, settings=pyspry.Settings.load(path, PREFIX))

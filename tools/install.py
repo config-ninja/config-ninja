@@ -49,7 +49,7 @@ WINDOWS = sys.platform.startswith('win') or (sys.platform == 'cli' and os.name =
 def _get_win_folder_from_registry(
     csidl_name: Literal['CSIDL_APPDATA', 'CSIDL_COMMON_APPDATA', 'CSIDL_LOCAL_APPDATA'],
 ) -> Any:  # pragma: no cover
-    import winreg as _winreg  # pylint: disable=import-error
+    import winreg as _winreg  # noqa: PLC0415  # pylint: disable=import-error
 
     shell_folder_name = {
         'CSIDL_APPDATA': 'AppData',
@@ -69,7 +69,7 @@ def _get_win_folder_from_registry(
 def _get_win_folder_with_ctypes(
     csidl_name: Literal['CSIDL_APPDATA', 'CSIDL_COMMON_APPDATA', 'CSIDL_LOCAL_APPDATA'],
 ) -> Any:  # pragma: no cover
-    import ctypes  # pylint: disable=import-error
+    import ctypes  # noqa: PLC0415  # pylint: disable=import-error
 
     csidl_const = {
         'CSIDL_APPDATA': 26,
@@ -101,7 +101,7 @@ def _get_data_dir() -> Path:
 
     if WINDOWS:  # pragma: no cover
         try:
-            from ctypes import (  # type: ignore[attr-defined,unused-ignore]
+            from ctypes import (  # type: ignore[attr-defined,unused-ignore]  # noqa: PLC0415
                 windll,  # pyright: ignore  # noqa: F401
             )
 
@@ -146,7 +146,7 @@ class _VirtualEnvironment:
     @staticmethod
     def _create_with_venv(target: Path) -> None:
         """Create a virtual environment using the `venv` module."""
-        import venv
+        import venv  # noqa: PLC0415
 
         builder = venv.EnvBuilder(clear=True, with_pip=True, symlinks=False)
         context = builder.ensure_directories(target)
@@ -231,6 +231,10 @@ class _Version:
     >>> _Version('1.0') == '1.0'
     True
 
+    >>> vset = {_Version('1.0'), _Version('2.0'), _Version('3.0')}
+    >>> _Version('1.0') in vset
+    True
+
     >>> with pytest.raises(ValueError):
     ...     invalid = _Version('random')
     """
@@ -265,6 +269,9 @@ class _Version:
 
     def __eq__(self, other: Any) -> bool:
         return self.tuple == _Version(str(other)).tuple
+
+    def __hash__(self) -> int:
+        return hash(self.tuple)
 
     def __gt__(self, other: _Version) -> bool:
         if self.tuple[:3] == other.tuple[:3]:

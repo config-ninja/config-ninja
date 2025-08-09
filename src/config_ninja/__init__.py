@@ -86,6 +86,6 @@ def main(*args: Any) -> None:  # pylint: disable=missing-function-docstring
     if args:
         sys.argv[1:] = list(args)
 
-    from config_ninja.cli import app
+    from config_ninja.cli import app  # noqa: PLC0415  # import is performed in function to avoid cycles
 
     app(prog_name='config-ninja')
