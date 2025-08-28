@@ -1,0 +1,33 @@
+from argparse import ArgumentParser, Namespace
+from collections.abc import Mapping, Sequence
+from typing import IO, Any
+
+from poethepoet.__version__ import __version__ as __version__
+from poethepoet.exceptions import ConfigValidationError as ConfigValidationError
+from poethepoet.exceptions import ExecutionError as ExecutionError
+from poethepoet.exceptions import PoeException as PoeException
+
+def guess_ansi_support(file: Any) -> Any: ...
+
+STDOUT_ANSI_SUPPORT: bool
+
+class PoeUi:
+    args: Namespace
+    output: Any
+    program_name: Any
+    def __init__(self, output: IO[Any], program_name: str = 'poe') -> None: ...
+    def __getitem__(self, key: str) -> Any: ...
+    def build_parser(self) -> ArgumentParser: ...
+    parser: Any
+    verbosity: int
+    def parse_args(self, cli_args: Sequence[str]) -> None: ...
+    def set_default_verbosity(self, default_verbosity: int) -> None: ...
+    def print_help(
+        self,
+        tasks: Mapping[str, tuple[str, Sequence[tuple[tuple[str, ...], str, str]]]] | None = None,
+        info: str | None = None,
+        error: PoeException | None = None,
+    ) -> None: ...
+    def print_msg(self, message: str, verbosity: int = 0, end: str = '\n') -> None: ...
+    def print_error(self, error: PoeException | ExecutionError) -> None: ...
+    def print_version(self) -> None: ...
