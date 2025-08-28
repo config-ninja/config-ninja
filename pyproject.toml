@@ -195,7 +195,7 @@ mdformat-gfm         = "^0.4.1"
 mdformat-gfm-alerts  = "^2.0.0"
 pre-commit           = ">=3.6"
 pylint               = "^3.0"
-shellcheck-py        = { version = ">=0.8,<0.11", markers = "platform_machine != 'arm64'" }
+shellcheck-py        = { version = ">=0.8,<0.12", markers = "platform_machine != 'arm64'" }
 yamlfix              = "^1.16"
 # dependency of pre-commit
 virtualenv = ">=20.26.6"
