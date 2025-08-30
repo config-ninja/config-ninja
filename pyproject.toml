@@ -181,7 +181,7 @@ dist_glob_patterns    = ["dist/*"]
 upload_to_vcs_release = true
 
 [tool.poetry.group.dev.dependencies]
-boto3-stubs  = { version = "^1.40.6", extras = ["appconfig", "appconfigdata", "secretsmanager"] }
+boto3-stubs  = { version = "^1.40.20", extras = ["appconfig", "appconfigdata", "secretsmanager"] }
 poethepoet   = ">=0.20,<0.31"
 types-pyyaml = "^6"
 
@@ -194,8 +194,8 @@ mdformat-frontmatter = "^2.0.8"
 mdformat-gfm         = "^0.4.1"
 mdformat-gfm-alerts  = "^2.0.0"
 pre-commit           = ">=3.6"
-pylint               = "^3.0"
-shellcheck-py        = { version = ">=0.8,<0.11", markers = "platform_machine != 'arm64'" }
+pylint               = "^3.3"
+shellcheck-py        = { version = ">=0.8,<0.12", markers = "platform_machine != 'arm64'" }
 yamlfix              = "^1.16"
 # dependency of pre-commit
 virtualenv = ">=20.26.6"
@@ -224,8 +224,8 @@ pytest-mock    = "^3.14"
 # note: these must be synchronized with `.pre-commit-config.yaml`
 lxml    = { version = ">=4.9.3", python = ">=3.12" }
 mypy    = { extras = ["reports"], version = "^1.17.1" }
-pyright = "^1.1.403"
-ruff    = "^0.12.8"
+pyright = "^1.1.404"
+ruff    = "^0.12.11"
 
 [tool.coverage.report]
 # https://coverage.readthedocs.io/en/latest/config.html#report
@@ -461,7 +461,7 @@ ignore = ["CVS"]
 # ignore-list. The regex matches against paths and can be in Posix or Windows
 # format. Because '\' represents the directory delimiter on Windows systems, it
 # can't be used as an escape character.
-# ignore-paths =
+ignore-paths = ["src/poethepoet/.*"]
 # Files or directories matching the regular expression patterns are skipped. The
 # regex matches against base names, not paths. The default value ignores Emacs
 # file locks
