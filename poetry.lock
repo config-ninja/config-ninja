@@ -3538,24 +3538,24 @@ testutils = ["gitpython (>3)"]
 
 [[package]]
 name = "pynvim"
-version = "0.5.2"
+version = "0.6.0"
 description = "Python client for Neovim"
 optional = false
 python-versions = ">=3.7"
 groups = ["misc"]
 files = [
-    {file = "pynvim-0.5.2-py3-none-any.whl", hash = "sha256:20b1c5a18c4cddfc480950094d4135f782b1a98c32149ea63e24bbdb7021eb54"},
-    {file = "pynvim-0.5.2.tar.gz", hash = "sha256:734a2432db8683519f58572617528ecb4a2f321bc7b27f034b3f9b2322c15615"},
+    {file = "pynvim-0.6.0-py3-none-any.whl", hash = "sha256:29f92ff3fde9e52c263e6bfd7f30345be05bfc7b5c21484da1cc38a8d8e5e98f"},
+    {file = "pynvim-0.6.0.tar.gz", hash = "sha256:0ffcb879322d08f9e9061e1123dd58ba3a5ccfbd4999bb1157bac525822aa590"},
 ]
 
 [package.dependencies]
 greenlet = {version = ">=3.0", markers = "platform_python_implementation != \"PyPy\""}
-msgpack = ">=0.5.0"
+msgpack = ">=1.0.0"
 typing-extensions = {version = ">=4.5", markers = "python_version < \"3.12\""}
 
 [package.extras]
 docs = ["sphinx", "sphinx-rtd-theme"]
-test = ["pytest", "pytest-timeout"]
+test = ["pytest", "pytest_timeout"]
 
 [[package]]
 name = "pyright"
@@ -5228,4 +5228,4 @@ poe = ["poethepoet"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4"
-content-hash = "f36f8fac0aff15198aec6549b12f1ce80314099c52590a5a22f773df69366692"
+content-hash = "12c8ecc2d3819c4cfd823aa6dcbddfa26029148fe5673a07a00afe5f7f0f439e"
