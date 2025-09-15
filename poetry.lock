@@ -7,6 +7,7 @@ description = "Reusable constraint types to use with typing.Annotated"
 optional = false
 python-versions = ">=3.8"
 groups = ["lint", "misc"]
+markers = "python_version >= \"3.10\""
 files = [
     {file = "annotated_types-0.7.0-py3-none-any.whl", hash = "sha256:1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53"},
     {file = "annotated_types-0.7.0.tar.gz", hash = "sha256:aff07c09a53a08bc8cfccb9c85b05f1aa9a2a6f23728d790723543408344ce89"},
@@ -1070,6 +1071,7 @@ description = "Option groups missing in Click"
 optional = false
 python-versions = ">=3.7"
 groups = ["misc"]
+markers = "python_version >= \"3.10\""
 files = [
     {file = "click_option_group-0.5.7-py3-none-any.whl", hash = "sha256:96b9f52f397ef4d916f81929bd6c1f85e89046c7a401a64e72a61ae74ad35c24"},
     {file = "click_option_group-0.5.7.tar.gz", hash = "sha256:8dc780be038712fc12c9fecb3db4fe49e0d0723f9c171d7cda85c20369be693c"},
@@ -1330,6 +1332,7 @@ description = "Python @deprecated decorator to deprecate old python classes, fun
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
 groups = ["misc"]
+markers = "python_version >= \"3.10\""
 files = [
     {file = "Deprecated-1.2.18-py2.py3-none-any.whl", hash = "sha256:bd5011788200372a32418f888e326a09ff80d0214bd961147cfed01b5c018eec"},
     {file = "deprecated-1.2.18.tar.gz", hash = "sha256:422b6f6d859da6f2ef57857761bfb392480502a64c3028ca9bbe86085d72115d"},
@@ -1697,18 +1700,36 @@ testing = ["flufl.flake8", "importlib-resources (>=1.3) ; python_version < \"3.9
 
 [[package]]
 name = "importlib-resources"
+version = "5.7.0"
+description = "Read resources from Python packages"
+optional = false
+python-versions = ">=3.7"
+groups = ["misc"]
+markers = "python_version < \"3.11\""
+files = [
+    {file = "importlib_resources-5.7.0-py3-none-any.whl", hash = "sha256:9c4c12f9ef4329a00c1f72f30bddb4f10e582766b8705980bb76356b3ba8bc91"},
+    {file = "importlib_resources-5.7.0.tar.gz", hash = "sha256:f6a4a9949f36ae289facec8dac1a899a54cbaf6a135cc8552d2c8b69209c06a3"},
+]
+
+[package.dependencies]
+zipp = {version = ">=3.1.0", markers = "python_version < \"3.10\""}
+
+[package.extras]
+docs = ["jaraco.packaging (>=9)", "rst.linker (>=1.9)", "sphinx"]
+testing = ["pytest (>=6)", "pytest-black (>=0.3.7) ; platform_python_implementation != \"PyPy\"", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.0.1)", "pytest-flake8", "pytest-mypy (>=0.9.1) ; platform_python_implementation != \"PyPy\""]
+
+[[package]]
+name = "importlib-resources"
 version = "6.5.2"
 description = "Read resources from Python packages"
 optional = false
 python-versions = ">=3.9"
 groups = ["misc"]
+markers = "python_version >= \"3.10\""
 files = [
     {file = "importlib_resources-6.5.2-py3-none-any.whl", hash = "sha256:789cfdc3ed28c78b67a06acb8126751ced69a3d5f79c095a98298cd8a760ccec"},
     {file = "importlib_resources-6.5.2.tar.gz", hash = "sha256:185f87adef5bcc288449d98fb4fba07cea78bc036455dd44c5fc4a2fe78fed2c"},
 ]
-
-[package.dependencies]
-zipp = {version = ">=3.1.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
 check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1) ; sys_platform != \"cygwin\""]
@@ -2401,20 +2422,20 @@ htmlsoup = ["BeautifulSoup4"]
 
 [[package]]
 name = "maison"
-version = "1.4.3"
+version = "1.4.2"
 description = "Read settings from config files"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 groups = ["lint"]
 markers = "python_version < \"3.11\""
 files = [
-    {file = "maison-1.4.3-py3-none-any.whl", hash = "sha256:a36208d0befb3bd8aa3b002ac198ce6f6e61efe568b195132640f4032eff46ac"},
-    {file = "maison-1.4.3.tar.gz", hash = "sha256:766222ce82ae27138256c4af9d0bc6b3226288349601e095dcc567884cf0ce36"},
+    {file = "maison-1.4.2-py3-none-any.whl", hash = "sha256:b63fe6751494935fc453dfb76319af223e4cb8bab32ac5464c2a9ca0edda8765"},
+    {file = "maison-1.4.2.tar.gz", hash = "sha256:d2abac30a5c6a0749526d70ae95a63c6acf43461a1c10e51410b36734e053ec7"},
 ]
 
 [package.dependencies]
 click = ">=8.0.1,<9.0.0"
-pydantic = ">=2.5.3,<3.0.0"
+pydantic = ">=1.10.13,<2.0.0"
 toml = ">=0.10.2,<0.11.0"
 
 [[package]]
@@ -3358,11 +3379,80 @@ files = [
 
 [[package]]
 name = "pydantic"
+version = "1.10.23"
+description = "Data validation and settings management using python type hints"
+optional = false
+python-versions = ">=3.7"
+groups = ["lint", "misc"]
+markers = "python_version < \"3.11\""
+files = [
+    {file = "pydantic-1.10.23-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:1ce178e49a471ebf867451872a3403b89da6194bc2c9761e78ce22f619794d0d"},
+    {file = "pydantic-1.10.23-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:d5f2ab29db92a2b11c7cd49466f68858583bf227165c42a3fae2b50042a1ab51"},
+    {file = "pydantic-1.10.23-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8e84ece91eb806586ffa4f92c149308cb07b0fa14a7e1204e18cde01aac283f7"},
+    {file = "pydantic-1.10.23-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:757c8a2f459311bf277f6ddb4891222f69ba93fb301eee095c985fc7239d5afd"},
+    {file = "pydantic-1.10.23-cp310-cp310-musllinux_1_2_i686.whl", hash = "sha256:50b4726ab72a027fb69da865e849ae16107bdbea01ff1670daf4560e078a1606"},
+    {file = "pydantic-1.10.23-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:4ed07c43d5c3f6f391eceeef7ead84c8c54083e0a1b5fa009302191c07775a73"},
+    {file = "pydantic-1.10.23-cp310-cp310-win_amd64.whl", hash = "sha256:bc5547c3be3b8494a444adf3703c037bdf2170e30af802f5d7bb14a232698106"},
+    {file = "pydantic-1.10.23-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:b2e9d81546af42331248bbffde26a441631c8823515ebf328ee2ec04d771cd73"},
+    {file = "pydantic-1.10.23-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:7e13f39ce65232a2826d1c32a9e2c6f9ca5451d6e51c6e5ea9fdebc285fc2980"},
+    {file = "pydantic-1.10.23-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:041308bdb4804f0b387b02f870ebdf4e86020de344a969020de853f5ea8d5508"},
+    {file = "pydantic-1.10.23-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:ed01648e2a469e2c35984bab9ff5080648c53af3b8b98312e1d7823eacd33d77"},
+    {file = "pydantic-1.10.23-cp311-cp311-musllinux_1_2_i686.whl", hash = "sha256:18056741c9febebeb043798414099ada8d8e74cc47ec2059d7fbdc7d091d0e7b"},
+    {file = "pydantic-1.10.23-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:7411a18deef02a6b7825edb3930b9ab0251f7b131ebb1cb1ffe0aadf74d60c6d"},
+    {file = "pydantic-1.10.23-cp311-cp311-win_amd64.whl", hash = "sha256:890213289bf40481a715b1d8b3e8a602af9e481d9f0e0b2b00dc375a12b0cfbb"},
+    {file = "pydantic-1.10.23-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:136b6428b644691d0ee2a3a7de395d0d1b01ce6388b747bd371bb9ca65b4cc32"},
+    {file = "pydantic-1.10.23-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:b47c210416606b7c8e236c7546647500856eaba0d01564d5cddacb30d1b5daec"},
+    {file = "pydantic-1.10.23-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6c9c436e12d81b7c3d3208f66a5d35b401c8ec25fafc9bff446c77f1072ed5f5"},
+    {file = "pydantic-1.10.23-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:edba6ac9bd6040daf3e876c284257624171884011e0729d90b90f5fe11f7217d"},
+    {file = "pydantic-1.10.23-cp312-cp312-musllinux_1_2_i686.whl", hash = "sha256:101ae7dcd77c23003d4766bcf23e08cd3d012173379ad549bdb2c898855b2a57"},
+    {file = "pydantic-1.10.23-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:9b05416d8dcf36fd291348bba8f565d015fce4c594577d2ef5bc0c5ec8f54a29"},
+    {file = "pydantic-1.10.23-cp312-cp312-win_amd64.whl", hash = "sha256:0f309b3dd80ed4d3487b1219c69dfd9036e51a863aeaa41a3b67497b81c4cb8f"},
+    {file = "pydantic-1.10.23-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:a6aa6881a18657fe66b9249e0572a9690ebc6f0b37c32872beb06bc51bff738f"},
+    {file = "pydantic-1.10.23-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:c57bfade74111335062c8ac830d5a14004742ff5b037c52c410d9e9011258bf5"},
+    {file = "pydantic-1.10.23-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:723cb7f6aca0b471bac9d7dceb42d151d26aabdca655bd4190be3a7de008a054"},
+    {file = "pydantic-1.10.23-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:1b81db6c9108c3f6509c897fcdf842e5993d7233e9140a7f1c4dc1c2f85b0a8d"},
+    {file = "pydantic-1.10.23-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:9e9544d07d96df6c6405b64462fb3122e5d0af46a1c4ddf94c180b17ac29f047"},
+    {file = "pydantic-1.10.23-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:4dff5e26a14424f4e6cf44cbd45861b458f31e37d316e92a78bf99ec6d1ef2ee"},
+    {file = "pydantic-1.10.23-cp313-cp313-win_amd64.whl", hash = "sha256:633235236c9af4a16e7cf47be3ffab15445552613a122b44a8946868c2ace426"},
+    {file = "pydantic-1.10.23-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:33fdacc8ffadaa0efecb1f8fec8d1ba8653c644f1c6a946c64f3e5e9563ac040"},
+    {file = "pydantic-1.10.23-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d6c46c8055833bce5786c5e66cb30208db0bd5534f007890c3b76556d2f24d11"},
+    {file = "pydantic-1.10.23-cp37-cp37m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:0bed91a634855400f5c3b180999d0437a3b418b0170222fc8f6294aa2a08848a"},
+    {file = "pydantic-1.10.23-cp37-cp37m-musllinux_1_2_i686.whl", hash = "sha256:e812b0f2a708595227aed10c636a54df4d02a1b3a5c90555df108a5e1244b2e9"},
+    {file = "pydantic-1.10.23-cp37-cp37m-musllinux_1_2_x86_64.whl", hash = "sha256:8a52b2eedc25215c9cc1d96340d8364f8c8b6787a7cf2cc202d058e73e06cbef"},
+    {file = "pydantic-1.10.23-cp37-cp37m-win_amd64.whl", hash = "sha256:38549feff6fac3c7a9e73fef6f8a2599300b10d71813ff329854449deb458aa6"},
+    {file = "pydantic-1.10.23-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:f71590dcd1ff354107cecc1c26b85406dd11e6f87d9b8416c5defd3cf4d54a51"},
+    {file = "pydantic-1.10.23-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:46b3cd6fb8edf973380ddf1ac7387cca5f0624c07579bf9d15121dd77986b57c"},
+    {file = "pydantic-1.10.23-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:89e9a801a538d056fd91edf0d01dec02abde1b325e3c019c5c06d75fcca86929"},
+    {file = "pydantic-1.10.23-cp38-cp38-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:7ee7fa1a9bfa45aad5652001efa552a79a40f9ea7a1b11185685dd047895d3a8"},
+    {file = "pydantic-1.10.23-cp38-cp38-musllinux_1_2_i686.whl", hash = "sha256:0db70ae0e58eed1ffd01fbfdd23f6c6e5ae5e1bf2cd50dfeb0a2853656766e68"},
+    {file = "pydantic-1.10.23-cp38-cp38-musllinux_1_2_x86_64.whl", hash = "sha256:d037210949ac9e837360239d91a834cab3cf02e84cf295ea66c6ff73137f3723"},
+    {file = "pydantic-1.10.23-cp38-cp38-win_amd64.whl", hash = "sha256:aa8d57384c6305febd9724b4f8de6860b5ba5821b7948dbbd0ddf733d50d7677"},
+    {file = "pydantic-1.10.23-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:cdb4c8fdf8344b912285ca85c99d44433bd3d877f44b9ffcfc79cefedbc08869"},
+    {file = "pydantic-1.10.23-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:144f739a617f2c12fa8d135d2efe26b9cf16033a44f2fe5400d7d0e9d9c90dca"},
+    {file = "pydantic-1.10.23-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3449e59f27a42ba2c35c2e92aea345794696e5dddba3b5d88d123155eac4ee83"},
+    {file = "pydantic-1.10.23-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:10e9d8259fab4599498c3246703b84a5e9500240544bf49c54fc57996c6d093a"},
+    {file = "pydantic-1.10.23-cp39-cp39-musllinux_1_2_i686.whl", hash = "sha256:08b576239a4acbbfd35365b603cbee5fee6d3c56323abba54f0142e7ad6ff406"},
+    {file = "pydantic-1.10.23-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:0f20e4dfe6413ee79fc1b4ac9c9f4112ff9d4cf44a19577592422d09774ee085"},
+    {file = "pydantic-1.10.23-cp39-cp39-win_amd64.whl", hash = "sha256:45fcc5ed6adde6703f9f22f898362a087d1d140a337ecc4caca2477f4d735390"},
+    {file = "pydantic-1.10.23-py3-none-any.whl", hash = "sha256:6294bb84565c294a3a6408c52b26a42803f258d5ebfdb3ae896cd7cccfa07211"},
+    {file = "pydantic-1.10.23.tar.gz", hash = "sha256:81ee80fe4bd69236aeb65c8beeb5150655b8a49b946fce6664a720d6cf5ec717"},
+]
+
+[package.dependencies]
+typing-extensions = ">=4.2.0"
+
+[package.extras]
+dotenv = ["python-dotenv (>=0.10.4)"]
+email = ["email-validator (>=1.0.3)"]
+
+[[package]]
+name = "pydantic"
 version = "2.11.4"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.9"
 groups = ["lint", "misc"]
+markers = "python_version >= \"3.10\""
 files = [
     {file = "pydantic-2.11.4-py3-none-any.whl", hash = "sha256:d9615eaa9ac5a063471da949c8fc16376a84afb5024688b3ff885693506764eb"},
     {file = "pydantic-2.11.4.tar.gz", hash = "sha256:32738d19d63a226a52eed76645a98ee07c1f410ee41d93b4afbfa85ed8111c2d"},
@@ -3385,6 +3475,7 @@ description = "Core functionality for Pydantic validation and serialization"
 optional = false
 python-versions = ">=3.9"
 groups = ["lint", "misc"]
+markers = "python_version >= \"3.10\""
 files = [
     {file = "pydantic_core-2.33.2-cp310-cp310-macosx_10_12_x86_64.whl", hash = "sha256:2b3d326aaef0c0399d9afffeb6367d5e26ddc24d351dbc9c636840ac355dc5d8"},
     {file = "pydantic_core-2.33.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:0e5b2671f05ba48b94cb90ce55d8bdcaaedb8ba00cc5359f6810fc918713983d"},
@@ -3737,11 +3828,33 @@ cli = ["click (>=5.0)"]
 
 [[package]]
 name = "python-gitlab"
+version = "3.15.0"
+description = "Interact with GitLab API"
+optional = false
+python-versions = ">=3.7.0"
+groups = ["misc"]
+markers = "python_version < \"3.11\""
+files = [
+    {file = "python-gitlab-3.15.0.tar.gz", hash = "sha256:c9e65eb7612a9fbb8abf0339972eca7fd7a73d4da66c9b446ffe528930aff534"},
+    {file = "python_gitlab-3.15.0-py3-none-any.whl", hash = "sha256:8f8d1c0d387f642eb1ac7bf5e8e0cd8b3dd49c6f34170cee3c7deb7d384611f3"},
+]
+
+[package.dependencies]
+requests = ">=2.25.0"
+requests-toolbelt = ">=0.10.1"
+
+[package.extras]
+autocompletion = ["argcomplete (>=1.10.0,<3)"]
+yaml = ["PyYaml (>=5.2)"]
+
+[[package]]
+name = "python-gitlab"
 version = "5.6.0"
 description = "The python wrapper for the GitLab REST and GraphQL APIs."
 optional = false
 python-versions = ">=3.9.0"
 groups = ["misc"]
+markers = "python_version >= \"3.10\""
 files = [
     {file = "python_gitlab-5.6.0-py3-none-any.whl", hash = "sha256:68980cd70929fc7f8f06d8a7b09bd046a6b79e1995c19d61249f046005099100"},
     {file = "python_gitlab-5.6.0.tar.gz", hash = "sha256:bc531e8ba3e5641b60409445d4919ace68a2c18cb0ec6d48fbced6616b954166"},
@@ -3776,11 +3889,44 @@ dev = ["backports.zoneinfo ; python_version < \"3.9\"", "black", "build", "freez
 
 [[package]]
 name = "python-semantic-release"
+version = "8.0.8"
+description = "Automatic Semantic Versioning for Python projects"
+optional = false
+python-versions = ">=3.7"
+groups = ["misc"]
+markers = "python_version < \"3.11\""
+files = [
+    {file = "python-semantic-release-8.0.8.tar.gz", hash = "sha256:1f7bb4979bd34364966e1d9f77780a7e472b8334c75bc2a8f75716938786e279"},
+    {file = "python_semantic_release-8.0.8-py3-none-any.whl", hash = "sha256:2c314c745cac0845d4ee342e2bf554733a25831ff014b97a144f5d625d4ca617"},
+]
+
+[package.dependencies]
+click = ">=8,<9"
+dotty-dict = ">=1.3.0,<2"
+gitpython = ">=3.0.8,<4"
+importlib-resources = "5.7"
+jinja2 = ">=3.1.2,<4"
+pydantic = ">=1.10.2,<2"
+python-gitlab = ">=2,<4"
+requests = ">=2.25,<3"
+rich = ">=12.5.1"
+shellingham = ">=1.5.0.post1"
+tomlkit = ">=0.10,<1.0"
+
+[package.extras]
+dev = ["black", "pre-commit", "ruff (==0.0.286)", "tox"]
+docs = ["Sphinx (<=6.0.0)", "furo (>=2023.3.27)", "sphinx-autobuild (==2021.03.14)", "sphinxcontrib-apidoc (==0.3.0)"]
+mypy = ["mypy", "types-requests"]
+test = ["coverage[toml] (>=6,<8)", "pytest (>=7,<8)", "pytest-cov (>=4,<5)", "pytest-lazy-fixture (>=0.6.3,<0.7.0)", "pytest-mock (>=3,<4)", "pytest-pretty (>=1.2.0,<2)", "pytest-xdist (>=2,<4)", "requests-mock (>=1.10.0,<2)", "responses (==0.23.3)", "types-pytest-lazy-fixture (>=0.6.3.3)"]
+
+[[package]]
+name = "python-semantic-release"
 version = "9.21.1"
 description = "Automatic Semantic Versioning for Python projects"
 optional = false
 python-versions = ">=3.8"
 groups = ["misc"]
+markers = "python_version >= \"3.10\""
 files = [
     {file = "python_semantic_release-9.21.1-py3-none-any.whl", hash = "sha256:e69afe5100106390eec9e800132c947ed774bdcf9aa8f0df29589ea9ef375a21"},
     {file = "python_semantic_release-9.21.1.tar.gz", hash = "sha256:b5c509a573899e88e8f29504d2f83e9ddab9a66af861ec1baf39f2b86bbf3517"},
@@ -4801,6 +4947,7 @@ description = "Runtime typing introspection tools"
 optional = false
 python-versions = ">=3.9"
 groups = ["lint", "misc"]
+markers = "python_version >= \"3.10\""
 files = [
     {file = "typing_inspection-0.4.0-py3-none-any.whl", hash = "sha256:50e72559fcd2a6367a19f7a7e610e6afcb9fac940c650290eed893d61386832f"},
     {file = "typing_inspection-0.4.0.tar.gz", hash = "sha256:9765c87de36671694a67904bf2c96e395be9c6439bb6c87b5142569dcdd65122"},
@@ -5083,6 +5230,7 @@ description = "Module for decorators, wrappers and monkey patching."
 optional = false
 python-versions = ">=3.8"
 groups = ["misc"]
+markers = "python_version >= \"3.10\""
 files = [
     {file = "wrapt-1.17.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:3d57c572081fed831ad2d26fd430d565b76aa277ed1d30ff4d40670b1c0dd984"},
     {file = "wrapt-1.17.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:b5e251054542ae57ac7f3fba5d10bfff615b6c2fb09abeb37d2f1463f841ae22"},
@@ -5167,20 +5315,20 @@ files = [
 
 [[package]]
 name = "yamlfix"
-version = "1.16.0"
+version = "1.16.1"
 description = "A simple opionated yaml formatter that keeps your comments!"
 optional = false
 python-versions = ">=3.8"
 groups = ["lint"]
 markers = "python_version < \"3.11\""
 files = [
-    {file = "yamlfix-1.16.0-py3-none-any.whl", hash = "sha256:d92bf8a6d5b6f186bd9d643d633549a1c2424555cb8d176a5d38bce3e678b2b0"},
-    {file = "yamlfix-1.16.0.tar.gz", hash = "sha256:72f7990e5b2b4459ef3249df4724dacbd85ce7b87f4ea3503d8a72c48574cc32"},
+    {file = "yamlfix-1.16.1-py3-none-any.whl", hash = "sha256:8c505ca27cf19181ca8943101b56b8e4ad58f47aa792fbab01339ededaddb7d2"},
+    {file = "yamlfix-1.16.1.tar.gz", hash = "sha256:f49ba70e457a1add6724a6859505d22f7f222f56f7e31f37822c530fc2e7ec94"},
 ]
 
 [package.dependencies]
 click = ">=8.1.3"
-maison = ">=1.4.0"
+maison = ">=1.4.0,<1.4.3"
 ruyaml = ">=0.91.0"
 
 [[package]]
