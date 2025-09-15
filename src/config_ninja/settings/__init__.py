@@ -15,8 +15,8 @@ import typing
 from pathlib import Path
 
 import jinja2
-import pyspry
 
+import pyspry
 from config_ninja.backend import DUMPERS, Backend, FormatT
 from config_ninja.contrib import get_backend
 from config_ninja.settings.schema import ConfigNinjaObject, Dest, DictConfigDefault, Source

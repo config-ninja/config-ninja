@@ -46,6 +46,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import jinja2
+
 import sdnotify
 
 if TYPE_CHECKING:  # pragma: no cover

@@ -8,12 +8,12 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import click.testing
-import pyspry
 import pytest
 import pytest_mock
 import typer
 from typer import testing
 
+import pyspry
 from config_ninja import cli
 from config_ninja import settings as settings_module
 
