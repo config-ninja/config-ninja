@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
-import pyspry
 import pytest
 import tomlkit
 import yaml
@@ -19,6 +18,7 @@ from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 import config_ninja
+import pyspry
 from config_ninja import cli, systemd
 from config_ninja.cli import app
 from tests.fixtures import MOCK_YAML_CONFIG
