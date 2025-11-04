@@ -13,10 +13,10 @@ lint = [
   "mdformat-config~=0.2",
   "mdformat-footnote~=0.1",
   "mdformat-frontmatter~=2.0",
-  "mdformat-gfm-alerts~=1.0",
+  "mdformat-gfm-alerts~=2.0",
   "mdformat-gfm~=0.4",
   "pre-commit>=3.6; python_version >= '3.9'",
-  "pylint~=3.2",
+  "pylint~=3.3",
   "shellcheck-py>=0.8,<0.11; platform_machine != 'arm64'",
   "virtualenv>=20.31.2",
   "yamlfix>=1.16.1",
@@ -28,10 +28,10 @@ misc = [
   "gitpython>=3.1.32",                  # https://nvd.nist.gov/vuln/detail/CVE-2023-40267
   "jupyterlab>=3.4,<5.0",
   "pdoc~=15.0",
-  "pynvim~=0.5",
+  "pynvim~=0.6",
   "pytest-testmon~=2.0",
   "pytest-watch~=4.2",
-  "python-dotenv~=1.0",
+  "python-dotenv~=1.1",
   "python-semantic-release>=8.0,<10.0",
 ]
 
@@ -40,11 +40,11 @@ test = [
   "pytest >=7.4.4,<9.0.0",
   "pytest-clarity~=1.0",
   "pytest-cov>=3,<7",
-  "pytest-mock~=3.8",
+  "pytest-mock~=3.15",
 ]
 
 # note: these must be synchronized with `.pre-commit-config.yaml`
-pre-commit = ["lxml>=4.9.3; python_version >= '3.12'", "mypy[reports]~=1.4", "pyright~=1.1", "ruff~=0.11"]
+pre-commit = ["lxml>=4.9.3; python_version >= '3.12'", "mypy[reports]~=1.18", "pyright~=1.1", "ruff~=0.13"]
 
 
 [project]
