@@ -10,7 +10,7 @@ build:
     - pip3 install --upgrade pip poetry
     - poetry self add 'poethepoet[poetry_plugin]'
     - poetry setup-versioning
-    - poetry install --all-extras
+    - poetry sync --all-extras
     - poetry docs
     - mkdir -p _readthedocs/html
     - cp --recursive docs/* _readthedocs/html/
