@@ -45,12 +45,19 @@ def mock_page_iterator(mock_paginator: mock.MagicMock) -> botocore.paginate.Page
 
 
 def test_cached_appconfig_requests(
-    mock_session: boto3.Session,
-    mock_page_iterator: botocore.paginate.PageIterator[str],
+    mock_session: boto3.Session, mock_page_iterator: botocore.paginate.PageIterator[str]
 ) -> None:
     """Verify requests are cached when instantiating the `config_ninja.contrib.appconfig.AppConfigBackend` class."""
     # Arrange
-    num_instances = 10
+    num_api_requests = (
+        0
+        + 1  # get application ID
+        + 1  # get configuration profile ID
+        + 1  # get environment ID
+    )
+    num_instances = 30
+    num_cache_hits = (num_instances - 1) * num_api_requests
+
     mock_search: mock.MagicMock = mock_page_iterator.search  # type: ignore[assignment]
 
     # Act
@@ -58,4 +65,5 @@ def test_cached_appconfig_requests(
         AppConfigBackend.new(f'{__name__}_app', f'{__name__}_config', f'{__name__}_env', session=mock_session)
 
     # Assert
-    assert 1 == mock_search.call_count
+    assert num_api_requests == mock_search.call_count
+    assert num_cache_hits == AppConfigBackend._get_id_from_name.cache_info().hits  # pyright: ignore[reportPrivateUsage]
