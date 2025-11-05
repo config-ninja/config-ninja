@@ -50,6 +50,12 @@ class MockFile(mock.MagicMock):
         return self.mock_bytes
 
 
+@pytest.fixture(autouse=True)
+def monkeypatch_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Monkeypatch environment variables for all tests."""
+    monkeypatch.setenv('TERM', 'dumb')
+
+
 def mock_file(mock_bytes: bytes) -> MockFile:
     """Mock the file object returned by `contextlib.closing`."""
     mock_file = MockFile()
