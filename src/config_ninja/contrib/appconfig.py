@@ -16,6 +16,7 @@ through AWS AppConfig:
 from __future__ import annotations
 
 import asyncio
+import functools
 import logging
 import warnings
 from collections.abc import AsyncIterator, Iterator
@@ -129,6 +130,7 @@ class AppConfigBackend(Backend):
         )
 
     @staticmethod
+    @functools.lru_cache(maxsize=127)
     def _get_id_from_name(name: str, operation_name: OperationName, client: AppConfigClient, **kwargs: Any) -> str:
         out: Iterator[str] = (
             client.get_paginator(operation_name).paginate(**kwargs).search(f'Items[?Name == `{name}`].Id')
@@ -205,10 +207,10 @@ class AppConfigBackend(Backend):
 
         A `ValueError` is raised if no IDs are found for the given name:
 
-        >>> backend = AppConfigBackend.new('app-name', 'conf-name', 'env-name', session)
+        >>> backend = AppConfigBackend.new('app-name-1', 'conf-name-1', 'env-name-1', session)
         Traceback (most recent call last):
         ...
-        ValueError: no "list_applications" results found for Name="app-name"
+        ValueError: no "list_applications" results found for Name="app-name-1"
 
         ### Warning: Multiple IDs Found
 
@@ -217,7 +219,7 @@ class AppConfigBackend(Backend):
         The first ID is used and the others ignored.
 
         >>> with pytest.warns(RuntimeWarning):
-        ...     backend = AppConfigBackend.new('app-name', 'conf-name', 'env-name', session)
+        ...     backend = AppConfigBackend.new('app-name-2', 'conf-name-2', 'env-name-2', session)
         """
         logger.info(
             'Create new instance: %s(app="%s", conf="%s", env="%s")',
