@@ -62,7 +62,7 @@ def test_cached_appconfig_requests(
 
     # Act
     for _ in range(num_instances):
-        AppConfigBackend.new(f'{__name__}_app', f'{__name__}_config', f'{__name__}_env', session=mock_session)
+        AppConfigBackend.new(f'{__name__}_app', f'{__name__}_config', f'{__name__}_env')
 
     # Assert
     assert num_api_requests == mock_search.call_count
