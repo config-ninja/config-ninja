@@ -46,6 +46,14 @@ OperationName: TypeAlias = Literal['list_applications', 'list_configuration_prof
 logger = logging.getLogger(__name__)
 
 
+@functools.cache
+def get_session_and_client() -> tuple[boto3.Session, AppConfigClient]:
+    """Get the default session and AppConfig client."""
+    session = boto3.Session()
+    client = session.client('appconfig')  # pyright: ignore[reportUnknownMemberType]
+    return session, client
+
+
 class ErrorT(TypedDict):
     """These properties are returned in the `BadRequestException` response's `Error` object.
 
@@ -229,8 +237,11 @@ class AppConfigBackend(Backend):
             environment_name,
         )
 
-        session = session or boto3.Session()
-        appconfig_client = session.client('appconfig')  # pyright: ignore[reportUnknownMemberType]
+        if session is None:
+            session, appconfig_client = get_session_and_client()
+        else:
+            appconfig_client = session.client('appconfig')  # pyright: ignore[reportUnknownMemberType]
+
         application_id = cls.get_application_id(application_name, appconfig_client)
         configuration_profile_id = cls.get_configuration_profile_id(
             configuration_profile_name, appconfig_client, application_id

@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any, TypeVar
 from unittest import mock
 
+import botocore
+import botocore.paginate
 import pytest
 import pytest_mock
 from boto3 import Session
@@ -101,11 +103,39 @@ def _mock_install_io(mocker: MockerFixture) -> None:  # pyright: ignore[reportUn
 
 
 @pytest.fixture
-def mock_session(mocker: MockerFixture) -> Session:
+def mock_session(
+    mocker: MockerFixture, mock_appconfig_client: mock.MagicMock, mock_appconfigdata_client: mock.MagicMock
+) -> Session:
     """Mock the `boto3.Session` class."""
     mock_session = mock.MagicMock(name='mock_session', spec_set=Session)
     mocker.patch('boto3.Session', return_value=mock_session)
+
+    def client(service: str) -> mock.MagicMock:
+        if service == 'appconfig':
+            return mock_appconfig_client
+        if service == 'appconfigdata':
+            return mock_appconfigdata_client
+        raise ValueError(f'Unknown service: {service}')
+
+    mock_session.client = client
     return mock_session
+
+
+@pytest.fixture
+def mock_paginator(mock_appconfig_client: mock.MagicMock) -> botocore.paginate.Paginator[str]:
+    """Create a mocked paginator and patch the client to return it."""
+    paginator = mock.MagicMock(spec_set=botocore.paginate.Paginator)
+    mock_appconfig_client.get_paginator.return_value = paginator
+    return paginator
+
+
+@pytest.fixture
+def mock_page_iterator(mock_paginator: mock.MagicMock) -> botocore.paginate.PageIterator[str]:
+    """Create a mocked page iterator and patch the paginator to return it."""
+    paginated_results = mock.MagicMock(spec_set=botocore.paginate.PageIterator)
+    paginated_results.search.return_value = [f'mock-id-{__name__}']
+    mock_paginator.paginate.return_value = paginated_results
+    return paginated_results
 
 
 @pytest.fixture
@@ -133,7 +163,6 @@ def mock_session_with_1_id(mock_appconfig_client: mock.MagicMock, mock_session: 
 
     mock_appconfig_client.get_paginator.return_value = mock_paginator
 
-    mock_session.client.return_value = mock_appconfig_client
     return mock_session
 
 
@@ -148,7 +177,6 @@ def mock_session_with_2_ids(mock_appconfig_client: mock.MagicMock, mock_session:
 
     mock_appconfig_client.get_paginator.return_value = mock_paginator
 
-    mock_session.client.return_value = mock_appconfig_client
     return mock_session
 
 
@@ -300,25 +328,6 @@ def mock_secretsmanager_client_no_current_initially() -> SecretsManagerClient:
 
     mock_client.list_secret_version_ids = mock_list_secret_version_ids
     return mock_client
-
-
-@pytest.fixture
-def mock_full_session(
-    mock_session_with_1_id: mock.MagicMock,
-    mock_appconfig_client: mock.MagicMock,
-    mock_appconfigdata_client: mock.MagicMock,
-) -> Session:
-    """Mock the `boto3.Session` class with a full AppConfig client."""
-
-    def client(service: str) -> mock.MagicMock:
-        if service == 'appconfig':
-            return mock_appconfig_client
-        if service == 'appconfigdata':
-            return mock_appconfigdata_client
-        raise ValueError(f'Unknown service: {service}')
-
-    mock_session_with_1_id.client = client
-    return mock_session_with_1_id
 
 
 @pytest.fixture
