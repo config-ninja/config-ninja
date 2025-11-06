@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest import mock
 
+import boto3
 import botocore
 import botocore.paginate
 import pytest
@@ -25,6 +26,7 @@ def test_cached_appconfig_requests(mock_page_iterator: botocore.paginate.PageIte
     num_cache_hits = (num_instances - 1) * num_api_requests
 
     mock_search: mock.MagicMock = mock_page_iterator.search  # type: ignore[assignment]
+    MockSession: mock.MagicMock = boto3.Session  # type: ignore[assignment] # noqa: N806
 
     # Act
     for _ in range(num_instances):
@@ -33,3 +35,4 @@ def test_cached_appconfig_requests(mock_page_iterator: botocore.paginate.PageIte
     # Assert
     assert num_api_requests == mock_search.call_count
     assert num_cache_hits == AppConfigBackend._get_id_from_name.cache_info().hits  # pyright: ignore[reportPrivateUsage]
+    assert MockSession.call_count != num_instances, 'a single session should be reused between instances'  # pyright: ignore[reportUnknownMemberType]
