@@ -45,6 +45,12 @@ OperationName: TypeAlias = Literal['list_applications', 'list_configuration_prof
 
 logger = logging.getLogger(__name__)
 
+default_session = boto3.Session()
+"""Use this session is if one is not provided to the `AppConfigBackend` constructor."""
+
+default_appconfig_client = default_session.client('appconfig')  # pyright: ignore[reportUnknownMemberType]
+"""Use this client to resolve application, configuration profile, and environment IDs (unless a session is provided)."""
+
 
 class ErrorT(TypedDict):
     """These properties are returned in the `BadRequestException` response's `Error` object.
@@ -229,8 +235,12 @@ class AppConfigBackend(Backend):
             environment_name,
         )
 
-        session = session or boto3.Session()
-        appconfig_client = session.client('appconfig')  # pyright: ignore[reportUnknownMemberType]
+        if session is None:
+            session = default_session
+            appconfig_client = default_appconfig_client
+        else:
+            appconfig_client = session.client('appconfig')  # pyright: ignore[reportUnknownMemberType]
+
         application_id = cls.get_application_id(application_name, appconfig_client)
         configuration_profile_id = cls.get_configuration_profile_id(
             configuration_profile_name, appconfig_client, application_id

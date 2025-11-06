@@ -109,6 +109,8 @@ def mock_session(
     """Mock the `boto3.Session` class."""
     mock_session = mock.MagicMock(name='mock_session', spec_set=Session)
     mocker.patch('boto3.Session', return_value=mock_session)
+    mocker.patch('config_ninja.contrib.appconfig.default_session', new=mock_session)
+    mocker.patch('config_ninja.contrib.appconfig.default_appconfig_client', new=mock_appconfig_client)
 
     def client(service: str) -> mock.MagicMock:
         if service == 'appconfig':
