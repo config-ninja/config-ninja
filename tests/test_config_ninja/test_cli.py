@@ -86,7 +86,8 @@ def test_missing_settings(mocker: MockerFixture, caplog: pytest.LogCaptureFixtur
     assert cli.LOG_MISSING_SETTINGS_MESSAGE in caplog.text
 
 
-@pytest.mark.usefixtures('mock_full_session')
+@pytest.mark.usefixtures('mock_session')
+@pytest.mark.usefixtures('mock_page_iterator')
 def test_get_example_appconfig() -> None:
     """Get the 'example-appconfig' configuration (as specified in config-ninja-settings.yaml)."""
     result = runner.invoke(app, ['get', 'example-appconfig'])
