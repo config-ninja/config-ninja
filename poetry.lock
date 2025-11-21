@@ -352,14 +352,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.41.0"
-description = "Type annotations for boto3 1.41.0 generated with mypy-boto3-builder 8.12.0"
+version = "1.41.1"
+description = "Type annotations for boto3 1.41.1 generated with mypy-boto3-builder 8.12.0"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "boto3_stubs-1.41.0-py3-none-any.whl", hash = "sha256:9e373ac5f9c721c5e615ef694a992c333480c71905d3b8e940175dd7265eef93"},
-    {file = "boto3_stubs-1.41.0.tar.gz", hash = "sha256:74d138f2d2f5f48140be81d680722b0194e09bcdf8d2080a914c21d277c2cfe3"},
+    {file = "boto3_stubs-1.41.1-py3-none-any.whl", hash = "sha256:1741f55a0e0ed1e2d68059da10895c8f6880cdc560708aa8646bdad7c810f5bf"},
+    {file = "boto3_stubs-1.41.1.tar.gz", hash = "sha256:751bac1bfbafca0db30b36df023c622ada94da61b53a3325df5490759ffb6c6f"},
 ]
 
 [package.dependencies]
@@ -423,7 +423,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.41.0,<1.42.0)"]
 billing = ["mypy-boto3-billing (>=1.41.0,<1.42.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.41.0,<1.42.0)"]
-boto3 = ["boto3 (==1.41.0)"]
+boto3 = ["boto3 (==1.41.1)"]
 braket = ["mypy-boto3-braket (>=1.41.0,<1.42.0)"]
 budgets = ["mypy-boto3-budgets (>=1.41.0,<1.42.0)"]
 ce = ["mypy-boto3-ce (>=1.41.0,<1.42.0)"]
@@ -3336,7 +3336,7 @@ description = "Pexpect allows easy control of interactive console applications."
 optional = false
 python-versions = "*"
 groups = ["misc"]
-markers = "sys_platform != \"win32\" and python_version < \"3.11\" or sys_platform != \"win32\" and sys_platform != \"emscripten\""
+markers = "sys_platform != \"win32\" and sys_platform != \"emscripten\" or sys_platform != \"win32\" and python_version < \"3.11\""
 files = [
     {file = "pexpect-4.9.0-py2.py3-none-any.whl", hash = "sha256:7236d1e080e4936be2dc3e326cec0af72acf9212a7e1d060210e70a47e253523"},
     {file = "pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f"},
@@ -3490,7 +3490,7 @@ description = "Run a subprocess in a pseudo terminal"
 optional = false
 python-versions = "*"
 groups = ["misc"]
-markers = "sys_platform != \"win32\" and python_version < \"3.11\" or sys_platform != \"win32\" and sys_platform != \"emscripten\" or os_name != \"nt\""
+markers = "sys_platform != \"win32\" and sys_platform != \"emscripten\" or os_name != \"nt\" or sys_platform != \"win32\" and python_version < \"3.11\""
 files = [
     {file = "ptyprocess-0.7.0-py2.py3-none-any.whl", hash = "sha256:4b41f3967fce3af57cc7e94b888626c18bf37a083e3651ca8feeb66d492fef35"},
     {file = "ptyprocess-0.7.0.tar.gz", hash = "sha256:5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220"},
@@ -5104,7 +5104,7 @@ files = [
     {file = "typing_extensions-4.13.2-py3-none-any.whl", hash = "sha256:a439e7c04b49fec3e5d3e2beaa21755cadbbdc391694e28ccdd36ca4a1408f8c"},
     {file = "typing_extensions-4.13.2.tar.gz", hash = "sha256:e6c81219bd689f51865d9e372991c540bda33a0379d5573cddb9a3a23f7caaef"},
 ]
-markers = {dev = "python_version < \"3.12\"", test = "python_version < \"3.11\""}
+markers = {dev = "python_version <= \"3.11\"", test = "python_version < \"3.11\""}
 
 [[package]]
 name = "typing-inspection"
@@ -5166,7 +5166,7 @@ files = [
     {file = "urllib3-2.5.0-py3-none-any.whl", hash = "sha256:e6b01673c0fa6a13e374b50871808eb3bf7046c4b125b216f6bf1cc604cff0dc"},
     {file = "urllib3-2.5.0.tar.gz", hash = "sha256:3fc47733c7e419d4bc3f6b3dc2b4f890bb743906a30d56ba4a5bfa4bbff92760"},
 ]
-markers = {main = "python_version >= \"3.10\" and (extra == \"all\" or extra == \"appconfig\")"}
+markers = {main = "(extra == \"all\" or extra == \"appconfig\") and python_version >= \"3.10\""}
 
 [package.extras]
 brotli = ["brotli (>=1.0.9) ; platform_python_implementation == \"CPython\"", "brotlicffi (>=0.8.0) ; platform_python_implementation != \"CPython\""]
@@ -5542,4 +5542,4 @@ poe = ["poethepoet"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4"
-content-hash = "0c6143eaa58c53a54f85543fab67e48d12c3120998dcd01163bd4d5791e5032b"
+content-hash = "7cf9800b5814a4d778ff9e318074f4176cfdc49b2778cfab8977680a3a32a4e0"
