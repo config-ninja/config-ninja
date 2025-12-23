@@ -19,7 +19,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/poe
         with:
           poe-task: lint
@@ -33,7 +33,7 @@ jobs:
         py: ['3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/poe
         with:
           poe-task: test
