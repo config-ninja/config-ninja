@@ -15,7 +15,7 @@ lint = [
   "mdformat-frontmatter~=2.0",
   "mdformat-gfm-alerts~=2.0",
   "mdformat-gfm~=0.4",
-  "pre-commit>=3.6; python_version >= '3.9'",
+  "pre-commit>=3.6",
   "pylint~=3.3",
   "shellcheck-py>=0.8,<0.11; platform_machine != 'arm64'",
   "virtualenv>=20.31.2",
@@ -59,7 +59,6 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python",
   "Typing :: Typed",
 ]
@@ -80,7 +79,7 @@ dynamic = ["version"]
 license-files = ["LICENSE.md"]
 name = "config-ninja"
 readme = "README.md"
-requires-python = ">=3.9,<4"
+requires-python = ">=3.10,<4"
 scripts.config-ninja = "config_ninja.cli:app"
 
 [project.optional-dependencies]
@@ -424,7 +423,7 @@ shell = """
 [tool.poe.tasks.test-python-versions]
 help = "Run the test suite in separate virtual environments for each supported Python version"
 shell = """
-  for py in 3.9 3.10 3.11 3.12 3.13; do
+  for py in 3.10 3.11 3.12 3.13; do
     poetry run poe test-py $py
   done
 """
@@ -489,7 +488,7 @@ load-plugins = "pylint.extensions.mccabe"
 persistent = true
 # Minimum Python version to use for version dependent checks. Will default to the
 # version used to run pylint.
-py-version = "3.9"
+py-version = "3.10"
 # Discover python modules and packages in the file system subtree.
 # recursive =
 # When enabled, pylint would attempt to guess common misconfiguration and emit
@@ -898,7 +897,7 @@ line-length    = 120
 output-format  = "full"
 show-fixes     = true
 src            = ["src", "tests", "tools"]
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.format]
 quote-style = "single"
