@@ -52,7 +52,6 @@ pre-commit = ["lxml>=4.9.3; python_version >= '3.12'", "mypy[reports]~=1.18", "p
 authors = [{ name = "Bryant Finney", email = "<bryant.finney@outlook.com>" }]
 classifiers = [
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
