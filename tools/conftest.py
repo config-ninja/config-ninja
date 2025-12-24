@@ -2,18 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, TypeAlias
 from unittest.mock import MagicMock
 
 import pytest
-
-try:
-    from typing import (  # type: ignore[attr-defined,unused-ignore]  # pylint: disable=ungrouped-imports
-        TypeAlias,  # pyright: ignore[reportGeneralTypeIssues,reportUnknownVariableType]
-    )
-except ImportError:  # pragma: no cover
-    from typing_extensions import TypeAlias
 
 PathT: TypeAlias = Callable[..., Path]
 

@@ -20,17 +20,11 @@ import functools
 import logging
 import warnings
 from collections.abc import AsyncIterator, Iterator
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypedDict  # type: ignore[attr-defined,unused-ignore]
 
 import boto3
 
 from config_ninja.backend import Backend
-
-try:  # pragma: no cover
-    from typing import TypeAlias, TypedDict  # type: ignore[attr-defined,unused-ignore]
-except ImportError:  # pragma: no cover
-    from typing_extensions import TypeAlias, TypedDict
-
 
 if TYPE_CHECKING:  # pragma: no cover
     from mypy_boto3_appconfig.client import AppConfigClient

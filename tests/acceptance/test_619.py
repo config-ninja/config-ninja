@@ -5,6 +5,7 @@ from __future__ import annotations
 import itertools
 import logging
 from pathlib import Path
+from typing import TypedDict
 from unittest.mock import MagicMock
 
 import click.testing
@@ -16,11 +17,6 @@ from typer import testing
 
 from config_ninja import cli
 from config_ninja import settings as settings_module
-
-try:
-    from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
 
 # pylint: disable=redefined-outer-name
 

@@ -4,17 +4,13 @@ from __future__ import annotations
 
 import logging
 import typing
+from typing import TypeAlias
 
 import jinja2
 
 from config_ninja import settings, systemd
 from config_ninja.backend import FormatT, dumps, loads
 from config_ninja.settings import ObjectSpec
-
-try:
-    from typing import TypeAlias  # type: ignore[attr-defined,unused-ignore]
-except ImportError:  # pragma: no cover
-    from typing_extensions import TypeAlias  # type: ignore[assignment,attr-defined,unused-ignore]
 
 __all__ = ['BackendController', 'ErrorHandler']
 

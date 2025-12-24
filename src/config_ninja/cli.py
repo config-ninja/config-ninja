@@ -17,6 +17,7 @@ import os
 import sys
 import typing
 from pathlib import Path
+from typing import Annotated, TypeAlias
 
 import rich
 import typer
@@ -25,14 +26,6 @@ from rich.markdown import Markdown
 
 from config_ninja import __version__, controller, settings, systemd
 from config_ninja.settings import schema
-
-try:
-    from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
-except ImportError:  # pragma: no cover
-    from typing import Annotated  # type: ignore[assignment,attr-defined,unused-ignore]
-
-    from typing_extensions import TypeAlias
-
 
 # ruff: noqa: PLR0913
 # pylint: disable=redefined-outer-name,unused-argument,too-many-arguments
@@ -73,7 +66,7 @@ app.add_typer(self_app, name='self', help='Operate on this installation of [bold
 ActionType = typing.Callable[[str], typing.Any]
 
 
-def help_callback(ctx: typer.Context, value: typing.Optional[bool] = None) -> None:
+def help_callback(ctx: typer.Context, value: bool | None = None) -> None:
     """Print the help message for the command."""
     if ctx.resilient_parsing:  # pragma: no cover
         return
@@ -84,7 +77,7 @@ def help_callback(ctx: typer.Context, value: typing.Optional[bool] = None) -> No
 
 
 HelpAnnotation: TypeAlias = Annotated[
-    typing.Optional[bool],
+    bool | None,
     typer.Option(
         '-h',
         '--help',
@@ -104,7 +97,7 @@ HookAnnotation: TypeAlias = Annotated[
     ),
 ]
 OptionalKeyAnnotation: TypeAlias = Annotated[
-    typing.Optional[list[str]],
+    list[str] | None,
     typer.Argument(
         help='Apply the configuration object(s) with matching key(s)'
         ' (multiple values may be provided). If unspecified, all objects will be applied',
@@ -113,7 +106,7 @@ OptionalKeyAnnotation: TypeAlias = Annotated[
     ),
 ]
 PollAnnotation: TypeAlias = Annotated[
-    typing.Optional[bool],
+    bool | None,
     typer.Option(
         '-p',
         '--poll',
@@ -122,7 +115,7 @@ PollAnnotation: TypeAlias = Annotated[
     ),
 ]
 PrintAnnotation: TypeAlias = Annotated[
-    typing.Optional[bool],
+    bool | None,
     typer.Option(
         '-p',
         '--print-only',
@@ -132,7 +125,7 @@ PrintAnnotation: TypeAlias = Annotated[
 ]
 
 
-def load_config(ctx: typer.Context, value: typing.Optional[Path]) -> None:
+def load_config(ctx: typer.Context, value: Path | None) -> None:
     """Load the settings file from the given path."""
     if ctx.resilient_parsing:  # pragma: no cover
         return
@@ -166,7 +159,7 @@ def load_config(ctx: typer.Context, value: typing.Optional[Path]) -> None:
 
 
 ConfigAnnotation: TypeAlias = Annotated[
-    typing.Optional[Path],
+    Path | None,
     typer.Option(
         '-c',
         '--config',
@@ -187,12 +180,12 @@ UserAnnotation: TypeAlias = Annotated[
     ),
 ]
 WorkdirAnnotation: TypeAlias = Annotated[
-    typing.Optional[Path],
+    Path | None,
     typer.Option('-w', '--workdir', help='Run the service from this directory.', show_default=False),
 ]
 
 
-def parse_env(ctx: typer.Context, value: typing.Optional[list[str]]) -> list[str]:
+def parse_env(ctx: typer.Context, value: list[str] | None) -> list[str]:
     """Parse the environment variables from the command line."""
     if ctx.resilient_parsing or not value:
         return []
@@ -201,7 +194,7 @@ def parse_env(ctx: typer.Context, value: typing.Optional[list[str]]) -> list[str
 
 
 EnvNamesAnnotation: TypeAlias = Annotated[
-    typing.Optional[list[str]],
+    list[str] | None,
     typer.Option(
         '-e',
         '--env',
@@ -219,7 +212,7 @@ class UserGroup(typing.NamedTuple):
     user: str
     """The user to run the service as."""
 
-    group: typing.Optional[str] = None
+    group: str | None = None
     """The group to run the service as."""
 
     @classmethod
@@ -229,7 +222,7 @@ class UserGroup(typing.NamedTuple):
 
 
 RunAsAnnotation: TypeAlias = Annotated[
-    typing.Optional[UserGroup],
+    UserGroup | None,
     typer.Option(
         '--run-as',
         help='Configure the systemd unit to run the service as this user (and optionally group).',
@@ -261,7 +254,7 @@ def parse_var(value: str) -> Variable:
 
 
 VariableAnnotation: TypeAlias = Annotated[
-    typing.Optional[list[Variable]],
+    list[Variable] | None,
     typer.Option(
         '--var',
         help='Embed the specified [yellow]VARIABLE=VALUE[/] into the unit file. Can be used multiple times.',
@@ -272,7 +265,7 @@ VariableAnnotation: TypeAlias = Annotated[
 ]
 
 
-def configure_logging(ctx: typer.Context, verbose: typing.Optional[bool] = None) -> None:
+def configure_logging(ctx: typer.Context, verbose: bool | None = None) -> None:
     """Callback for the `--verbose` option to configure logging verbosity.
 
     By default, log messages at the `logging.INFO` level:
@@ -304,7 +297,7 @@ def configure_logging(ctx: typer.Context, verbose: typing.Optional[bool] = None)
         'logging_config', copy.deepcopy(settings.DEFAULT_LOGGING_CONFIG)
     )
 
-    conf: typing.Optional[settings.Config] = ctx.obj.get('settings')
+    conf: settings.Config | None = ctx.obj.get('settings')
     new_logging_config: schema.DictConfig = (conf.settings.LOGGING or {}) if conf else {}  # type: ignore[assignment,typeddict-item,unused-ignore]
 
     for key, value in new_logging_config.items():
@@ -326,7 +319,7 @@ def configure_logging(ctx: typer.Context, verbose: typing.Optional[bool] = None)
 
 
 VerbosityAnnotation = Annotated[
-    typing.Optional[bool],
+    bool | None,
     typer.Option(
         '-v',
         '--verbose',
@@ -339,7 +332,7 @@ VerbosityAnnotation = Annotated[
 ]
 
 
-def version_callback(ctx: typer.Context, value: typing.Optional[bool] = None) -> None:
+def version_callback(ctx: typer.Context, value: bool | None = None) -> None:
     """Print the version of the package."""
     if ctx.resilient_parsing:  # pragma: no cover  # this is for tab completions
         return
@@ -350,7 +343,7 @@ def version_callback(ctx: typer.Context, value: typing.Optional[bool] = None) ->
 
 
 VersionAnnotation = Annotated[
-    typing.Optional[bool],
+    bool | None,
     typer.Option(
         '-V',
         '--version',
@@ -500,7 +493,7 @@ def self_print(
     version: VersionAnnotation = None,
 ) -> None:
     """Print [bold blue]config-ninja[/]'s settings."""
-    conf: typing.Optional[settings.Config] = ctx.obj['settings']
+    conf: settings.Config | None = ctx.obj['settings']
     if not conf:
         raise typer.Exit(1)
 
