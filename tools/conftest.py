@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -13,7 +14,7 @@ try:
         TypeAlias,  # pyright: ignore[reportGeneralTypeIssues,reportUnknownVariableType]
     )
 except ImportError:  # pragma: no cover
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
 PathT: TypeAlias = Callable[..., Path]
 

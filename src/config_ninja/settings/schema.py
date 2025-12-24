@@ -35,7 +35,6 @@ This YAML file would be parsed into a dictionary of the following structure:
 from __future__ import annotations
 
 import logging
-import typing
 from typing import Literal, TypedDict
 
 from config_ninja.backend import FormatT
@@ -43,7 +42,9 @@ from config_ninja.backend import FormatT
 try:
     from typing import NotRequired, TypeAlias  # type: ignore[attr-defined,unused-ignore]  # for older Python versions
 except ImportError:  # pragma: no cover
-    from typing_extensions import NotRequired, TypeAlias
+    from typing import TypeAlias
+
+    from typing_extensions import NotRequired
 
 
 __all__ = ['ConfigNinjaObject', 'Dest', 'DictConfig', 'DictConfigDefault', 'Init', 'New', 'PathStr', 'Source']
@@ -78,7 +79,7 @@ Handler = TypedDict(
         'class': str,
         'filters': NotRequired[list[FilterId]],
         'formatter': FormatterId,
-        'level': NotRequired[typing.Union[str, int]],
+        'level': NotRequired[str | int],
         'rich_tracebacks': NotRequired[bool],
     },
 )

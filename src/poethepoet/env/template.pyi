@@ -1,5 +1,5 @@
-from collections.abc import Iterable, Mapping
-from typing import Callable, TypeVar
+from collections.abc import Callable, Iterable, Mapping
+from typing import TypeVar
 
 KT = TypeVar('KT')
 VT = TypeVar('VT')

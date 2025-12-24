@@ -29,7 +29,9 @@ from config_ninja.backend import Backend
 try:  # pragma: no cover
     from typing import TypeAlias, TypedDict  # type: ignore[attr-defined,unused-ignore]
 except ImportError:  # pragma: no cover
-    from typing_extensions import TypeAlias, TypedDict
+    from typing import TypeAlias
+
+    from typing_extensions import TypedDict
 
 
 if TYPE_CHECKING:  # pragma: no cover
