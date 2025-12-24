@@ -331,19 +331,19 @@ css = ["tinycss2 (>=1.1.0,<1.5)"]
 
 [[package]]
 name = "boto3"
-version = "1.42.15"
+version = "1.42.16"
 description = "The AWS SDK for Python"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"all\" or extra == \"appconfig\""
 files = [
-    {file = "boto3-1.42.15-py3-none-any.whl", hash = "sha256:94aabb83e3be3e2ea5ffa530cd5e221e8f4eb65f8d126d097e03d1ab80e5c5ce"},
-    {file = "boto3-1.42.15.tar.gz", hash = "sha256:d673c9b6bb9e293e028e354de6701351f1881e3fbeb25d739dd33c4940a30929"},
+    {file = "boto3-1.42.16-py3-none-any.whl", hash = "sha256:37a43d42aebd06a8f93ee801ea1b7b5181ac42a30869ef403c9dadc160a748e5"},
+    {file = "boto3-1.42.16.tar.gz", hash = "sha256:811391611db88c8a061f6e6fabbd7ca784ad9de04490a879f091cbaa9de7de74"},
 ]
 
 [package.dependencies]
-botocore = ">=1.42.15,<1.43.0"
+botocore = ">=1.42.16,<1.43.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.16.0,<0.17.0"
 
@@ -793,15 +793,15 @@ xray = ["mypy-boto3-xray (>=1.42.0,<1.43.0)"]
 
 [[package]]
 name = "botocore"
-version = "1.42.15"
+version = "1.42.16"
 description = "Low-level, data-driven core of boto 3."
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"all\" or extra == \"appconfig\""
 files = [
-    {file = "botocore-1.42.15-py3-none-any.whl", hash = "sha256:888ec4a817cbc56a93d5945b458621d8a6f580694373f8e93f68984f27523913"},
-    {file = "botocore-1.42.15.tar.gz", hash = "sha256:504c548aa333728c99a692908d3e6acb718983585ad7a836d2fab9604518a636"},
+    {file = "botocore-1.42.16-py3-none-any.whl", hash = "sha256:b1f584a0f8645c12e07bf6ec9c18e05221a789f2a9b2d3c6291deb42f8c1c542"},
+    {file = "botocore-1.42.16.tar.gz", hash = "sha256:29ee8555cd5d5023350405387cedcf3fe1c7f02fcb8060bf9e01602487482c25"},
 ]
 
 [package.dependencies]
@@ -3439,7 +3439,7 @@ description = "Pexpect allows easy control of interactive console applications."
 optional = false
 python-versions = "*"
 groups = ["misc"]
-markers = "sys_platform != \"win32\" and sys_platform != \"emscripten\" or sys_platform != \"win32\" and python_version < \"3.11\""
+markers = "sys_platform != \"win32\" and python_version < \"3.11\" or sys_platform != \"win32\" and sys_platform != \"emscripten\""
 files = [
     {file = "pexpect-4.9.0-py2.py3-none-any.whl", hash = "sha256:7236d1e080e4936be2dc3e326cec0af72acf9212a7e1d060210e70a47e253523"},
     {file = "pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f"},
@@ -3593,7 +3593,7 @@ description = "Run a subprocess in a pseudo terminal"
 optional = false
 python-versions = "*"
 groups = ["misc"]
-markers = "sys_platform != \"win32\" and sys_platform != \"emscripten\" or os_name != \"nt\" or sys_platform != \"win32\" and python_version < \"3.11\""
+markers = "sys_platform != \"win32\" and python_version < \"3.11\" or sys_platform != \"win32\" and sys_platform != \"emscripten\" or os_name != \"nt\""
 files = [
     {file = "ptyprocess-0.7.0-py2.py3-none-any.whl", hash = "sha256:4b41f3967fce3af57cc7e94b888626c18bf37a083e3651ca8feeb66d492fef35"},
     {file = "ptyprocess-0.7.0.tar.gz", hash = "sha256:5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220"},
@@ -5207,7 +5207,7 @@ files = [
     {file = "typing_extensions-4.13.2-py3-none-any.whl", hash = "sha256:a439e7c04b49fec3e5d3e2beaa21755cadbbdc391694e28ccdd36ca4a1408f8c"},
     {file = "typing_extensions-4.13.2.tar.gz", hash = "sha256:e6c81219bd689f51865d9e372991c540bda33a0379d5573cddb9a3a23f7caaef"},
 ]
-markers = {dev = "python_version <= \"3.11\"", test = "python_version < \"3.11\""}
+markers = {dev = "python_version < \"3.12\"", test = "python_version < \"3.11\""}
 
 [[package]]
 name = "typing-inspection"
@@ -5269,7 +5269,7 @@ files = [
     {file = "urllib3-2.6.2-py3-none-any.whl", hash = "sha256:ec21cddfe7724fc7cb4ba4bea7aa8e2ef36f607a4bab81aa6ce42a13dc3f03dd"},
     {file = "urllib3-2.6.2.tar.gz", hash = "sha256:016f9c98bb7e98085cb2b4b17b87d2c702975664e4f060c6532e64d1c1a5e797"},
 ]
-markers = {main = "(extra == \"all\" or extra == \"appconfig\") and python_version >= \"3.10\""}
+markers = {main = "python_version >= \"3.10\" and (extra == \"all\" or extra == \"appconfig\")"}
 
 [package.extras]
 brotli = ["brotli (>=1.2.0) ; platform_python_implementation == \"CPython\"", "brotlicffi (>=1.2.0.0) ; platform_python_implementation != \"CPython\""]
