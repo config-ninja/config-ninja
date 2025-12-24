@@ -35,17 +35,14 @@ This YAML file would be parsed into a dictionary of the following structure:
 from __future__ import annotations
 
 import logging
-from typing import Literal, TypedDict
+from typing import Literal, TypeAlias, TypedDict
 
 from config_ninja.backend import FormatT
 
 try:
-    from typing import NotRequired, TypeAlias  # type: ignore[attr-defined,unused-ignore]  # for older Python versions
+    from typing import NotRequired
 except ImportError:  # pragma: no cover
-    from typing import TypeAlias
-
     from typing_extensions import NotRequired
-
 
 __all__ = ['ConfigNinjaObject', 'Dest', 'DictConfig', 'DictConfigDefault', 'Init', 'New', 'PathStr', 'Source']
 

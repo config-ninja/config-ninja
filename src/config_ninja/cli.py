@@ -17,6 +17,7 @@ import os
 import sys
 import typing
 from pathlib import Path
+from typing import Annotated, TypeAlias
 
 import rich
 import typer
@@ -25,15 +26,6 @@ from rich.markdown import Markdown
 
 from config_ninja import __version__, controller, settings, systemd
 from config_ninja.settings import schema
-
-try:
-    from typing import Annotated, TypeAlias  # type: ignore[attr-defined,unused-ignore]
-except ImportError:  # pragma: no cover
-    from typing import (
-        Annotated,  # type: ignore[assignment,attr-defined,unused-ignore]
-        TypeAlias,
-    )
-
 
 # ruff: noqa: PLR0913
 # pylint: disable=redefined-outer-name,unused-argument,too-many-arguments

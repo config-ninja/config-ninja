@@ -933,7 +933,7 @@ ban-relative-imports = "all"
 
 [tool.ruff.lint.isort]
 known-first-party = ["tests", "tools"]
-known-third-party = ["pyspry"]
+known-third-party = ["jinja2", "pyspry", "sdnotify"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 5
