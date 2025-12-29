@@ -179,7 +179,7 @@ dist_glob_patterns    = ["dist/*"]
 upload_to_vcs_release = true
 
 [tool.poetry.group.dev.dependencies]
-boto3-stubs  = { version = "^1.42.16", extras = ["appconfig", "appconfigdata", "secretsmanager"] }
+boto3-stubs  = { version = "^1.42.17", extras = ["appconfig", "appconfigdata", "secretsmanager"] }
 poethepoet   = ">=0.20,<0.31"
 types-pyyaml = "^6"
 
