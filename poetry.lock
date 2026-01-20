@@ -2748,18 +2748,18 @@ test = ["pytest (>=8.0.0)", "pytest-cov (>=7.0.0)"]
 
 [[package]]
 name = "mdformat-frontmatter"
-version = "2.0.8"
+version = "2.0.10"
 description = "An mdformat plugin for parsing / ignoring frontmatter."
 optional = false
 python-versions = ">=3.7"
 groups = ["lint"]
 files = [
-    {file = "mdformat_frontmatter-2.0.8-py3-none-any.whl", hash = "sha256:577396695af96ad66dff1ff781284ff3764a10be3ab8659f2ef842ab42264ebb"},
-    {file = "mdformat_frontmatter-2.0.8.tar.gz", hash = "sha256:c11190ae3f9c91ada78fbd820f5b221631b520484e0b644715aa0f6ed7f097ed"},
+    {file = "mdformat_frontmatter-2.0.10-py3-none-any.whl", hash = "sha256:c99f7c52de0403e39f48b6a1c2bb79a4c8ce69304a799ff0e403e3957aa3669b"},
+    {file = "mdformat_frontmatter-2.0.10.tar.gz", hash = "sha256:decefcb4beb66cf111f17e8c0d82e60b208104c7922ec09564d05365db551bd8"},
 ]
 
 [package.dependencies]
-mdformat = ">=0.7.16,<0.8.0"
+mdformat = ">=0.7.16"
 mdit-py-plugins = ">=0.4.0"
 "ruamel.yaml" = "*"
 
@@ -5437,4 +5437,4 @@ poe = ["poethepoet"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "f4ae50752907e59b2faa70d60e848fb0fc08eb6b8aa69289f56a78c0ff262bb9"
+content-hash = "392d35f2132bd8870eb5fae2892b51052a6cdabd8d418d2188ae3fc3060a5c34"
