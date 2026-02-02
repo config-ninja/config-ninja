@@ -2728,14 +2728,14 @@ taplo = ">=0.9.3"
 
 [[package]]
 name = "mdformat-footnote"
-version = "0.1.2"
+version = "0.1.3"
 description = "An mdformat plugin for parsing/validating footnotes"
 optional = false
 python-versions = ">=3.10"
 groups = ["lint"]
 files = [
-    {file = "mdformat_footnote-0.1.2-py3-none-any.whl", hash = "sha256:fe23888fc8ddb68c080bae9787a65bb1e51253f5de2bea2633feffdb095e59cd"},
-    {file = "mdformat_footnote-0.1.2.tar.gz", hash = "sha256:d8e6a7fece0f902f0c7dfbd009c093182b9b523527ae48f57f57506d79ccb4ec"},
+    {file = "mdformat_footnote-0.1.3-py3-none-any.whl", hash = "sha256:3033184237cbaf2a71cc02a4c37f043a97c1f16d3ed6939bc104964e77aad0b3"},
+    {file = "mdformat_footnote-0.1.3.tar.gz", hash = "sha256:70617e61af87f59d7dea93a392c5093089a6d4551126fa18025c6fddb18bf742"},
 ]
 
 [package.dependencies]
@@ -5437,4 +5437,4 @@ poe = ["poethepoet"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "5c073b1901b7050d4679051e1560369e780985011a2c9e837959427a6dec2739"
+content-hash = "b5a18df907a400f54efde16d65053e1c3eecf64eae57e1c630604b40b6ffc7bd"
