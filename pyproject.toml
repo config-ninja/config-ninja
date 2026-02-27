@@ -223,7 +223,7 @@ pytest-mock    = "^3.15"
 lxml    = { version = ">=4.9.3", python = ">=3.12" }
 mypy    = { extras = ["reports"], version = "^1.19.1" }
 pyright = "^1.1.408"
-ruff    = "^0.15.2"
+ruff    = "^0.15.4"
 
 [tool.coverage.report]
 # https://coverage.readthedocs.io/en/latest/config.html#report
