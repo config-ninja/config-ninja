@@ -207,7 +207,7 @@ pdoc                    = "^15"
 pynvim                  = "^0.6.0"
 pytest-testmon          = "^2.1.4"
 pytest-watch            = "^4.2.0"
-python-dotenv           = "^1.2.1"
+python-dotenv           = "^1.2.2"
 python-semantic-release = ">=8.0.8,<10.0.0"
 
 [tool.poetry.group.test.dependencies]
