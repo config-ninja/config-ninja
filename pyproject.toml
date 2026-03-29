@@ -179,7 +179,7 @@ dist_glob_patterns    = ["dist/*"]
 upload_to_vcs_release = true
 
 [tool.poetry.group.dev.dependencies]
-boto3-stubs  = { version = "^1.42.56", extras = ["appconfig", "appconfigdata", "secretsmanager"] }
+boto3-stubs  = { version = "^1.42.77", extras = ["appconfig", "appconfigdata", "secretsmanager"] }
 poethepoet   = ">=0.20,<0.31"
 types-pyyaml = "^6"
 
@@ -207,7 +207,7 @@ pdoc                    = "^15"
 pynvim                  = "^0.6.0"
 pytest-testmon          = "^2.1.4"
 pytest-watch            = "^4.2.0"
-python-dotenv           = "^1.2.1"
+python-dotenv           = "^1.2.2"
 python-semantic-release = ">=8.0.8,<10.0.0"
 
 [tool.poetry.group.test.dependencies]
@@ -223,7 +223,7 @@ pytest-mock    = "^3.15"
 lxml    = { version = ">=4.9.3", python = ">=3.12" }
 mypy    = { extras = ["reports"], version = "^1.19.1" }
 pyright = "^1.1.408"
-ruff    = "^0.15.2"
+ruff    = "^0.15.8"
 
 [tool.coverage.report]
 # https://coverage.readthedocs.io/en/latest/config.html#report
