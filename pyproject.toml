@@ -100,7 +100,8 @@ exclude = ["**/conftest.py"]
 version = "0.0.0"
 
 [tool.poetry-dynamic-versioning]
-enable = true
+enable           = true
+fallback-version = "0.0.0"
 # in plain english:
 #   1. is the current commit tagged?
 #      - if yes, convert the tag to PEP-440 format
@@ -120,7 +121,7 @@ format-jinja = """
     {{ serialize_pep440(base, stage, revision, post=distance, metadata=[commit] + (["dirty"] if dirty else [])) }}
   {%- endif -%}
 """
-strict = true
+strict = false # allows fallback-version in shallow clones (e.g. Dependabot)
 style = "pep440"
 vcs = "git"
 
@@ -179,7 +180,7 @@ dist_glob_patterns    = ["dist/*"]
 upload_to_vcs_release = true
 
 [tool.poetry.group.dev.dependencies]
-boto3-stubs  = { version = "^1.42.77", extras = ["appconfig", "appconfigdata", "secretsmanager"] }
+boto3-stubs  = { version = "^1.42.78", extras = ["appconfig", "appconfigdata", "secretsmanager"] }
 poethepoet   = ">=0.20,<0.31"
 types-pyyaml = "^6"
 
