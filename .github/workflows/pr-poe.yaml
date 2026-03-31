@@ -11,6 +11,7 @@ on:
       - '*.py'
       - .pre-commit-config.yaml
       - poetry.lock
+      - uv.lock
       - pyproject.toml
       - .github/workflows/*.yaml
       - .github/actions/poe/*
