@@ -37,10 +37,10 @@ misc = [
 
 test = [
   "coverage[toml]>=6.4,<8.0",
-  "pytest >=7.4.4,<9.0.0",
   "pytest-clarity~=1.0",
   "pytest-cov>=3,<7",
   "pytest-mock~=3.15",
+  "pytest>=7.4.4,<10.0.0",
 ]
 
 # note: these must be synchronized with `.pre-commit-config.yaml`
