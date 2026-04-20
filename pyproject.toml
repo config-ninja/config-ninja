@@ -18,7 +18,7 @@ lint = [
   "pre-commit>=3.6",
   "pylint~=3.3",
   "shellcheck-py>=0.8,<0.11; platform_machine != 'arm64'",
-  "virtualenv>=20.31.2",
+  "virtualenv>=21.2.4",
   "yamlfix>=1.16.1",
 ]
 
@@ -196,7 +196,7 @@ pylint               = "^3.3"
 shellcheck-py        = { version = ">=0.8,<0.12", markers = "platform_machine != 'arm64'" }
 yamlfix              = "^1.16"
 # dependency of pre-commit
-virtualenv = ">=21.2.1"
+virtualenv = ">=21.2.4"
 
 [tool.poetry.group.misc.dependencies]
 certifi                 = ">=2023.07.22"
