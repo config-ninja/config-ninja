@@ -199,7 +199,7 @@ yamlfix              = "^1.16"
 virtualenv = ">=21.2.4"
 
 [tool.poetry.group.misc.dependencies]
-certifi                 = ">=2023.07.22"
+certifi                 = ">=2026.4.22"
 cruft                   = "^2.11"
 gitpython               = ">=3.1.47"        # https://nvd.nist.gov/vuln/detail/CVE-2023-40267
 jupyterlab              = ">=3.4,<5.0"
