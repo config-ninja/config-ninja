@@ -3757,14 +3757,14 @@ test = ["pytest", "pytest_timeout"]
 
 [[package]]
 name = "pyright"
-version = "1.1.408"
+version = "1.1.409"
 description = "Command line wrapper for pyright"
 optional = false
 python-versions = ">=3.7"
 groups = ["pre-commit"]
 files = [
-    {file = "pyright-1.1.408-py3-none-any.whl", hash = "sha256:090b32865f4fdb1e0e6cd82bf5618480d48eecd2eb2e70f960982a3d9a4c17c1"},
-    {file = "pyright-1.1.408.tar.gz", hash = "sha256:f28f2321f96852fa50b5829ea492f6adb0e6954568d1caa3f3af3a5f555eb684"},
+    {file = "pyright-1.1.409-py3-none-any.whl", hash = "sha256:aa3ea228cab90c845c7a60d28db7a844c04315356392aa09fafcee98c8c22fb3"},
+    {file = "pyright-1.1.409.tar.gz", hash = "sha256:986ee05beca9e077c165758ad123667c679e050059a2546aa02473930394bc93"},
 ]
 
 [package.dependencies]
@@ -5500,4 +5500,4 @@ poe = ["poethepoet"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "9583c54ec1943f5b29e21b99fcd3e10286e5ca1b7a2cf82b53a4a3339812209a"
+content-hash = "e90c2b2aae4a797133ac457d274420d50be7e338cefa09ca6e074ca0dbe16383"
