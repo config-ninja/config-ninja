@@ -82,8 +82,8 @@ requires-python = ">=3.10,<4"
 scripts.config-ninja = "config_ninja.cli:app"
 
 [project.optional-dependencies]
-all       = ["boto3~=1.42", "poethepoet>=0.29,<0.31", "watchfiles>=0.21,<0.25"]
-appconfig = ["boto3~=1.42"]
+all       = ["boto3~=1.43", "poethepoet>=0.29,<0.31", "watchfiles>=0.21,<0.25"]
+appconfig = ["boto3~=1.43"]
 local     = ["watchfiles>=0.21,<0.25"]
 poe       = ["poethepoet>=0.29,<0.31"]
 
