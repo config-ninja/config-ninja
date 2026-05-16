@@ -212,7 +212,7 @@ python-semantic-release = ">=8.0.8,<10.0.0"
 
 [tool.poetry.group.test.dependencies]
 # dependencies for testing
-coverage       = { extras = ["toml"], version = ">=6.4,<8.0" }
+coverage       = { extras = ["toml"], version = ">=7.14.0,<8.0" }
 pytest         = ">=9.0.3,<10.0.0"
 pytest-clarity = "^1.0.1"
 pytest-cov     = ">=3,<8"
