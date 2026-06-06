@@ -74,7 +74,7 @@ logger = logging.getLogger(__name__)
 
 
 @contextlib.contextmanager
-def dummy() -> typing.Iterator[None]:
+def dummy() -> typing.Generator[None, None, None]:
     """Define a dummy context manager to use instead of `sudo`.
 
     There are a few scenarios where `sudo` is unavailable or unnecessary:

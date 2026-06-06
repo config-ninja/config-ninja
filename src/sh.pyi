@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 
 # pylint: disable=unused-argument
@@ -14,7 +14,7 @@ class Contrib:
 
     @property
     @contextmanager
-    def sudo(self) -> Iterator[None]:
+    def sudo(self) -> Generator[None]:
         """Run the wrapped code as root."""
 
 class ErrorReturnCode(Exception):  # noqa: N818
