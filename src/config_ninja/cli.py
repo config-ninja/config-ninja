@@ -357,7 +357,7 @@ VersionAnnotation = Annotated[
 
 
 @contextlib.contextmanager
-def handle_key_errors(objects: dict[str, typing.Any]) -> typing.Iterator[None]:
+def handle_key_errors(objects: dict[str, typing.Any]) -> typing.Generator[None, None, None]:
     """Handle KeyError exceptions within the managed context."""
     try:
         yield
